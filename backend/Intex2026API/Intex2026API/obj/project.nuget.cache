@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "scsfFJZqss8=",
+  "success": true,
+  "projectFilePath": "/Users/colelatour/Desktop/School/INTEX2026/Intex2026API/Intex2026API/Intex2026API.csproj",
+  "expectedPackageFiles": [
+    "/Users/colelatour/.nuget/packages/microsoft.aspnetcore.openapi/10.0.2/microsoft.aspnetcore.openapi.10.0.2.nupkg.sha512",
+    "/Users/colelatour/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512",
+    "/Users/colelatour/.nuget/packages/system.text.json/8.0.5/system.text.json.8.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}
