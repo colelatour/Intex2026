@@ -1,0 +1,68 @@
+# Project data (not versioned)
+DataFiles/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.json
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs and temp
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.cache
+
+# Dependencies (common stacks)
+node_modules/
+vendor/
+__pycache__/
+*.py[cod]
+.Python
+venv/
+.venv/
+env/
+
+# Build outputs
+dist/
+build/
+out/
+bin/
+obj/
+*.dll
+*.exe
+*.so
+*.dylib
+*.class
+target/
+
+# Test / coverage
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.nyc_output/
+
+# Package managers
+*.tgz
+.pnpm-store/
+
+# Misc
+*.bak
+*.orig
