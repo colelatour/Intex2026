@@ -1,0 +1,31 @@
+resident_id,readiness_probability,readiness_label
+53,0.67,Near Ready
+59,0.64,Near Ready
+10,0.62,Near Ready
+32,0.58,Near Ready
+14,0.565,Near Ready
+12,0.56,Near Ready
+17,0.555,Near Ready
+41,0.55,Near Ready
+42,0.52,Near Ready
+8,0.505,Near Ready
+1,0.49,Progressing
+4,0.485,Progressing
+16,0.475,Progressing
+36,0.435,Progressing
+25,0.425,Progressing
+9,0.42,Progressing
+38,0.41,Progressing
+50,0.385,Progressing
+6,0.375,Progressing
+19,0.355,Progressing
+24,0.345,Early Stage
+57,0.34,Early Stage
+49,0.325,Early Stage
+3,0.32,Early Stage
+7,0.305,Early Stage
+21,0.295,Early Stage
+55,0.29,Early Stage
+46,0.275,Early Stage
+40,0.265,Early Stage
+48,0.265,Early Stage
