@@ -1,0 +1,42 @@
+/* ── Footer.css ── */
+
+.footer {
+  background: var(--navy-deep);
+  padding: 1.75rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer__logo {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.footer__logo span {
+  color: #f0c060;
+}
+
+.footer__copy {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+}
+
+.footer__links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer__links a {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer__links a:hover {
+  color: white;
+}

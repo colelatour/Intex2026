@@ -1,0 +1,56 @@
+/* ─────────────────────────────────────────────
+   globals.css  —  SafeHaven base styles
+   Import this once in main.jsx
+───────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  /* ── Lighthouse Sanctuary palette ── */
+  --navy:       #1b2d4f;   /* deep navy (primary dark)       */
+  --navy-deep:  #111e35;   /* darker navy for hero/footer    */
+  --blue:       #2a4a7f;   /* mid navy-blue                  */
+  --blue-light: #3d6499;   /* lighter navy-blue              */
+  --teal:       #c8952a;   /* golden amber                   */
+  --green:      #e8a830;   /* warm gold                      */
+  --green-cta:  #b8791a;   /* darker amber for CTAs          */
+  --cream:      #fdf8f0;   /* warm cream background          */
+  --gray-50:    #faf7f2;   /* warm off-white                 */
+  --gray-100:   #f2ede4;   /* warm light gray                */
+  --gray-200:   #e3dcd0;   /* warm border gray               */
+  --gray-400:   #a89d8e;   /* warm mid gray                  */
+  --gray-600:   #5a5147;   /* warm dark gray                 */
+  --gray-800:   #2e2820;   /* warm near-black                */
+  --white:      #ffffff;
+  --red:        #c0392b;   /* muted red for at-risk          */
+  --orange:     #e07b39;   /* warm coral-orange              */
+  --gold:       #d4a017;   /* pure gold accent               */
+  --gold-light: #f5e6c0;   /* pale gold for backgrounds      */
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--gray-800);
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+
+h1, h2, h3 {
+  font-family: 'DM Serif Display', serif;
+}

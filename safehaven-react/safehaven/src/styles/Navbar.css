@@ -1,0 +1,86 @@
+/* ── Navbar.css ── */
+
+.navbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+}
+
+.navbar__logo {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.navbar__logo span {
+  color: var(--teal);
+}
+
+.navbar__logo-icon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--navy), var(--gold));
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar__logo-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: white;
+}
+
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+}
+
+.navbar__links a {
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.navbar__links a:hover {
+  background: var(--gray-100);
+  color: var(--navy);
+}
+
+.navbar__links a.active {
+  color: var(--gold);
+}
+
+.navbar__cta {
+  background: var(--navy) !important;
+  color: var(--white) !important;
+  padding: 7px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: background 0.15s !important;
+}
+
+.navbar__cta:hover {
+  background: var(--blue) !important;
+}
