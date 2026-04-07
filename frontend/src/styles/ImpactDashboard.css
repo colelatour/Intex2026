@@ -139,6 +139,18 @@
   line-height: 1.4;
 }
 
+.hero-card__region-link {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #1D9E75;
+  text-decoration: none;
+}
+
+.hero-card__region-link:hover {
+  text-decoration: underline;
+}
+
 /* ── Outcome highlights ──────────────────────────────────────────────────────── */
 
 .outcomes-grid {
