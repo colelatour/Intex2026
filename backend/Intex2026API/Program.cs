@@ -138,9 +138,6 @@ using (var scope = app.Services.CreateScope())
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     try
     {
-        var identityDb = scope.ServiceProvider.GetRequiredService<AuthIdentityDbContext>();
-        await identityDb.Database.EnsureCreatedAsync();
-
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
