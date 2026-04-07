@@ -1,30 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Intex2026API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Intex2026API.Data;
 
 public partial class LighthouseContext : DbContext
 {
-    private static DateOnly? ParseNullableDateOnly(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (DateOnly.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)) return parsed;
-        if (DateOnly.TryParse(value, out parsed)) return parsed;
-        return null;
-    }
-
-    private static decimal? ParseNullableDecimal(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed)) return parsed;
-        if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out parsed)) return parsed;
-        return null;
-    }
-
     public LighthouseContext(DbContextOptions<LighthouseContext> options)
         : base(options)
     {
@@ -66,21 +48,7 @@ public partial class LighthouseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var dateOnlyConverter = new ValueConverter<DateOnly, string>(
-            date => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            value => DateOnly.Parse(value, CultureInfo.InvariantCulture));
-
-        var nullableDateOnlyConverter = new ValueConverter<DateOnly?, string?>(
-            date => date.HasValue ? date.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : null,
-            value => ParseNullableDateOnly(value));
-
-        var decimalConverter = new ValueConverter<decimal, string>(
-            value => value.ToString(CultureInfo.InvariantCulture),
-            value => decimal.Parse(value, NumberStyles.Any, CultureInfo.InvariantCulture));
-
-        var nullableDecimalConverter = new ValueConverter<decimal?, string?>(
-            value => value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : null,
-            value => ParseNullableDecimal(value));
+        // SQL Server / Azure SQL: native date, datetime2, decimal — matches lighthouse.sqlserver.sql.
 
         modelBuilder.Entity<Donation>(entity =>
         {
@@ -484,21 +452,10 @@ public partial class LighthouseContext : DbContext
         {
             foreach (var property in entityType.GetProperties())
             {
-                if (property.ClrType == typeof(DateOnly))
+                if (property.ClrType == typeof(decimal) || property.ClrType == typeof(decimal?))
                 {
-                    property.SetValueConverter(dateOnlyConverter);
-                }
-                else if (property.ClrType == typeof(DateOnly?))
-                {
-                    property.SetValueConverter(nullableDateOnlyConverter);
-                }
-                else if (property.ClrType == typeof(decimal))
-                {
-                    property.SetValueConverter(decimalConverter);
-                }
-                else if (property.ClrType == typeof(decimal?))
-                {
-                    property.SetValueConverter(nullableDecimalConverter);
+                    property.SetPrecision(18);
+                    property.SetScale(6);
                 }
             }
         }

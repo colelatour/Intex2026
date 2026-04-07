@@ -33,11 +33,11 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<LighthouseContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("LighthouseConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LighthouseConnection"));
 });
 builder.Services.AddDbContext<AuthIdentityDbContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("LighthouseIdentityConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LighthouseIdentityConnection"));
 });
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
