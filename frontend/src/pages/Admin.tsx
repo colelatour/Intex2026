@@ -9,10 +9,14 @@ import RecentActivity    from '../components/admin/RecentActivity';
 import QuickActions      from '../components/admin/QuickActions';
 import BottomCharts      from '../components/admin/BottomCharts';
 import ResidentDirectory from '../components/admin/ResidentDirectory';
+import DonorDashboard    from '../components/admin/DonorDashboard';
+import ProcessRecordings from '../components/admin/ProcessRecordings';
 
 const SECTION_TITLES: Record<string, string> = {
   'dashboard':          'Admin Dashboard',
   'resident-directory': 'Resident Directory',
+  'donors':             'Donor Dashboard',
+  'process-recordings': 'Process Recordings',
 };
 
 export default function Admin() {
@@ -55,6 +59,8 @@ export default function Admin() {
           </>
         )}
 
+        {activeSection === 'donors' && <DonorDashboard />}
+        {activeSection === 'process-recordings' && <ProcessRecordings />}
         {activeSection === 'resident-directory' && (
           <ResidentDirectory showCreate={showCreate} setShowCreate={setShowCreate} />
         )}
