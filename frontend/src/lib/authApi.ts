@@ -1,30 +1,21 @@
-import type { AuthSession } from '../types/AuthSession';
+import { get, post } from "./api";
+import type { AuthSession } from "../types/AuthSession";
 
-export async function getAuthSession(): Promise<AuthSession> {
-    const response = await fetch(`/api/auth/me`, {
-        credentials: 'include'
-    });
-
-    if (!response.ok) {
-        throw new Error('unable to load auth session');
-    }
-    return response.json();
+export function getSession(): Promise<AuthSession> {
+  return get<AuthSession>("/api/auth/me");
 }
 
-export async function registerUser(
-    email: string,
-    password: string,
-): Promise<void> {
-    const response = await fetch(`/api/auth/register`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({email, password }),
-        credentials: 'include'
-    });
+export function login(email: string, password: string): Promise<AuthSession> {
+  return post<AuthSession>("/api/auth/login", { email, password });
+}
 
-    if (!response.ok) {
-        throw new Error('unable to register user')
-    }
+export function logout(): Promise<{ message: string }> {
+  return post<{ message: string }>("/api/auth/logout");
+}
+
+export function register(
+  email: string,
+  password: string
+): Promise<AuthSession> {
+  return post<AuthSession>("/api/auth/register", { email, password });
 }

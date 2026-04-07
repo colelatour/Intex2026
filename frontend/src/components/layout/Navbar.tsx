@@ -1,9 +1,23 @@
-// src/components/layout/Navbar.tsx
-import { Link, useLocation } from 'react-router-dom';
-import '../../styles/Navbar.css';
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getSession, logout } from "../../lib/authApi";
+import type { AuthSession } from "../../types/AuthSession";
+import "../../styles/Navbar.css";
 
 export default function Navbar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const [session, setSession] = useState<AuthSession | null>(null);
+
+  useEffect(() => {
+    getSession().then(setSession).catch(() => setSession(null));
+  }, [pathname]);
+
+  async function handleLogout() {
+    await logout();
+    setSession(null);
+    navigate("/");
+  }
 
   return (
     <nav className="navbar">
@@ -18,7 +32,7 @@ export default function Navbar() {
 
       <ul className="navbar__links">
         <li>
-          <Link to="/" className={pathname === '/' ? 'active' : ''}>
+          <Link to="/" className={pathname === "/" ? "active" : ""}>
             Home
           </Link>
         </li>
@@ -35,8 +49,10 @@ export default function Navbar() {
         <li>
           <Link
             to="/donate"
-            className={pathname === '/donate' ? 'active' : ''}
-            style={{ color: pathname === '/donate' ? undefined : 'var(--gold)' }}
+            className={pathname === "/donate" ? "active" : ""}
+            style={{
+              color: pathname === "/donate" ? undefined : "var(--gold)",
+            }}
           >
             Donate
           </Link>
@@ -47,7 +63,7 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link to="/admin" className={pathname === '/admin' ? 'active' : ''}>
+          <Link to="/admin" className={pathname === "/admin" ? "active" : ""}>
             Admin
           </Link>
         </li>
@@ -56,6 +72,25 @@ export default function Navbar() {
             Donate Now
           </Link>
         </li>
+
+        {session?.isAuthenticated ? (
+          <>
+            <li style={{ color: "var(--gold)", fontSize: "0.85rem", display: "flex", alignItems: "center" }}>
+              {session.email}
+            </li>
+            <li>
+              <button onClick={handleLogout} className="navbar__cta" style={{ border: "none", background: "var(--red)", color: "var(--white)" }}>
+                Logout
+              </button>
+            </li>
+          </>
+        ) : (
+          <li>
+            <Link to="/login" className="navbar__cta" style={{ background: "var(--navy)" }}>
+              Login
+            </Link>
+          </li>
+        )}
       </ul>
     </nav>
   );
