@@ -1,5 +1,6 @@
 using Intex2026API.Data;
 using Intex2026API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace Intex2026API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Roles = "Admin,Worker,Donor")]
 public class DonationAllocationsController : ControllerBase
 {
     private readonly LighthouseContext _context;
@@ -48,6 +50,7 @@ public class DonationAllocationsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteDonationAllocation(string id)
     {
         var allocation = await _context.DonationAllocations.FindAsync(id);
