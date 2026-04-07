@@ -20,10 +20,15 @@ export default function Footer({ variant = 'default' }: FooterProps) {
       </div>
 
       <div className="footer__links">
-        <Link to="#">Privacy Policy</Link>
-        <Link to="#">Cookie Settings</Link>
+        <Link to="/privacy">Privacy Policy</Link>
+        <button
+          className="footer__link-btn"
+          onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
+        >
+          Cookie Settings
+        </button>
         <Link to="#">Contact</Link>
-        <Link to="/admin">Admin Login</Link>
+        <Link to="/login">Admin Login</Link>
       </div>
     </footer>
   );
