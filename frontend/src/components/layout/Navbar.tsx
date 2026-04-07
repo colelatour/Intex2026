@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getSession, logout } from "../../lib/authApi";
 import type { AuthSession } from "../../types/AuthSession";
@@ -8,6 +8,8 @@ export default function Navbar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getSession()
@@ -15,9 +17,20 @@ export default function Navbar() {
       .catch(() => setSession(null));
   }, [pathname]);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   async function handleLogout() {
     await logout();
     setSession(null);
+    setProfileOpen(false);
     navigate("/");
   }
 
@@ -61,19 +74,17 @@ export default function Navbar() {
             Our Regions
           </Link>
         </li>
-        {isDonor && (
-          <li>
-            <Link
-              to="/donate"
-              className={pathname === "/donate" ? "active" : ""}
-              style={{
-                color: pathname === "/donate" ? undefined : "var(--gold)",
-              }}
-            >
-              Donate
-            </Link>
-          </li>
-        )}
+        <li>
+          <Link
+            to="/donate"
+            className={pathname === "/donate" ? "active" : ""}
+            style={{
+              color: pathname === "/donate" ? undefined : "var(--gold)",
+            }}
+          >
+            Donate
+          </Link>
+        </li>
         <li>
           <Link to="/" className="">
             Contact
@@ -86,40 +97,46 @@ export default function Navbar() {
             </Link>
           </li>
         )}
-        {isDonor && (
-          <li>
-            <Link to="/donate" className="navbar__cta">
-              Donate Now
-            </Link>
-          </li>
-        )}
+        <li>
+          <Link to="/donate" className="navbar__cta">
+            Donate Now
+          </Link>
+        </li>
 
         {isAuthenticated ? (
-          <>
-            <li
-              style={{
-                color: "var(--gold)",
-                fontSize: "0.85rem",
-                display: "flex",
-                alignItems: "center",
-              }}
+          <li className="navbar__profile-wrapper" ref={profileRef}>
+            <button
+              className="navbar__profile-btn"
+              onClick={() => setProfileOpen((prev) => !prev)}
+              aria-expanded={profileOpen}
             >
-              {session!.email}
-            </li>
-            <li>
-              <button
-                onClick={handleLogout}
-                className="navbar__cta"
-                style={{
-                  border: "none",
-                  background: "var(--red)",
-                  color: "var(--white)",
-                }}
-              >
-                Logout
-              </button>
-            </li>
-          </>
+              <span className="navbar__avatar">
+                {(session!.email?.[0] ?? "U").toUpperCase()}
+              </span>
+            </button>
+            {profileOpen && (
+              <div className="navbar__profile-dropdown">
+                <div className="navbar__profile-header">
+                  <span className="navbar__profile-email">{session!.email}</span>
+                  <span className="navbar__profile-role">{roles.join(", ")}</span>
+                </div>
+                <hr className="navbar__profile-divider" />
+                <Link
+                  to="/account"
+                  className="navbar__profile-item"
+                  onClick={() => setProfileOpen(false)}
+                >
+                  Account Details
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="navbar__profile-item navbar__profile-item--logout"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </li>
         ) : (
           <li>
             <Link

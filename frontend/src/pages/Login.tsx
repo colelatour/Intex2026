@@ -1,10 +1,12 @@
 import { useState, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { login, register } from "../lib/authApi";
 import "../styles/Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +24,7 @@ export default function Login() {
       } else {
         await register(email, password);
       }
-      navigate("/");
+      navigate(redirectTo);
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -33,7 +35,7 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h2>Safe<span style={{ color: "var(--gold)" }}>Haven</span></h2>
+        <h2>Sheltered<span style={{ color: "var(--gold)" }}>Light</span></h2>
 
         <div className="login-tabs">
           <button
