@@ -1,4 +1,4 @@
-// src/pages/Home.jsx
+// src/pages/Home.tsx
 import '../styles/Home.css';
 
 import HeroSection    from '../components/home/HeroSection';

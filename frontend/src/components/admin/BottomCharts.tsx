@@ -1,4 +1,4 @@
-// src/components/admin/BottomCharts.jsx
+// src/components/admin/BottomCharts.tsx
 
 const EVENTS = [
   { date: 'Apr 7',  title: 'Case Conference',       house: 'House A' },

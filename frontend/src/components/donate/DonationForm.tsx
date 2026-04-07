@@ -1,4 +1,4 @@
-// src/components/donate/DonationForm.jsx
+// src/components/donate/DonationForm.tsx
 import { useState } from 'react';
 
 const AMOUNTS = [
@@ -13,21 +13,21 @@ const AMOUNTS = [
 const TABS = ['One-Time Gift', 'Monthly Giving', 'In-Kind / Other'];
 
 export default function DonationForm() {
-  const [selectedAmt, setSelectedAmt] = useState(50);
+  const [selectedAmt, setSelectedAmt] = useState<number | null>(50);
   const [customAmt, setCustomAmt]     = useState('');
   const [activeTab, setActiveTab]     = useState(0);
   const [honorToggle, setHonorToggle] = useState(false);
 
   const displayAmount = customAmt
     ? `$${customAmt}`
-    : `$${selectedAmt.toLocaleString()}`;
+    : `$${selectedAmt?.toLocaleString()}`;
 
-  const handleAmtClick = (val) => {
+  const handleAmtClick = (val: number) => {
     setSelectedAmt(val);
     setCustomAmt('');
   };
 
-  const handleCustomChange = (e) => {
+  const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomAmt(e.target.value);
     setSelectedAmt(null);
   };

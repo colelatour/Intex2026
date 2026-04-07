@@ -1,4 +1,4 @@
-// src/components/admin/RecentActivity.jsx
+// src/components/admin/RecentActivity.tsx
 
 const ACTIVITIES = [
   { dot: 'dot-blue',   text: 'Process recording added for #RES-003', time: '2 hours ago' },

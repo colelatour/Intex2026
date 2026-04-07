@@ -1,4 +1,4 @@
-// src/pages/Donate.jsx
+// src/pages/Donate.tsx
 import '../styles/Donate.css';
 
 import DonationForm from '../components/donate/DonationForm';

@@ -1,4 +1,4 @@
-// src/components/home/StatsBar.jsx
+// src/components/home/StatsBar.tsx
 
 const STATS = [
   { num: '247',   label: 'Girls Currently in Care' },

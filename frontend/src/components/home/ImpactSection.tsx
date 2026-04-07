@@ -1,4 +1,4 @@
-// src/components/home/ImpactSection.jsx
+// src/components/home/ImpactSection.tsx
 
 const IMPACT_ITEMS = [
   'Funding is transparently tracked and allocated across safehouse programs',

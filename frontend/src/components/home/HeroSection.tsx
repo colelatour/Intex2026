@@ -1,4 +1,4 @@
-// src/components/home/HeroSection.jsx
+// src/components/home/HeroSection.tsx
 import { useNavigate } from 'react-router-dom';
 
 export default function HeroSection() {

@@ -1,4 +1,4 @@
-// src/components/admin/QuickActions.jsx
+// src/components/admin/QuickActions.tsx
 
 const ACTIONS = [
   {

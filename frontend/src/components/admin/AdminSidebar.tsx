@@ -1,4 +1,4 @@
-// src/components/admin/AdminSidebar.jsx
+// src/components/admin/AdminSidebar.tsx
 import { useState } from 'react';
 
 const NAV_SECTIONS = [
@@ -34,7 +34,7 @@ const NAV_SECTIONS = [
   },
 ];
 
-const ICONS = {
+const ICONS: Record<string, JSX.Element> = {
   grid: (
     <svg className="sidebar__icon" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
       <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>

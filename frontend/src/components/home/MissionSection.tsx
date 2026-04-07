@@ -1,4 +1,4 @@
-// src/components/home/MissionSection.jsx
+// src/components/home/MissionSection.tsx
 
 export default function MissionSection() {
   return (

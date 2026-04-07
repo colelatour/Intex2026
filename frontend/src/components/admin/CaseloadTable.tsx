@@ -1,4 +1,4 @@
-// src/components/admin/CaseloadTable.jsx
+// src/components/admin/CaseloadTable.tsx
 import { useState } from 'react';
 
 const RESIDENTS = [
@@ -9,7 +9,7 @@ const RESIDENTS = [
   { id: '#RES-005', safehouse: 'House B', caseType: 'Sexual Abuse',   worker: 'M. Reyes',  status: 'Progressing' },
 ];
 
-const STATUS_CLASS = {
+const STATUS_CLASS: Record<string, string> = {
   Progressing:   'badge-prog',
   Monitoring:    'badge-mon',
   'At Risk':     'badge-risk',

@@ -1,4 +1,4 @@
-// src/components/home/HealingSteps.jsx
+// src/components/home/HealingSteps.tsx
 
 const STEPS = [
   {

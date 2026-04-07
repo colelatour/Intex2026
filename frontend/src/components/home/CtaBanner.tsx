@@ -1,4 +1,4 @@
-// src/components/home/CtaBanner.jsx
+// src/components/home/CtaBanner.tsx
 import { useNavigate } from 'react-router-dom';
 
 export default function CtaBanner() {

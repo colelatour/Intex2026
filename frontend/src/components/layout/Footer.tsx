@@ -1,8 +1,12 @@
-// src/components/layout/Footer.jsx
+// src/components/layout/Footer.tsx
 import { Link } from 'react-router-dom';
 import '../../styles/Footer.css';
 
-export default function Footer({ variant = 'default' }) {
+interface FooterProps {
+  variant?: 'default' | 'donate';
+}
+
+export default function Footer({ variant = 'default' }: FooterProps) {
   return (
     <footer className="footer">
       <div className="footer__logo">

@@ -1,4 +1,4 @@
-// src/pages/Admin.jsx
+// src/pages/Admin.tsx
 import '../styles/Admin.css';
 
 import AdminSidebar  from '../components/admin/AdminSidebar';

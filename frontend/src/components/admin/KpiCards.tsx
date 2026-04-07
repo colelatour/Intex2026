@@ -1,4 +1,4 @@
-// src/components/admin/KpiCards.jsx
+// src/components/admin/KpiCards.tsx
 
 const KPI_DATA = [
   { label: 'Active Residents',       value: '247',   sub: 'Across all safehouses',  color: 'blue'   },

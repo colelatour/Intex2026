@@ -1,4 +1,4 @@
-// src/components/donate/DonationInfo.jsx
+// src/components/donate/DonationInfo.tsx
 
 const GIFT_USES = [
   { icon: '🏠', bg: '#dbeafe', title: 'Safe Housing',          body: 'Maintaining secure, nurturing safehouses for residents across the Philippines.' },
