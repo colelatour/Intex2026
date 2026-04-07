@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getSession, logout } from "../../lib/authApi";
 import type { AuthSession } from "../../types/AuthSession";
+import navbarLogo from "../../images/sheltered_light_navbar_logo.png";
 import "../../styles/Navbar.css";
 
 export default function Navbar() {
@@ -29,12 +30,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar__logo">
-        <div className="navbar__logo-icon">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
-        </div>
-        Sheltered<span>Light</span>
+        <img src={navbarLogo} alt="Sheltered Light" className="navbar__logo-img" />
       </Link>
 
       <ul className="navbar__links">
