@@ -60,78 +60,127 @@ const STATUS_CLASS: Record<string, string> = {
   Monitoring: 'badge-mon',
 };
 
-function DetailGrid({ resident }: { resident: Resident }) {
-  const fields: { label: string; value: string | null }[] = [
-    { label: 'Resident ID',            value: resident.residentId },
-    { label: 'Case Control No.',       value: resident.caseControlNo },
-    { label: 'Internal Code',          value: resident.internalCode },
-    { label: 'Safehouse ID',           value: resident.safehouseId },
-    { label: 'Case Status',            value: resident.caseStatus },
-    { label: 'Case Category',          value: resident.caseCategory },
-    { label: 'Sex',                    value: resident.sex },
-    { label: 'Date of Birth',          value: resident.dateOfBirth },
-    { label: 'Birth Status',           value: resident.birthStatus },
-    { label: 'Place of Birth',         value: resident.placeOfBirth },
-    { label: 'Religion',               value: resident.religion },
-    { label: 'Age Upon Admission',     value: resident.ageUponAdmission },
-    { label: 'Present Age',            value: resident.presentAge },
-    { label: 'Date of Admission',      value: resident.dateOfAdmission },
-    { label: 'Length of Stay',         value: resident.lengthOfStay },
-    { label: 'Date Enrolled',          value: resident.dateEnrolled },
-    { label: 'Date Closed',            value: resident.dateClosed },
-    { label: 'Assigned Social Worker', value: resident.assignedSocialWorker },
-    { label: 'Referral Source',        value: resident.referralSource },
-    { label: 'Referring Agency/Person',value: resident.referringAgencyPerson },
-    { label: 'Initial Case Assessment',value: resident.initialCaseAssessment },
-    { label: 'Date Case Study Prepared',value: resident.dateCaseStudyPrepared },
-    { label: 'Initial Risk Level',     value: resident.initialRiskLevel },
-    { label: 'Current Risk Level',     value: resident.currentRiskLevel },
-    { label: 'Reintegration Type',     value: resident.reintegrationType },
-    { label: 'Reintegration Status',   value: resident.reintegrationStatus },
-    { label: 'Date COLB Registered',   value: resident.dateColbRegistered },
-    { label: 'Date COLB Obtained',     value: resident.dateColbObtained },
-    { label: 'Is PWD',                 value: resident.isPwd },
-    { label: 'PWD Type',               value: resident.pwdType },
-    { label: 'Has Special Needs',      value: resident.hasSpecialNeeds },
-    { label: 'Special Needs Diagnosis',value: resident.specialNeedsDiagnosis },
-    { label: 'Family Is 4Ps',          value: resident.familyIs4ps },
-    { label: 'Family Solo Parent',     value: resident.familySoloParent },
-    { label: 'Family Indigenous',      value: resident.familyIndigenous },
-    { label: 'Family Parent PWD',      value: resident.familyParentPwd },
-    { label: 'Family Informal Settler',value: resident.familyInformalSettler },
-    { label: 'Sub-Cat: Orphaned',      value: resident.subCatOrphaned },
-    { label: 'Sub-Cat: Trafficked',    value: resident.subCatTrafficked },
-    { label: 'Sub-Cat: Child Labor',   value: resident.subCatChildLabor },
-    { label: 'Sub-Cat: Physical Abuse',value: resident.subCatPhysicalAbuse },
-    { label: 'Sub-Cat: Sexual Abuse',  value: resident.subCatSexualAbuse },
-    { label: 'Sub-Cat: OSAEC',         value: resident.subCatOsaec },
-    { label: 'Sub-Cat: CICL',          value: resident.subCatCicl },
-    { label: 'Sub-Cat: At Risk',       value: resident.subCatAtRisk },
-    { label: 'Sub-Cat: Street Child',  value: resident.subCatStreetChild },
-    { label: 'Sub-Cat: Child w/ HIV',  value: resident.subCatChildWithHiv },
-    { label: 'Notes (Restricted)',     value: resident.notesRestricted },
-    { label: 'Created At',             value: resident.createdAt },
+function hasValue(v: string | null): v is string {
+  return v !== null && v.trim() !== '';
+}
+
+function DetailPanel({ resident }: { resident: Resident }) {
+  const sections: {
+    title: string;
+    type?: 'tags';
+    fields: { label: string; value: string | null }[];
+  }[] = [
+    {
+      title: 'Personal Info',
+      fields: [
+        { label: 'Sex',               value: resident.sex },
+        { label: 'Date of Birth',     value: resident.dateOfBirth },
+        { label: 'Birth Status',      value: resident.birthStatus },
+        { label: 'Place of Birth',    value: resident.placeOfBirth },
+        { label: 'Religion',          value: resident.religion },
+        { label: 'Age on Admission',  value: resident.ageUponAdmission },
+        { label: 'Present Age',       value: resident.presentAge },
+        { label: 'Is PWD',            value: resident.isPwd },
+        { label: 'PWD Type',          value: resident.pwdType },
+        { label: 'Has Special Needs', value: resident.hasSpecialNeeds },
+        { label: 'Special Needs Diagnosis', value: resident.specialNeedsDiagnosis },
+      ],
+    },
+    {
+      title: 'Case Details',
+      fields: [
+        { label: 'Case Category',          value: resident.caseCategory },
+        { label: 'Case Status',            value: resident.caseStatus },
+        { label: 'Initial Case Assessment',value: resident.initialCaseAssessment },
+        { label: 'Initial Risk Level',     value: resident.initialRiskLevel },
+        { label: 'Current Risk Level',     value: resident.currentRiskLevel },
+        { label: 'Assigned Social Worker', value: resident.assignedSocialWorker },
+        { label: 'Referral Source',        value: resident.referralSource },
+        { label: 'Referring Agency/Person',value: resident.referringAgencyPerson },
+        { label: 'Date of Admission',      value: resident.dateOfAdmission },
+        { label: 'Length of Stay',         value: resident.lengthOfStay },
+        { label: 'Date Enrolled',          value: resident.dateEnrolled },
+        { label: 'Date Closed',            value: resident.dateClosed },
+      ],
+    },
+    {
+      title: 'Case Subcategories',
+      type: 'tags',
+      fields: [
+        { label: 'Orphaned',      value: resident.subCatOrphaned },
+        { label: 'Trafficked',    value: resident.subCatTrafficked },
+        { label: 'Child Labor',   value: resident.subCatChildLabor },
+        { label: 'Physical Abuse',value: resident.subCatPhysicalAbuse },
+        { label: 'Sexual Abuse',  value: resident.subCatSexualAbuse },
+        { label: 'OSAEC',         value: resident.subCatOsaec },
+        { label: 'CICL',          value: resident.subCatCicl },
+        { label: 'At Risk',       value: resident.subCatAtRisk },
+        { label: 'Street Child',  value: resident.subCatStreetChild },
+        { label: 'Child w/ HIV',  value: resident.subCatChildWithHiv },
+      ],
+    },
+    {
+      title: 'Family Background',
+      fields: [
+        { label: 'Family Is 4Ps',          value: resident.familyIs4ps },
+        { label: 'Solo Parent',            value: resident.familySoloParent },
+        { label: 'Indigenous',             value: resident.familyIndigenous },
+        { label: 'Parent PWD',             value: resident.familyParentPwd },
+        { label: 'Informal Settler',       value: resident.familyInformalSettler },
+      ],
+    },
+    {
+      title: 'Administrative',
+      fields: [
+        { label: 'Internal Code',           value: resident.internalCode },
+        { label: 'Safehouse ID',            value: resident.safehouseId },
+        { label: 'Case Control No.',        value: resident.caseControlNo },
+        { label: 'Date COLB Registered',    value: resident.dateColbRegistered },
+        { label: 'Date COLB Obtained',      value: resident.dateColbObtained },
+        { label: 'Date Case Study Prepared',value: resident.dateCaseStudyPrepared },
+        { label: 'Reintegration Type',      value: resident.reintegrationType },
+        { label: 'Reintegration Status',    value: resident.reintegrationStatus },
+        { label: 'Notes (Restricted)',      value: resident.notesRestricted },
+        { label: 'Created At',              value: resident.createdAt },
+      ],
+    },
   ];
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-      gap: '0.5rem 1.5rem',
-      padding: '1rem 1.5rem',
-      background: 'var(--gray-50, #f9fafb)',
-      borderTop: '1px solid var(--gray-200, #e5e7eb)',
-    }}>
-      {fields.map(({ label, value }) => (
-        <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--gray-500, #6b7280)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            {label}
-          </span>
-          <span style={{ fontSize: '0.85rem', color: 'var(--gray-800, #1f2937)' }}>
-            {value ?? '—'}
-          </span>
-        </div>
-      ))}
+    <div className="detail-panel">
+      {sections.map((section) => {
+        if (section.type === 'tags') {
+          const active = section.fields.filter((f) => hasValue(f.value));
+          if (active.length === 0) return null;
+          return (
+            <div className="detail-section" key={section.title}>
+              <div className="detail-section__title">{section.title}</div>
+              <div className="subcat-tags">
+                {active.map((f) => (
+                  <span key={f.label} className="badge badge-risk">{f.label}</span>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        const visible = section.fields.filter((f) => hasValue(f.value));
+        if (visible.length === 0) return null;
+
+        return (
+          <div className="detail-section" key={section.title}>
+            <div className="detail-section__title">{section.title}</div>
+            <div className="detail-grid">
+              {visible.map((f) => (
+                <div key={f.label}>
+                  <div className="detail-field__label">{f.label}</div>
+                  <div className="detail-field__value">{f.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -212,23 +261,21 @@ export default function ResidentDirectory() {
                       style={{ cursor: 'pointer' }}
                       onClick={() => toggleExpand(r.residentId)}
                     >
-                      <td className="resident-id" style={{ color: 'var(--navy, #1e3a5f)', fontWeight: 600 }}>
-                        {r.residentId ?? '—'}
-                      </td>
+                      <td className="resident-id">{r.residentId ?? '—'}</td>
                       <td>{r.caseControlNo ?? '—'}</td>
                       <td>
                         <span className={`badge ${STATUS_CLASS[r.caseStatus ?? ''] ?? ''}`}>
                           {r.caseStatus ?? '—'}
                         </span>
                       </td>
-                      <td style={{ textAlign: 'right', color: 'var(--gray-400, #9ca3af)', fontSize: '0.8rem' }}>
+                      <td style={{ textAlign: 'right', color: 'var(--gray-400)', fontSize: '0.78rem' }}>
                         {isExpanded ? '▲ collapse' : '▼ expand'}
                       </td>
                     </tr>
                     {isExpanded && (
                       <tr key={`${r.residentId}-detail`}>
                         <td colSpan={4} style={{ padding: 0 }}>
-                          <DetailGrid resident={r} />
+                          <DetailPanel resident={r} />
                         </td>
                       </tr>
                     )}
