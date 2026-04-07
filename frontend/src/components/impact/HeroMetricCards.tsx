@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { ImpactSummary } from '../../hooks/useImpactSummary';
 
 interface Props {
@@ -26,6 +27,11 @@ export default function HeroMetricCards({ data, loading }: Props) {
                   {data?.heroMetrics[key].toLocaleString() ?? '—'}
                 </div>
                 <div className="hero-card__label">{label}</div>
+                {key === 'activeSafehouses' && (
+                  <Link to="/regions" className="hero-card__region-link">
+                    → See our safehouses by region
+                  </Link>
+                )}
               </>
             )}
           </div>
