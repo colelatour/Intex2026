@@ -73,7 +73,7 @@ export default function ProcessRecordings() {
             residentId: r.residentId,
             label: `${r.residentId}${r.assignedSocialWorker ? ` — ${r.assignedSocialWorker}` : ''}`,
           }))
-          .sort((a, b) => a.residentId.localeCompare(b.residentId));
+          .sort((a, b) => a.residentId.localeCompare(b.residentId, undefined, { numeric: true }));
         setResidents(opts);
       })
       .catch(() => setResidents([]));
