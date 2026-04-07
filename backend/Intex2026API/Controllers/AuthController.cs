@@ -42,13 +42,11 @@ namespace Intex2026API.Controllers
         }
 
         [HttpPost("logout")]
-            public async Task<IActionResult> Logout()
-            {
-                await signInManager.SignOutAsync();
+        public async Task<IActionResult> Logout()
+        {
+            await signInManager.SignOutAsync();
 
-                return Ok(new { message = "logged out succesfully" });
-
-            }
+            return Ok(new { message = "logged out succesfully" });
         }
     }
 }
