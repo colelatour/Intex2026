@@ -1,40 +1,17 @@
 // src/components/admin/AdminSidebar.tsx
-import { useState } from 'react';
+import type { ReactNode } from 'react';
 
 const NAV_SECTIONS = [
   {
     label: 'Main',
     items: [
-      { id: 'dashboard',   label: 'Dashboard',         icon: 'grid' },
-      { id: 'caseload',    label: 'Caseload Inventory', icon: 'users' },
-      { id: 'recordings',  label: 'Process Recordings', icon: 'play' },
-      { id: 'visitations', label: 'Home Visitations',   icon: 'home' },
-    ],
-  },
-  {
-    label: 'Donors',
-    items: [
-      { id: 'donors',      label: 'Donors & Contributions', icon: 'heart' },
-      { id: 'allocations', label: 'Donation Allocations',   icon: 'dollar' },
-    ],
-  },
-  {
-    label: 'Reports',
-    items: [
-      { id: 'reports',  label: 'Reports & Analytics',   icon: 'chart' },
-      { id: 'social',   label: 'Social Media Insights',  icon: 'twitter' },
-    ],
-  },
-  {
-    label: 'Settings',
-    items: [
-      { id: 'users',      label: 'User Management', icon: 'user' },
-      { id: 'safehouses', label: 'Safehouses',       icon: 'house' },
+      { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'  },
+      { id: 'resident-directory', label: 'Resident Directory', icon: 'users' },
     ],
   },
 ];
 
-const ICONS: Record<string, JSX.Element> = {
+const ICONS: Record<string, ReactNode> = {
   grid: (
     <svg className="sidebar__icon" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
       <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -94,9 +71,12 @@ const ICONS: Record<string, JSX.Element> = {
   ),
 };
 
-export default function AdminSidebar() {
-  const [active, setActive] = useState('dashboard');
+interface AdminSidebarProps {
+  activeSection: string;
+  onSectionChange: (id: string) => void;
+}
 
+export default function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
   return (
     <div className="sidebar">
       <div className="sidebar__brand">
@@ -109,8 +89,8 @@ export default function AdminSidebar() {
           {section.items.map((item) => (
             <button
               key={item.id}
-              className={`sidebar__link${active === item.id ? ' active' : ''}`}
-              onClick={() => setActive(item.id)}
+              className={`sidebar__link${activeSection === item.id ? ' active' : ''}`}
+              onClick={() => onSectionChange(item.id)}
             >
               {ICONS[item.icon]}
               {item.label}
