@@ -337,10 +337,11 @@ export default function ResidentDirectory() {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
   const [search, setSearch]         = useState('');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [editingId, setEditingId]   = useState<string | null>(null);
-  const [editDraft, setEditDraft]   = useState<Resident | null>(null);
-  const [saving, setSaving]         = useState(false);
+  const [expandedId, setExpandedId]     = useState<string | null>(null);
+  const [editingId, setEditingId]       = useState<string | null>(null);
+  const [editDraft, setEditDraft]       = useState<Resident | null>(null);
+  const [saving, setSaving]             = useState(false);
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     fetch('http://localhost:5000/Residents')
@@ -358,11 +359,11 @@ export default function ResidentDirectory() {
       });
   }, []);
 
-  const filtered = residents.filter((r) =>
-    (r.residentId    ?? '').toLowerCase().includes(search.toLowerCase()) ||
-    (r.caseControlNo ?? '').toLowerCase().includes(search.toLowerCase()) ||
-    (r.caseStatus    ?? '').toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = residents.filter((r) => {
+    const matchesSearch = search === '' || (r.residentId ?? '').toLowerCase() === search.toLowerCase();
+    const matchesStatus = statusFilter === '' || r.caseStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const toggleExpand = (id: string | null) => {
     if (editingId) return; // block collapse while editing
@@ -428,11 +429,22 @@ export default function ResidentDirectory() {
             </svg>
             <input
               type="text"
-              placeholder="Search by ID, name, or status…"
+              placeholder="Search by resident ID…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          <select
+            className="filter-btn"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
+          >
+            <option value="">All Statuses</option>
+            {FIELD_OPTIONS.caseStatus!.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
         </div>
       </div>
 
