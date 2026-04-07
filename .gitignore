@@ -67,3 +67,8 @@ htmlcov/
 # Misc
 *.bak
 *.orig
+
+# SQLite databases
+*.sqlite
+*.sqlite3
+*.db
