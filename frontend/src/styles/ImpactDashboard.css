@@ -418,6 +418,109 @@
   line-height: 1.6;
 }
 
+/* ── Emotional transformation ───────────────────────────────────────────────── */
+
+.emo-section {
+  background: #fdf8f4;
+  padding: 64px 24px;
+  border-top: 1px solid #ede8e2;
+}
+
+.emo-headline {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.emo-pct {
+  font-size: clamp(4rem, 10vw, 5.5rem);
+  font-weight: 800;
+  color: #1D9E75;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.emo-sublabel {
+  font-size: 1rem;
+  color: #5a4e48;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.emo-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  max-width: 900px;
+  margin: 0 auto 40px;
+}
+
+@media (min-width: 700px) {
+  .emo-columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.emo-col-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9a8e88;
+  margin-bottom: 16px;
+}
+
+.emo-col-header--teal {
+  color: #1D9E75;
+}
+
+.emo-bar-row {
+  display: grid;
+  grid-template-columns: 88px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.emo-bar-label {
+  font-size: 0.8rem;
+  color: #3a2e2a;
+  white-space: nowrap;
+}
+
+.emo-bar-track {
+  background: #ede8e2;
+  border-radius: 4px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.emo-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.emo-bar-count {
+  font-size: 0.75rem;
+  color: #9a8e88;
+  text-align: right;
+}
+
+.emo-interpretation {
+  max-width: 900px;
+  margin: 0 auto 20px;
+}
+
+.emo-footnote {
+  font-size: 0.75rem;
+  color: #9a8e88;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 /* ── CTA banner ──────────────────────────────────────────────────────────────── */
 
 .cta-banner {

@@ -6,7 +6,7 @@ interface Props {
 }
 
 const CARDS = [
-  { key: 'totalGirlsServed',    label: 'Girls ever served'         },
+  { key: 'totalGirlsServed',    label: 'Girls served'         },
   { key: 'activeResidents',     label: 'Currently in care'         },
   { key: 'girlsReintegrated',   label: 'Successfully reintegrated' },
   { key: 'activeSafehouses',    label: 'Active safehouses'         },

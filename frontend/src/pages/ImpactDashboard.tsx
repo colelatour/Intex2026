@@ -2,21 +2,23 @@ import '../styles/ImpactDashboard.css';
 import { useImpactSummary } from '../hooks/useImpactSummary';
 import { useImpactTrends } from '../hooks/useImpactTrends';
 import { useEducationJourney } from '../hooks/useEducationJourney';
+import { useEmotionalTransformation } from '../hooks/useEmotionalTransformation';
 
-import HeroBanner              from '../components/impact/HeroBanner';
-import HeroMetricCards         from '../components/impact/HeroMetricCards';
-import OutcomeHighlights       from '../components/impact/OutcomeHighlights';
-import TrendCharts             from '../components/impact/TrendCharts';
-import EducationJourneyChart   from '../components/impact/EducationJourneyChart';
-import CareIntensityRow        from '../components/impact/CareIntensityRow';
-import DonationsSection        from '../components/impact/DonationsSection';
-import IncidentResolution      from '../components/impact/IncidentResolution';
-import CallToActionBanner      from '../components/impact/CallToActionBanner';
+import HeroBanner                    from '../components/impact/HeroBanner';
+import HeroMetricCards               from '../components/impact/HeroMetricCards';
+import OutcomeHighlights             from '../components/impact/OutcomeHighlights';
+import TrendCharts                   from '../components/impact/TrendCharts';
+import EducationJourneyChart         from '../components/impact/EducationJourneyChart';
+import CareIntensityRow              from '../components/impact/CareIntensityRow';
+import DonationsSection              from '../components/impact/DonationsSection';
+import EmotionalTransformationSection from '../components/impact/EmotionalTransformationSection';
+import CallToActionBanner            from '../components/impact/CallToActionBanner';
 
 export default function ImpactDashboard() {
-  const summary  = useImpactSummary();
-  const trends   = useImpactTrends();
-  const journey  = useEducationJourney();
+  const summary    = useImpactSummary();
+  const trends     = useImpactTrends();
+  const journey    = useEducationJourney();
+  const emotional  = useEmotionalTransformation();
 
   const summaryError = summary.error
     ? 'Unable to load impact data right now. Please try again later.'
@@ -31,13 +33,8 @@ export default function ImpactDashboard() {
           <p>{summaryError}</p>
         </div>
       ) : (
-        <>
-          <HeroMetricCards data={summary.data} loading={summary.loading} />
-          <OutcomeHighlights data={summary.data} loading={summary.loading} />
-        </>
+        <HeroMetricCards data={summary.data} loading={summary.loading} />
       )}
-
-      <TrendCharts data={trends.data} loading={trends.loading} />
 
       <EducationJourneyChart
         data={journey.data}
@@ -46,12 +43,22 @@ export default function ImpactDashboard() {
       />
 
       {!summaryError && (
+        <DonationsSection data={summary.data} loading={summary.loading} />
+      )}
+
+      {!summaryError && (
         <>
+          <OutcomeHighlights data={summary.data} loading={summary.loading} />
+          <TrendCharts data={trends.data} loading={trends.loading} />
           <CareIntensityRow  data={summary.data} loading={summary.loading} />
-          <DonationsSection  data={summary.data} loading={summary.loading} />
-          <IncidentResolution data={summary.data} loading={summary.loading} />
         </>
       )}
+
+      <EmotionalTransformationSection
+        data={emotional.data}
+        loading={emotional.loading}
+        error={emotional.error}
+      />
 
       <CallToActionBanner data={summary.data} />
     </main>

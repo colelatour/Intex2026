@@ -27,6 +27,14 @@ public record ImpactTrendsDto(List<HealthTrendPointDto> HealthTrend, List<Educat
 
 public record EducationJourneyPointDto(int MonthOffset, double AvgProgress, int GirlsIncluded);
 
+public record EmotionalTransformationDto(
+    int TotalSessions,
+    int ImprovedSessions,
+    int ImprovedPercent,
+    Dictionary<string, int> StartStateBreakdown,
+    Dictionary<string, int> EndStateBreakdown
+);
+
 // ── Controller ──────────────────────────────────────────────────────────────
 
 [ApiController]
@@ -198,8 +206,75 @@ public class ImpactController : ControllerBase
         return Ok(result);
     }
 
+    // GET /api/impact/emotional-transformation
+    [HttpGet("emotional-transformation")]
+    public async Task<ActionResult<EmotionalTransformationDto>> GetEmotionalTransformation()
+    {
+        var sessions = await _context.ProcessRecordings
+            .Where(p => p.EmotionalStateObserved != null && p.EmotionalStateEnd != null)
+            .Select(p => new { p.EmotionalStateObserved, p.EmotionalStateEnd })
+            .ToListAsync();
+
+        var totalSessions = sessions.Count;
+
+        var improvedSessions = sessions.Count(s =>
+            EmotionalScore(s.EmotionalStateEnd) > EmotionalScore(s.EmotionalStateObserved));
+
+        var improvedPercent = totalSessions > 0
+            ? (int)Math.Round(improvedSessions * 100.0 / totalSessions)
+            : 0;
+
+        var startBreakdown = sessions
+            .GroupBy(s => Normalize(s.EmotionalStateObserved!))
+            .Where(g => g.Key != "Unknown")
+            .OrderByDescending(g => g.Count())
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var endBreakdown = sessions
+            .GroupBy(s => Normalize(s.EmotionalStateEnd!))
+            .Where(g => g.Key != "Unknown")
+            .OrderByDescending(g => g.Count())
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        return Ok(new EmotionalTransformationDto(
+            totalSessions,
+            improvedSessions,
+            improvedPercent,
+            startBreakdown,
+            endBreakdown
+        ));
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private static bool IsTruthy(string? value) =>
         value?.Trim().ToLower() is "1" or "true" or "yes";
+
+    private static string Normalize(string state) =>
+        state.Trim() switch
+        {
+            var s when string.Equals(s, "distressed", StringComparison.OrdinalIgnoreCase) => "Distressed",
+            var s when string.Equals(s, "withdrawn",  StringComparison.OrdinalIgnoreCase) => "Withdrawn",
+            var s when string.Equals(s, "anxious",    StringComparison.OrdinalIgnoreCase) => "Anxious",
+            var s when string.Equals(s, "sad",        StringComparison.OrdinalIgnoreCase) => "Sad",
+            var s when string.Equals(s, "angry",      StringComparison.OrdinalIgnoreCase) => "Angry",
+            var s when string.Equals(s, "neutral",    StringComparison.OrdinalIgnoreCase) => "Neutral",
+            var s when string.Equals(s, "calm",       StringComparison.OrdinalIgnoreCase) => "Calm",
+            var s when string.Equals(s, "engaged",    StringComparison.OrdinalIgnoreCase) => "Engaged",
+            var s when string.Equals(s, "hopeful",    StringComparison.OrdinalIgnoreCase) => "Hopeful",
+            var s when string.Equals(s, "happy",      StringComparison.OrdinalIgnoreCase) => "Happy",
+            var s when string.Equals(s, "positive",   StringComparison.OrdinalIgnoreCase) => "Positive",
+            _ => "Unknown"
+        };
+
+    private static int EmotionalScore(string? state) =>
+        Normalize(state ?? "").ToLower() switch
+        {
+            "distressed"            => 1,
+            "withdrawn" or "anxious" or "sad" or "angry" => 2,
+            "neutral"               => 3,
+            "calm"    or "engaged"  => 4,
+            "hopeful" or "happy" or "positive" => 5,
+            _                       => 0
+        };
 }
