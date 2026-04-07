@@ -1,4 +1,4 @@
-// TODO: replace with GET /api/impact/regions once endpoint is built
+import { useEffect, useState } from 'react';
 
 export type RegionKey = 'luzon' | 'visayas' | 'mindanao';
 
@@ -26,63 +26,117 @@ export interface RegionData {
   contextParagraph: string;
 }
 
-export const ALL_SAFEHOUSES: SafehouseInfo[] = [
-  { code: 'SH01', city: 'Quezon City',    lat: 14.6760, lng: 121.0437, capacity:  8, occupied:  8, region: 'luzon'    },
-  { code: 'SH02', city: 'Cebu City',      lat: 10.3157, lng: 123.8854, capacity: 10, occupied:  8, region: 'visayas'  },
-  { code: 'SH03', city: 'Davao City',     lat:  7.1907, lng: 125.4553, capacity:  9, occupied:  9, region: 'mindanao' },
-  { code: 'SH04', city: 'Iloilo City',    lat: 10.7202, lng: 122.5621, capacity: 12, occupied: 12, region: 'visayas'  },
-  { code: 'SH05', city: 'Baguio City',    lat: 16.4023, lng: 120.5960, capacity: 11, occupied:  9, region: 'luzon'    },
-  { code: 'SH06', city: 'Cagayan de Oro', lat:  8.4542, lng: 124.6319, capacity:  8, occupied:  6, region: 'mindanao' },
-  { code: 'SH07', city: 'Bacolod',        lat: 10.6770, lng: 122.9560, capacity: 12, occupied: 12, region: 'visayas'  },
-  { code: 'SH08', city: 'Tacloban',       lat: 11.2543, lng: 124.9981, capacity:  9, occupied:  7, region: 'visayas'  },
-  { code: 'SH09', city: 'General Santos', lat:  6.1164, lng: 125.1716, capacity:  6, occupied:  6, region: 'mindanao' },
-];
-
-const REGION_DATA: Record<RegionKey, RegionData> = {
-  luzon: {
-    name: 'Luzon',
-    safehouses: ALL_SAFEHOUSES.filter(s => s.region === 'luzon'),
-    girlsServed: 16,
-    currentlyInCare: 10,
-    reintegrated: 8,
-    riskImprovedPct: 60,
-    donationsPhp: 58685,
-    totalCapacity: 19,
-    totalOccupied: 17,
-    openSince: 'January 2022',
-    contextParagraph:
-      'Luzon is home to two Lighthouse safehouses serving girls in Metro Manila and the Cordillera highlands. Our Quezon City safehouse is currently at full capacity, serving girls referred by government agencies and NGOs across the National Capital Region. 60% of girls in Luzon have reduced their risk level during their stay — the highest rate across all our regions.',
-  },
-  visayas: {
-    name: 'Visayas',
-    safehouses: ALL_SAFEHOUSES.filter(s => s.region === 'visayas'),
-    girlsServed: 30,
-    currentlyInCare: 13,
-    reintegrated: 6,
-    riskImprovedPct: 50,
-    donationsPhp: 133029,
-    totalCapacity: 43,
-    totalOccupied: 39,
-    openSince: 'February 2022',
-    contextParagraph:
-      'The Visayas is our largest operational region, with four safehouses spanning Cebu, Iloilo, Bacolod, and Tacloban. The region serves the highest number of girls of any region — 30 in total — reflecting both the scale of need and the strength of our local partnerships. Three of four safehouses are at or near full capacity.',
-  },
-  mindanao: {
-    name: 'Mindanao',
-    safehouses: ALL_SAFEHOUSES.filter(s => s.region === 'mindanao'),
-    girlsServed: 14,
-    currentlyInCare: 7,
-    reintegrated: 5,
-    riskImprovedPct: 29,
-    donationsPhp: 90722,
-    totalCapacity: 23,
-    totalOccupied: 21,
-    openSince: 'April 2022',
-    contextParagraph:
-      'Mindanao presents some of the most complex cases we serve, with a higher proportion of abandoned children than other regions. Our three safehouses in Davao City, Cagayan de Oro, and General Santos are operating at 91% capacity. This region receives the most operational support from local partners and is where additional donor funding would have the most direct impact on our ability to serve more girls.',
-  },
+// Hardcoded because the DB has no lat/lng columns.
+const SAFEHOUSE_LATLNG: Record<string, { lat: number; lng: number }> = {
+  SH01: { lat: 14.6760, lng: 121.0437 },
+  SH02: { lat: 10.3157, lng: 123.8854 },
+  SH03: { lat:  7.1907, lng: 125.4553 },
+  SH04: { lat: 10.7202, lng: 122.5621 },
+  SH05: { lat: 16.4023, lng: 120.5960 },
+  SH06: { lat:  8.4542, lng: 124.6319 },
+  SH07: { lat: 10.6770, lng: 122.9560 },
+  SH08: { lat: 11.2543, lng: 124.9981 },
+  SH09: { lat:  6.1164, lng: 125.1716 },
 };
 
-export function useRegionData() {
-  return REGION_DATA;
+// Descriptive narrative text with no DB backing.
+const CONTEXT_PARAGRAPHS: Record<RegionKey, string> = {
+  luzon:
+    'Luzon is home to two Lighthouse safehouses serving girls in Metro Manila and the Cordillera highlands. Our Quezon City safehouse is currently at full capacity, serving girls referred by government agencies and NGOs across the National Capital Region. 60% of girls in Luzon have reduced their risk level during their stay — the highest rate across all our regions.',
+  visayas:
+    'The Visayas is our largest operational region, with four safehouses spanning Cebu, Iloilo, Bacolod, and Tacloban. The region serves the highest number of girls of any region — reflecting both the scale of need and the strength of our local partnerships. Three of four safehouses are at or near full capacity.',
+  mindanao:
+    'Mindanao presents some of the most complex cases we serve, with a higher proportion of abandoned children than other regions. Our three safehouses in Davao City, Cagayan de Oro, and General Santos are operating at near-full capacity. This region receives the most operational support from local partners and is where additional donor funding would have the most direct impact on our ability to serve more girls.',
+};
+
+// ── API response types ────────────────────────────────────────────────────────
+
+interface ApiSafehouseDto {
+  code:     string;
+  city:     string;
+  capacity: number;
+  occupied: number;
+  status:   string;
+}
+
+interface ApiRegionDto {
+  regionKey:       RegionKey;
+  name:            string;
+  totalCapacity:   number;
+  totalOccupied:   number;
+  openSince:       string;
+  girlsServed:     number;
+  currentlyInCare: number;
+  reintegrated:    number;
+  riskImprovedPct: number | null;
+  donationsPhp:    number;
+  safehouses:      ApiSafehouseDto[];
+}
+
+interface ApiRegionsResponse {
+  regions: ApiRegionDto[];
+}
+
+// ── Merge helper ─────────────────────────────────────────────────────────────
+
+function mergeRegion(api: ApiRegionDto): RegionData {
+  const safehouses: SafehouseInfo[] = api.safehouses.map(sh => ({
+    code:     sh.code,
+    city:     sh.city,
+    lat:      SAFEHOUSE_LATLNG[sh.code]?.lat ?? 0,
+    lng:      SAFEHOUSE_LATLNG[sh.code]?.lng ?? 0,
+    capacity: sh.capacity,
+    occupied: sh.occupied,
+    region:   api.regionKey,
+  }));
+
+  return {
+    name:             api.name,
+    safehouses,
+    girlsServed:      api.girlsServed,
+    currentlyInCare:  api.currentlyInCare,
+    reintegrated:     api.reintegrated,
+    riskImprovedPct:  api.riskImprovedPct ?? 0,
+    donationsPhp:     api.donationsPhp,
+    totalCapacity:    api.totalCapacity,
+    totalOccupied:    api.totalOccupied,
+    openSince:        api.openSince,
+    contextParagraph: CONTEXT_PARAGRAPHS[api.regionKey],
+  };
+}
+
+// ── Hook ─────────────────────────────────────────────────────────────────────
+
+export interface UseRegionDataResult {
+  data:    Record<RegionKey, RegionData> | null;
+  loading: boolean;
+  error:   string | null;
+}
+
+export function useRegionData(): UseRegionDataResult {
+  const [data,    setData]    = useState<Record<RegionKey, RegionData> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/regions`, { credentials: 'include' })
+      .then(res => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json() as Promise<ApiRegionsResponse>;
+      })
+      .then(json => {
+        const record = {} as Record<RegionKey, RegionData>;
+        for (const r of json.regions) {
+          record[r.regionKey] = mergeRegion(r);
+        }
+        setData(record);
+        setLoading(false);
+      })
+      .catch((err: Error) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  return { data, loading, error };
 }

@@ -108,3 +108,18 @@
   text-decoration: underline;
   padding: 0.6rem 0.5rem;
 }
+
+@media (max-width: 768px) {
+  .cookie-banner__content {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .cookie-banner__actions {
+    flex-direction: column;
+  }
+
+  .cookie-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

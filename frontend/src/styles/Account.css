@@ -1,0 +1,130 @@
+.account {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.account-loading {
+  text-align: center;
+  padding: 4rem;
+  color: var(--gray-600);
+}
+
+.account__container h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem;
+  color: var(--navy);
+  margin-bottom: 2rem;
+}
+
+.account__section {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.account__section h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.account__field {
+  margin-bottom: 1rem;
+}
+
+.account__field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.account__field p {
+  font-size: 0.95rem;
+  color: var(--navy);
+}
+
+.account__field input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: border-color 0.15s;
+}
+
+.account__field input:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+
+.account__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.account__btn {
+  align-self: flex-start;
+  padding: 0.6rem 1.5rem;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.account__btn:hover {
+  background: var(--blue);
+}
+
+.account__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.account__message {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.account__message--success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.account__message--error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 768px) {
+  .account {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+
+  .account__container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .account__section {
+    padding: 1.25rem;
+  }
+}

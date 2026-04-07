@@ -11,6 +11,7 @@ import Login           from './pages/Login';
 import ImpactDashboard from './pages/ImpactDashboard';
 import RegionsPage     from './pages/RegionsPage';
 import PrivacyPolicy   from './pages/PrivacyPolicy';
+import Account         from './pages/Account';
 
 export default function App() {
   return (
@@ -22,11 +23,8 @@ export default function App() {
         <Route path="/impact"  element={<ImpactDashboard />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/regions" element={<RegionsPage />} />
-        <Route path="/donate"  element={
-          <ProtectedRoute requiredRoles={["Donor", "Admin"]}>
-            <Donate />
-          </ProtectedRoute>
-        } />
+        <Route path="/account" element={<Account />} />
+        <Route path="/donate"  element={<Donate />} />
         <Route path="/admin"   element={
           <ProtectedRoute requiredRoles={["Admin"]}>
             <Admin />

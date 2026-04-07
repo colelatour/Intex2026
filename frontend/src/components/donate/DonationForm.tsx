@@ -1,7 +1,8 @@
 // src/components/donate/DonationForm.tsx
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { recordDonation } from '../../lib/donationsApi';
+import { getSession } from '../../lib/authApi';
 
 const AMOUNTS = [
   { value: 25, impact: 'Provides meals for one week' },
@@ -12,6 +13,7 @@ const AMOUNTS = [
 const REGIONS = ['Luzon', 'Visayas', 'Mindanao'] as const;
 
 export default function DonationForm() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [selectedAmt, setSelectedAmt] = useState<number>(50);
   const [customAmt, setCustomAmt] = useState('');
@@ -49,6 +51,18 @@ export default function DonationForm() {
     e.preventDefault();
     setSubmitError('');
     setSubmitSuccess('');
+
+    // Check if user is logged in before allowing donation
+    try {
+      const session = await getSession();
+      if (!session.isAuthenticated) {
+        navigate('/login?redirect=/donate');
+        return;
+      }
+    } catch {
+      navigate('/login?redirect=/donate');
+      return;
+    }
 
     if (!firstName.trim() || !lastName.trim() || !email.trim()) {
       setSubmitError('Please fill in first name, last name, and email.');

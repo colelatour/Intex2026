@@ -1,13 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getSession, logout } from "../../lib/authApi";
 import type { AuthSession } from "../../types/AuthSession";
+import navbarLogo from "../../images/sheltered_light_navbar_logo.png";
 import "../../styles/Navbar.css";
 
 export default function Navbar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getSession()
@@ -15,9 +19,26 @@ export default function Navbar() {
       .catch(() => setSession(null));
   }, [pathname]);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
+
   async function handleLogout() {
     await logout();
     setSession(null);
+    setProfileOpen(false);
     navigate("/");
   }
 
@@ -29,27 +50,33 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar__logo">
-        <div className="navbar__logo-icon">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
-        </div>
-        Sheltered<span>Light</span>
+        <img src={navbarLogo} alt="Sheltered Light" className="navbar__logo-img" />
       </Link>
 
-      <ul className="navbar__links">
+      <button
+        className="navbar__hamburger"
+        onClick={() => setMobileMenuOpen((prev) => !prev)}
+        aria-label="Toggle menu"
+        aria-expanded={mobileMenuOpen}
+      >
+        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
+        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
+        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
+      </button>
+
+      <ul className={`navbar__links${mobileMenuOpen ? " navbar__links--open" : ""}`}>
         <li>
-          <Link to="/" className={pathname === "/" ? "active" : ""}>
+          <Link to="/" className={pathname === "/" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
             Home
           </Link>
         </li>
         <li>
-          <Link to="/" className="">
+          <Link to="/" className="" onClick={() => setMobileMenuOpen(false)}>
             Our Mission
           </Link>
         </li>
         <li>
-          <Link to="/impact" className={pathname === "/impact" ? "active" : ""}>
+          <Link to="/impact" className={pathname === "/impact" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
             Impact
           </Link>
         </li>
@@ -57,81 +84,88 @@ export default function Navbar() {
           <Link
             to="/regions"
             className={pathname === "/regions" ? "active" : ""}
+            onClick={() => setMobileMenuOpen(false)}
           >
             Our Regions
           </Link>
         </li>
-        {isDonor && (
-          <li>
-            <Link
-              to="/donate"
-              className={pathname === "/donate" ? "active" : ""}
-              style={{
-                color: pathname === "/donate" ? undefined : "var(--gold)",
-              }}
-            >
-              Donate
-            </Link>
-          </li>
-        )}
         <li>
-          <Link to="/" className="">
+          <Link
+            to="/donate"
+            className={pathname === "/donate" ? "active" : ""}
+            style={{
+              color: pathname === "/donate" ? undefined : "var(--gold)",
+            }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Donate
+          </Link>
+        </li>
+        <li>
+          <Link to="/" className="" onClick={() => setMobileMenuOpen(false)}>
             Contact
           </Link>
         </li>
         {isAdmin && (
           <li>
-            <Link to="/admin" className={pathname === "/admin" ? "active" : ""}>
+            <Link to="/admin" className={pathname === "/admin" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
               Admin
-            </Link>
-          </li>
-        )}
-        {isDonor && (
-          <li>
-            <Link to="/donate" className="navbar__cta">
-              Donate Now
             </Link>
           </li>
         )}
 
         {isAuthenticated ? (
-          <>
-            <li
-              style={{
-                color: "var(--gold)",
-                fontSize: "0.85rem",
-                display: "flex",
-                alignItems: "center",
-              }}
+          <li className="navbar__profile-wrapper" ref={profileRef}>
+            <button
+              className="navbar__profile-btn"
+              onClick={() => setProfileOpen((prev) => !prev)}
+              aria-expanded={profileOpen}
             >
-              {session!.email}
-            </li>
-            <li>
-              <button
-                onClick={handleLogout}
-                className="navbar__cta"
-                style={{
-                  border: "none",
-                  background: "var(--red)",
-                  color: "var(--white)",
-                }}
-              >
-                Logout
-              </button>
-            </li>
-          </>
+              <span className="navbar__avatar">
+                {(session!.email?.[0] ?? "U").toUpperCase()}
+              </span>
+            </button>
+            {profileOpen && (
+              <div className="navbar__profile-dropdown">
+                <div className="navbar__profile-header">
+                  <span className="navbar__profile-email">{session!.email}</span>
+                  <span className="navbar__profile-role">{roles.join(", ")}</span>
+                </div>
+                <hr className="navbar__profile-divider" />
+                <Link
+                  to="/account"
+                  className="navbar__profile-item"
+                  onClick={() => setProfileOpen(false)}
+                >
+                  Account Details
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="navbar__profile-item navbar__profile-item--logout"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </li>
         ) : (
           <li>
             <Link
               to="/login"
-              className="navbar__cta"
-              style={{ background: "var(--navy)" }}
+              className={pathname === "/login" ? "active" : ""}
+              onClick={() => setMobileMenuOpen(false)}
             >
               Login
             </Link>
           </li>
         )}
       </ul>
+
+      {/* Backdrop overlay for mobile menu */}
+      <div
+        className={`navbar__overlay${mobileMenuOpen ? " navbar__overlay--visible" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
     </nav>
   );
 }
