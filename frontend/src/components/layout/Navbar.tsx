@@ -47,6 +47,11 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
+          <Link to="/regions" className={pathname === '/regions' ? 'active' : ''}>
+            Our Regions
+          </Link>
+        </li>
+        <li>
           <Link
             to="/donate"
             className={pathname === "/donate" ? "active" : ""}
