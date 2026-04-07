@@ -1,0 +1,165 @@
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer,
+} from 'recharts';
+import type { TooltipContentProps } from 'recharts';
+import { EducationJourneyPoint } from '../../hooks/useEducationJourney';
+
+interface Props {
+  data: EducationJourneyPoint[] | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const LINE_COLOR = '#1D9E75';
+
+function xLabel(monthOffset: number): string {
+  return monthOffset === 0 ? 'Arrival' : `Month ${monthOffset}`;
+}
+
+type ChartRow = EducationJourneyPoint & { label: string; value: number };
+
+function CustomTooltip({ active, payload }: TooltipContentProps) {
+  if (!active || !payload?.length) return null;
+  const row = payload[0].payload as ChartRow;
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid #ede8e2', borderRadius: 8,
+      padding: '10px 14px', fontSize: 13, lineHeight: 1.6,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    }}>
+      <div style={{ fontWeight: 700, color: '#3a2e2a', marginBottom: 4 }}>{row.label}</div>
+      <div>Average progress: <strong>{row.value.toFixed(1)}%</strong></div>
+      <div style={{ color: '#9a8e88' }}>Girls included: {row.girlsIncluded}</div>
+    </div>
+  );
+}
+
+export default function EducationJourneyChart({ data, loading, error }: Props) {
+  const chartData = (data ?? []).map((p) => ({
+    ...p,
+    label: xLabel(p.monthOffset),
+    value: p.avgProgress,
+  }));
+
+  const arrivalPct  = data?.[0]?.avgProgress ?? null;
+  const peakPoint   = data ? [...data].sort((a, b) => b.avgProgress - a.avgProgress)[0] : null;
+  const improvement = arrivalPct !== null && peakPoint
+    ? Math.round(peakPoint.avgProgress - arrivalPct)
+    : null;
+
+  return (
+    <section className="impact-section" aria-labelledby="journey-heading">
+      <h2 className="impact-section-title" id="journey-heading">
+        A girl's journey through education
+      </h2>
+      <p className="impact-section-subtitle">
+        Average curriculum progress across all girls, from their first day in the program.
+      </p>
+
+      <div className="trend-chart-card">
+        {/* Stat callouts */}
+        <div className="journey-callouts">
+          <div className="journey-callout">
+            {loading ? (
+              <div className="skeleton" style={{ height: 36, width: 80 }} aria-hidden="true" />
+            ) : (
+              <>
+                <div className="journey-callout__num">
+                  {arrivalPct !== null ? `${arrivalPct}%` : '—'}
+                </div>
+                <div className="journey-callout__label">average progress at arrival</div>
+              </>
+            )}
+          </div>
+          <div className="journey-callout journey-callout--right">
+            {loading ? (
+              <div className="skeleton" style={{ height: 36, width: 80 }} aria-hidden="true" />
+            ) : (
+              <>
+                <div className="journey-callout__num journey-callout__num--teal">
+                  {improvement !== null ? `+${improvement} pts` : '—'}
+                </div>
+                <div className="journey-callout__label">improvement by month 10</div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Chart */}
+        {loading ? (
+          <div className="skeleton skeleton-chart" aria-label="Loading education journey chart" />
+        ) : error ? (
+          <div className="impact-error" role="alert">
+            Unable to load education journey data.
+          </div>
+        ) : (
+          <ResponsiveContainer
+            width="100%"
+            height={260}
+            aria-label="Area chart: education progress by months in program"
+          >
+            <AreaChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="eduJourneyFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor={LINE_COLOR} stopOpacity={0.18} />
+                  <stop offset="95%" stopColor={LINE_COLOR} stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ede8e2" />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 11, fill: '#9a8e88' }}
+                interval={0}
+                label={{
+                  value: 'Months after joining the program',
+                  position: 'insideBottom',
+                  offset: -2,
+                  fontSize: 11,
+                  fill: '#9a8e88',
+                }}
+                height={42}
+              />
+              <YAxis
+                domain={[40, 100]}
+                tickFormatter={(v) => `${v}%`}
+                tick={{ fontSize: 11, fill: '#9a8e88' }}
+              />
+              <Tooltip content={CustomTooltip} />
+              <Area
+                type="monotoneX"
+                dataKey="value"
+                stroke={LINE_COLOR}
+                strokeWidth={2.5}
+                fill="url(#eduJourneyFill)"
+                dot={{ r: 4, fill: LINE_COLOR, strokeWidth: 0 }}
+                activeDot={{ r: 6, fill: LINE_COLOR }}
+                name="Education Progress"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+
+        {/* Interpretation paragraph */}
+        {!loading && !error && (
+          <div className="chart-interpretation">
+            <p>
+              <strong>What this means in real life:</strong>{' '}
+              When a girl first arrives at a Lighthouse safehouse, she is typically midway through
+              her schooling — often with significant gaps caused by trauma, displacement, or years
+              out of the classroom. Within just 5 months, the average girl has caught up to over
+              90% curriculum completion. By month 10, she is nearly finished. This isn't just
+              academic progress — it represents a girl rebuilding confidence, routine, and a future
+              she can picture.
+            </p>
+          </div>
+        )}
+
+        <p className="journey-footnote">
+          Each data point represents the average across all girls at that stage of their stay.
+          Data covers 60 girls across 9 safehouses.
+        </p>
+      </div>
+    </section>
+  );
+}
