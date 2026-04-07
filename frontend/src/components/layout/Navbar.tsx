@@ -28,7 +28,7 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link to="/" className="">
+          <Link to="/impact" className={pathname === '/impact' ? 'active' : ''}>
             Impact
           </Link>
         </li>
