@@ -7,6 +7,7 @@ const NAV_SECTIONS = [
     items: [
       { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'  },
       { id: 'resident-directory', label: 'Resident Directory', icon: 'users' },
+      { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart' },
     ],
   },
 ];

@@ -1,0 +1,46 @@
+name: Nightly Churn Scoring
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC = midnight MDT (UTC-6)
+  workflow_dispatch:        # also allows manual trigger from GitHub UI
+
+jobs:
+  score-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install ODBC Driver 18 for SQL Server
+        run: |
+          curl -sSL https://packages.microsoft.com/keys/microsoft.asc \
+            | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+          curl -sSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list \
+            | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pandas pyodbc python-dotenv scikit-learn xgboost \
+                      matplotlib seaborn shap jupyter nbconvert
+
+      - name: Execute churn pipeline notebook
+        run: |
+          jupyter nbconvert --to notebook --execute \
+            --ExecutePreprocessor.timeout=300 \
+            pipelines/donor_churn_pipeline/donor-churn-classifier.ipynb
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload scores to Azure SQL
+        env:
+          ConnectionStrings__LighthouseConnection: ${{ secrets.LIGHTHOUSE_CONNECTION_STRING }}
+        run: python3 pipelines/donor_churn_pipeline/upload_churn_scores.py

@@ -12,6 +12,8 @@ public partial class LighthouseContext : DbContext
     {
     }
 
+    public virtual DbSet<DonorChurnScore> DonorChurnScores { get; set; }
+
     public virtual DbSet<Donation> Donations { get; set; }
 
     public virtual DbSet<DonationAllocation> DonationAllocations { get; set; }
@@ -49,6 +51,18 @@ public partial class LighthouseContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // SQL Server / Azure SQL: native date, datetime2, decimal — matches lighthouse.sqlserver.sql.
+
+        modelBuilder.Entity<DonorChurnScore>(entity =>
+        {
+            entity.HasKey(e => new { e.SupporterId, e.ScoredAt });
+            entity.ToTable("donor_churn_scores");
+
+            entity.Property(e => e.SupporterId).HasColumnName("supporter_id");
+            entity.Property(e => e.ScoredAt).HasColumnName("scored_at");
+            entity.Property(e => e.ChurnProbability).HasColumnName("churn_probability");
+            entity.Property(e => e.ChurnRiskLabel).HasColumnName("churn_risk_label");
+            entity.Property(e => e.ModelVersion).HasColumnName("model_version");
+        });
 
         modelBuilder.Entity<Donation>(entity =>
         {
