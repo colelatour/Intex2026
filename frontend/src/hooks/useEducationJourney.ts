@@ -18,7 +18,7 @@ export function useEducationJourney(): UseEducationJourneyResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/impact/education-journey')
+    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/education-journey`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
         return res.json();

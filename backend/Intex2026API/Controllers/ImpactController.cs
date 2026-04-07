@@ -1,4 +1,5 @@
 using Intex2026API.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +40,7 @@ public record EmotionalTransformationDto(
 
 [ApiController]
 [Route("api/impact")]
+[AllowAnonymous]
 public class ImpactController : ControllerBase
 {
     private readonly LighthouseContext _context;

@@ -46,7 +46,7 @@ export function useImpactSummary(): UseImpactSummaryResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/impact/summary')
+    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/summary`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
         return res.json();

@@ -80,7 +80,7 @@ export default function AdminSidebar({ activeSection, onSectionChange }: AdminSi
   return (
     <div className="sidebar">
       <div className="sidebar__brand">
-        SafeHaven <span>Admin Portal</span>
+        Sheltered Light <span>Admin Portal</span>
       </div>
 
       {NAV_SECTIONS.map((section) => (

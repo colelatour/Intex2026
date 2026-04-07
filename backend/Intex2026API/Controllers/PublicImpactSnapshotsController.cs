@@ -1,5 +1,6 @@
 using Intex2026API.Data;
 using Intex2026API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace Intex2026API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Roles = "Admin,Worker")]
 public class PublicImpactSnapshotsController : ControllerBase
 {
     private readonly LighthouseContext _context;
@@ -17,12 +19,14 @@ public class PublicImpactSnapshotsController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<PublicImpactSnapshot>>> GetPublicImpactSnapshots()
     {
         return await _context.PublicImpactSnapshots.ToListAsync();
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<PublicImpactSnapshot>> GetPublicImpactSnapshot(string id)
     {
         var snapshot = await _context.PublicImpactSnapshots.FindAsync(id);
@@ -48,6 +52,7 @@ public class PublicImpactSnapshotsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeletePublicImpactSnapshot(string id)
     {
         var snapshot = await _context.PublicImpactSnapshots.FindAsync(id);

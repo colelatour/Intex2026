@@ -40,3 +40,17 @@
 .footer__links a:hover {
   color: white;
 }
+
+.footer__link-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.footer__link-btn:hover {
+  color: white;
+}

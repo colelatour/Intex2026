@@ -1,147 +1,260 @@
 // src/components/donate/DonationForm.tsx
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { recordDonation } from '../../lib/donationsApi';
 
 const AMOUNTS = [
-  { value: 25,   label: '$25',    impact: 'Provides meals for one week' },
-  { value: 50,   label: '$50',    impact: 'One counseling session' },
-  { value: 100,  label: '$100',   impact: 'School supplies & uniforms' },
-  { value: 250,  label: '$250',   impact: 'Monthly care for one resident' },
-  { value: 500,  label: '$500',   impact: 'Sponsors a program' },
-  { value: 1000, label: '$1,000', impact: 'Delivers major transformation' },
+  { value: 25, impact: 'Provides meals for one week' },
+  { value: 50, impact: 'One counseling session' },
+  { value: 100, impact: 'School supplies & uniforms' },
+  { value: 250, impact: 'Monthly care for one resident' },
 ];
-
-const TABS = ['One-Time Gift', 'Monthly Giving', 'In-Kind / Other'];
+const REGIONS = ['Luzon', 'Visayas', 'Mindanao'] as const;
 
 export default function DonationForm() {
-  const [selectedAmt, setSelectedAmt] = useState<number | null>(50);
-  const [customAmt, setCustomAmt]     = useState('');
-  const [activeTab, setActiveTab]     = useState(0);
+  const [searchParams] = useSearchParams();
+  const [selectedAmt, setSelectedAmt] = useState<number>(50);
+  const [customAmt, setCustomAmt] = useState('');
+  const [giftType, setGiftType] = useState<'one-time' | 'monthly'>('one-time');
+  const initialRegion = useMemo(() => {
+    const qp = (searchParams.get('region') ?? '').trim().toLowerCase();
+    if (qp === 'luzon') return 'Luzon';
+    if (qp === 'visayas') return 'Visayas';
+    if (qp === 'mindanao') return 'Mindanao';
+    return '';
+  }, [searchParams]);
+  const [region, setRegion] = useState(initialRegion);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
   const [honorToggle, setHonorToggle] = useState(false);
+  const [honoreeName, setHonoreeName] = useState('');
+  const [honoreeEmail, setHonoreeEmail] = useState('');
+  const [honorNote, setHonorNote] = useState('');
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const displayAmount = customAmt
-    ? `$${customAmt}`
-    : `$${selectedAmt?.toLocaleString()}`;
+  const finalAmount = useMemo(() => {
+    const parsed = Number(customAmt);
+    if (customAmt.trim() !== '' && Number.isFinite(parsed) && parsed > 0) return parsed;
+    return selectedAmt;
+  }, [customAmt, selectedAmt]);
 
-  const handleAmtClick = (val: number) => {
-    setSelectedAmt(val);
-    setCustomAmt('');
-  };
+  useEffect(() => {
+    setRegion(initialRegion);
+  }, [initialRegion]);
 
-  const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomAmt(e.target.value);
-    setSelectedAmt(null);
-  };
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitError('');
+    setSubmitSuccess('');
+
+    if (!firstName.trim() || !lastName.trim() || !email.trim()) {
+      setSubmitError('Please fill in first name, last name, and email.');
+      return;
+    }
+
+    if (finalAmount <= 0) {
+      setSubmitError('Donation amount must be greater than zero.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await recordDonation({
+        amount: finalAmount,
+        currencyCode: 'USD',
+        isRecurring: giftType === 'monthly',
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        region: region || undefined,
+        isHonorGift: honorToggle,
+        honoreeName: honorToggle ? honoreeName.trim() : undefined,
+        honoreeEmail: honorToggle ? honoreeEmail.trim() : undefined,
+        honorMessage: honorToggle ? honorNote.trim() : undefined,
+      });
+
+      setSubmitSuccess(`Donation recorded successfully. Reference: ${result.donationId}`);
+      setCustomAmt('');
+      setSelectedAmt(50);
+      setGiftType('one-time');
+      setRegion(initialRegion);
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setHonorToggle(false);
+      setHonoreeName('');
+      setHonoreeEmail('');
+      setHonorNote('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to record donation right now.';
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
-    <div className="form-card">
-      {/* Header */}
-      <div className="form-card__header">
-        <h3>Make a Donation</h3>
-        <p>100% of your gift goes directly to supporting residents in our safehouses.</p>
-        <div className="tabs">
-          {TABS.map((tab, i) => (
-            <button
-              key={tab}
-              className={`tab${activeTab === i ? ' active' : ''}`}
-              onClick={() => setActiveTab(i)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
+    <form className="donate-lean-form-card" onSubmit={handleSubmit}>
+      <h2>Make a Donation</h2>
+      <p>Choose an amount and share your details to support girls in our safehouses.</p>
 
-      {/* Body */}
-      <div className="form-body">
-        <span className="form-label">Select an Amount</span>
-        <div className="amount-grid">
-          {AMOUNTS.map((a) => (
-            <div
-              key={a.value}
-              className={`amt-btn${selectedAmt === a.value ? ' selected' : ''}`}
-              onClick={() => handleAmtClick(a.value)}
-            >
-              <span className="amt-btn__price">{a.label}</span>
-              <div className="amt-btn__impact">{a.impact}</div>
-            </div>
-          ))}
-        </div>
+      {submitError && <div className="donate-lean-alert donate-lean-alert--error">{submitError}</div>}
+      {submitSuccess && <div className="donate-lean-alert donate-lean-alert--success">{submitSuccess}</div>}
 
-        <span className="form-label">Or enter a custom amount</span>
-        <div className="custom-amount">
-          <span style={{ color: 'var(--gray-600)', fontWeight: 600 }}>$</span>
-          <input
-            type="number"
-            placeholder="Enter amount"
-            value={customAmt}
-            onChange={handleCustomChange}
-          />
-        </div>
-
-        <div className="honor-row">
-          <div>
-            <p>Make this gift in honor of someone</p>
-            <small>We'll send a notification to their email</small>
-          </div>
-          <button
-            className={`toggle${honorToggle ? ' on' : ''}`}
-            onClick={() => setHonorToggle(!honorToggle)}
-          />
-        </div>
-
-        <div className="divider" />
-
-        <span className="form-label" style={{ marginBottom: '0.75rem', display: 'block' }}>
-          Your Information
-        </span>
-
-        <div className="two-col">
-          <div className="field-group">
-            <label>First Name</label>
-            <input type="text" placeholder="First name" />
-          </div>
-          <div className="field-group">
-            <label>Last Name</label>
-            <input type="text" placeholder="Last name" />
-          </div>
-        </div>
-
-        <div className="field-group">
-          <label>Email Address</label>
-          <input type="email" placeholder="you@example.com" />
-        </div>
-
-        <span className="form-label" style={{ marginBottom: '0.75rem', display: 'block' }}>
-          Payment Method
-        </span>
-        <div className="field-group">
-          <input type="text" placeholder="Credit / Debit Card ▾" style={{ cursor: 'pointer' }} readOnly />
-        </div>
-
-        <div className="field-group">
-          <label>Card Number</label>
-          <input type="text" placeholder="•••• •••• •••• ••••" />
-        </div>
-
-        <div className="two-col">
-          <div className="field-group">
-            <label>Expiry</label>
-            <input type="text" placeholder="MM / YY" />
-          </div>
-          <div className="field-group">
-            <label>CVV</label>
-            <input type="text" placeholder="•••" />
-          </div>
-        </div>
-
-        <button className="donate-btn">
-          🔒 Donate {displayAmount} →
+      <label className="donate-lean-label">Gift Type</label>
+      <div className="donate-lean-gift-type">
+        <button
+          type="button"
+          className={`donate-lean-gift-type__btn${giftType === 'one-time' ? ' active' : ''}`}
+          onClick={() => setGiftType('one-time')}
+        >
+          One-Time
         </button>
+        <button
+          type="button"
+          className={`donate-lean-gift-type__btn${giftType === 'monthly' ? ' active' : ''}`}
+          onClick={() => setGiftType('monthly')}
+        >
+          Monthly
+        </button>
+      </div>
 
-        <div className="secure-note">
-          🔒 Secure, encrypted payment · Tax-deductible receipt sent to your email
+      <label className="donate-lean-label">Amount</label>
+      <div className="donate-lean-amount-grid">
+        {AMOUNTS.map(({ value, impact }) => (
+          <button
+            key={value}
+            type="button"
+            className={`donate-lean-amount-btn${selectedAmt === value && customAmt.trim() === '' ? ' selected' : ''}`}
+            onClick={() => {
+              setSelectedAmt(value);
+              setCustomAmt('');
+            }}
+          >
+            <span className="donate-lean-amount-btn__price">${value}</span>
+            <span className="donate-lean-amount-btn__impact">{impact}</span>
+          </button>
+        ))}
+      </div>
+
+      <label htmlFor="donate-region" className="donate-lean-label">Dedicate To Region (Optional)</label>
+      <select
+        id="donate-region"
+        value={region}
+        onChange={(e) => setRegion(e.target.value)}
+      >
+        <option value="">Where needed most</option>
+        {REGIONS.map((r) => (
+          <option key={r} value={r}>{r}</option>
+        ))}
+      </select>
+
+      <label htmlFor="donate-custom" className="donate-lean-label">Custom amount</label>
+      <div className="donate-lean-input-row">
+        <span>$</span>
+        <input
+          id="donate-custom"
+          type="number"
+          min={1}
+          inputMode="numeric"
+          placeholder="Enter amount"
+          value={customAmt}
+          onChange={(e) => setCustomAmt(e.target.value)}
+        />
+      </div>
+
+      <div className="honor-row donate-lean-honor-row">
+        <div>
+          <p>Make this gift in honor of someone</p>
+          <small>We'll include your tribute details with the donation.</small>
+        </div>
+        <button
+          type="button"
+          className={`toggle${honorToggle ? ' on' : ''}`}
+          aria-label="Toggle gift in honor of someone"
+          aria-pressed={honorToggle}
+          onClick={() => setHonorToggle((prev) => !prev)}
+        />
+      </div>
+
+      {honorToggle && (
+        <div className="donate-lean-honor-fields">
+          <div className="donate-lean-two-col">
+            <div>
+              <label htmlFor="donate-honoree-name" className="donate-lean-label">Honoree Name</label>
+              <input
+                id="donate-honoree-name"
+                type="text"
+                placeholder="Who is this gift honoring?"
+                value={honoreeName}
+                onChange={(e) => setHonoreeName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="donate-honoree-email" className="donate-lean-label">Honoree Email</label>
+              <input
+                id="donate-honoree-email"
+                type="email"
+                placeholder="honoree@example.com"
+                value={honoreeEmail}
+                onChange={(e) => setHonoreeEmail(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <label htmlFor="donate-honor-note" className="donate-lean-label">Tribute Message (Optional)</label>
+          <textarea
+            id="donate-honor-note"
+            placeholder="Write a short note"
+            rows={3}
+            value={honorNote}
+            onChange={(e) => setHonorNote(e.target.value)}
+          />
+        </div>
+      )}
+
+      <div className="donate-lean-two-col">
+        <div>
+          <label htmlFor="donate-first" className="donate-lean-label">First Name</label>
+          <input
+            id="donate-first"
+            type="text"
+            placeholder="First name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="donate-last" className="donate-lean-label">Last Name</label>
+          <input
+            id="donate-last"
+            type="text"
+            placeholder="Last name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
         </div>
       </div>
-    </div>
+
+      <label htmlFor="donate-email" className="donate-lean-label">Email</label>
+      <input
+        id="donate-email"
+        type="email"
+        placeholder="you@example.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <button className="donate-btn donate-lean-submit" type="submit" disabled={isSubmitting}>
+        {isSubmitting
+          ? 'Submitting...'
+          : `Submit ${giftType === 'monthly' ? 'Monthly ' : ''}Donation (${finalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })})`}
+      </button>
+      <p className="donate-lean-note">This records your donation request. Payment processing is not enabled yet.</p>
+    </form>
   );
 }

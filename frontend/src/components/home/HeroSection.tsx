@@ -14,7 +14,7 @@ export default function HeroSection() {
             <span className="accent">Rebuilding Futures</span>
           </h1>
           <p className="hero__body">
-            SafeHaven provides safe homes, counseling, and education to girls who are
+            Sheltered Light provides safe homes, counseling, and education to girls who are
             survivors of trafficking and abuse — giving them a real path forward.
           </p>
           <div className="hero__btns">

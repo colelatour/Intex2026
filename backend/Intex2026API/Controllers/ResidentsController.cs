@@ -1,5 +1,6 @@
 using Intex2026API.Data;
 using Intex2026API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace Intex2026API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Roles = "Admin,Worker")]
 public class ResidentsController : ControllerBase
 {
     private readonly LighthouseContext _context;
@@ -80,6 +82,7 @@ public class ResidentsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteResident(string id)
     {
         var resident = await _context.Residents.FindAsync(id);
