@@ -75,7 +75,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var identityDb = scope.ServiceProvider.GetRequiredService<AuthIdentityDbContext>();
-        await identityDb.Database.MigrateAsync();
+        await identityDb.Database.EnsureCreatedAsync();
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -110,10 +110,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-else
-{
-    app.UseDeveloperExceptionPage();
-}
+
 
 app.UseHttpsRedirection();
 
@@ -139,5 +136,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();
