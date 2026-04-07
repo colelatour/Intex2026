@@ -4,7 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using DotNetEnv;
 
-Env.Load();
+if (File.Exists(".env"))
+{
+    Env.Load();
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -106,9 +109,9 @@ app.Use(async (context, next) =>
         "Content-Security-Policy",
         "default-src 'self'; " +
         "script-src 'self'; " +
-        "style-src 'self' 'unsafe-inline'; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "img-src 'self' data: https:; " +
-        "font-src 'self' https:; " +
+        "font-src 'self' https://fonts.gstatic.com; " +
         "connect-src 'self'; " +
         "frame-ancestors 'none';"
     );
