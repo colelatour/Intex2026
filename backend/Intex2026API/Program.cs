@@ -4,9 +4,53 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using DotNetEnv;
 
-if (File.Exists(".env"))
+static string? FindDotEnvFile()
 {
-    Env.Load();
+    var tried = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    bool tryPath(string path)
+    {
+        try
+        {
+            path = Path.GetFullPath(path);
+            return tried.Add(path) && File.Exists(path);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    var cwdEnv = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+    if (tryPath(cwdEnv))
+        return Path.GetFullPath(cwdEnv);
+
+    foreach (var root in new[] { Directory.GetCurrentDirectory(), AppContext.BaseDirectory })
+    {
+        try
+        {
+            var dir = new DirectoryInfo(root);
+            for (var i = 0; i < 12 && dir != null; i++)
+            {
+                var candidate = Path.Combine(dir.FullName, ".env");
+                if (tryPath(candidate))
+                    return Path.GetFullPath(candidate);
+                dir = dir.Parent;
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    return null;
+}
+
+// Load backend/.env even when `dotnet run` cwd is Intex2026API (walks up to repo / backend).
+var dotEnvPath = FindDotEnvFile();
+if (dotEnvPath != null)
+{
+    Env.Load(dotEnvPath, new LoadOptions(setEnvVars: true, clobberExistingVars: true, onlyExactPath: false));
 }
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +63,22 @@ builder.Services.AddOpenApi();
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
     ?? new[] { "http://localhost:3000", "http://localhost:5173" };
+
+var lighthouseConnection = builder.Configuration.GetConnectionString("LighthouseConnection");
+var identityConnection = builder.Configuration.GetConnectionString("LighthouseIdentityConnection");
+if (string.IsNullOrWhiteSpace(lighthouseConnection))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:LighthouseConnection is missing or empty. Set it in appsettings.json or in a .env file " +
+        "(e.g. backend/.env) as ConnectionStrings__LighthouseConnection=... so it is found when you run from Intex2026API.");
+}
+
+if (string.IsNullOrWhiteSpace(identityConnection))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:LighthouseIdentityConnection is missing or empty. Set it in appsettings.json or in backend/.env " +
+        "as ConnectionStrings__LighthouseIdentityConnection=...");
+}
 
 builder.Services.AddCors(options =>
 {
@@ -33,11 +93,15 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<LighthouseContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("LighthouseConnection"));
+    options.UseSqlServer(
+        lighthouseConnection,
+        sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
 });
 builder.Services.AddDbContext<AuthIdentityDbContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("LighthouseIdentityConnection"));
+    options.UseSqlServer(
+        identityConnection,
+        sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
 });
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
