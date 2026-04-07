@@ -459,6 +459,58 @@ public partial class LighthouseContext : DbContext
                 }
             }
         }
+
+        // Align with lighthouse.sqlserver.sql (Azure SQL): native date / datetime2 / nvarchar(450) keys & FK strings.
+        ApplySqlServerRelationalFacets(modelBuilder);
+    }
+
+    private void ApplySqlServerRelationalFacets(ModelBuilder modelBuilder)
+    {
+        if (!Database.IsSqlServer())
+            return;
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                var clr = property.ClrType;
+                if (clr == typeof(DateTime) || clr == typeof(DateTime?))
+                    property.SetColumnType("datetime2(7)");
+                else if (clr == typeof(DateOnly) || clr == typeof(DateOnly?))
+                    property.SetColumnType("date");
+
+                if (clr == typeof(string) && property.IsPrimaryKey())
+                    property.SetMaxLength(450);
+            }
+        }
+
+        foreach (var (entityType, name) in StringForeignKeyIdPropertiesAt450())
+        {
+            var et = modelBuilder.Entity(entityType);
+            et.Property(name).HasMaxLength(450);
+        }
+    }
+
+    /// <summary>
+    /// String FK columns stored as NVARCHAR(450) in lighthouse.sqlserver.sql (index-friendly, matches PK width).
+    /// </summary>
+    private static IEnumerable<(Type ClrType, string PropertyName)> StringForeignKeyIdPropertiesAt450()
+    {
+        yield return (typeof(Donation), nameof(Donation.SupporterId));
+        yield return (typeof(Donation), nameof(Donation.ReferralPostId));
+        yield return (typeof(DonationAllocation), nameof(DonationAllocation.DonationId));
+        yield return (typeof(DonationAllocation), nameof(DonationAllocation.SafehouseId));
+        yield return (typeof(InKindDonationItem), nameof(InKindDonationItem.DonationId));
+        yield return (typeof(Resident), nameof(Resident.SafehouseId));
+        yield return (typeof(EducationRecord), nameof(EducationRecord.ResidentId));
+        yield return (typeof(HealthWellbeingRecord), nameof(HealthWellbeingRecord.ResidentId));
+        yield return (typeof(HomeVisitation), nameof(HomeVisitation.ResidentId));
+        yield return (typeof(IncidentReport), nameof(IncidentReport.ResidentId));
+        yield return (typeof(IncidentReport), nameof(IncidentReport.SafehouseId));
+        yield return (typeof(InterventionPlan), nameof(InterventionPlan.ResidentId));
+        yield return (typeof(ProcessRecording), nameof(ProcessRecording.ResidentId));
+        yield return (typeof(PartnerAssignment), nameof(PartnerAssignment.PartnerId));
+        yield return (typeof(SafehouseMonthlyMetric), nameof(SafehouseMonthlyMetric.SafehouseId));
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
