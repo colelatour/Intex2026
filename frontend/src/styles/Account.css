@@ -112,3 +112,19 @@
   color: #991b1b;
   border: 1px solid #fecaca;
 }
+
+@media (max-width: 768px) {
+  .account {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+
+  .account__container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .account__section {
+    padding: 1.25rem;
+  }
+}
