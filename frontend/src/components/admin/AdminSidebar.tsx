@@ -5,9 +5,10 @@ const NAV_SECTIONS = [
   {
     label: 'Main',
     items: [
-      { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'  },
-      { id: 'resident-directory', label: 'Resident Directory', icon: 'users' },
-      { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart' },
+      { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'      },
+      { id: 'resident-directory', label: 'Resident Directory', icon: 'users'     },
+      { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
+      { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
     ],
   },
 ];
@@ -46,6 +47,13 @@ const ICONS: Record<string, ReactNode> = {
     <svg className="sidebar__icon" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
       <line x1="12" y1="1" x2="12" y2="23"/>
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </svg>
+  ),
+  clipboard: (
+    <svg className="sidebar__icon" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+      <path d="M9 12h6M9 16h6" />
     </svg>
   ),
   chart: (

@@ -597,3 +597,38 @@
 .cta-btn-outline:hover {
   border-color: #fff;
 }
+
+@media (max-width: 768px) {
+  .impact-section {
+    padding: 32px 16px;
+  }
+
+  .impact-hero {
+    padding: 48px 16px;
+  }
+
+  .incidents-num {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+  }
+
+  .emo-section {
+    padding: 40px 16px;
+  }
+
+  .emo-bar-row {
+    grid-template-columns: 72px 1fr 32px;
+  }
+
+  .emo-bar-label {
+    font-size: 0.72rem;
+  }
+
+  .journey-callouts {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .journey-callout--right {
+    text-align: center;
+  }
+}
