@@ -19,6 +19,11 @@ export default function Navbar() {
     navigate("/");
   }
 
+  const isAuthenticated = session?.isAuthenticated ?? false;
+  const roles = session?.roles ?? [];
+  const isAdmin = roles.includes("Admin");
+  const isDonor = roles.includes("Donor") || isAdmin;
+
   return (
     <nav className="navbar">
       <Link to="/" className="navbar__logo">
@@ -51,37 +56,43 @@ export default function Navbar() {
             Our Regions
           </Link>
         </li>
-        <li>
-          <Link
-            to="/donate"
-            className={pathname === "/donate" ? "active" : ""}
-            style={{
-              color: pathname === "/donate" ? undefined : "var(--gold)",
-            }}
-          >
-            Donate
-          </Link>
-        </li>
+        {isDonor && (
+          <li>
+            <Link
+              to="/donate"
+              className={pathname === "/donate" ? "active" : ""}
+              style={{
+                color: pathname === "/donate" ? undefined : "var(--gold)",
+              }}
+            >
+              Donate
+            </Link>
+          </li>
+        )}
         <li>
           <Link to="/" className="">
             Contact
           </Link>
         </li>
-        <li>
-          <Link to="/admin" className={pathname === "/admin" ? "active" : ""}>
-            Admin
-          </Link>
-        </li>
-        <li>
-          <Link to="/donate" className="navbar__cta">
-            Donate Now
-          </Link>
-        </li>
+        {isAdmin && (
+          <li>
+            <Link to="/admin" className={pathname === "/admin" ? "active" : ""}>
+              Admin
+            </Link>
+          </li>
+        )}
+        {isDonor && (
+          <li>
+            <Link to="/donate" className="navbar__cta">
+              Donate Now
+            </Link>
+          </li>
+        )}
 
-        {session?.isAuthenticated ? (
+        {isAuthenticated ? (
           <>
             <li style={{ color: "var(--gold)", fontSize: "0.85rem", display: "flex", alignItems: "center" }}>
-              {session.email}
+              {session!.email}
             </li>
             <li>
               <button onClick={handleLogout} className="navbar__cta" style={{ border: "none", background: "var(--red)", color: "var(--white)" }}>

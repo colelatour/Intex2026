@@ -1,5 +1,6 @@
 using Intex2026API.Data;
 using Intex2026API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace Intex2026API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Roles = "Admin,Worker")]
 public class PartnerAssignmentsController : ControllerBase
 {
     private readonly LighthouseContext _context;
@@ -48,6 +50,7 @@ public class PartnerAssignmentsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeletePartnerAssignment(string id)
     {
         var assignment = await _context.PartnerAssignments.FindAsync(id);

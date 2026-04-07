@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Intex2026API.Data;
@@ -7,6 +8,7 @@ namespace Intex2026API.Controllers
 {
     [ApiController]
     [Route("api/auth")]
+    [AllowAnonymous]
     public class AuthController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager) : ControllerBase
@@ -27,12 +29,14 @@ namespace Intex2026API.Controllers
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Invalid email or password" });
 
+            var roles = await userManager.GetRolesAsync(user);
+
             return Ok(new
             {
                 isAuthenticated = true,
                 userName = user.UserName,
                 email = user.Email,
-                roles = Array.Empty<string>()
+                roles
             });
         }
 
@@ -52,14 +56,19 @@ namespace Intex2026API.Controllers
                 return BadRequest(new { message = errors });
             }
 
+            // Auto-assign Donor role to all new registrations
+            await userManager.AddToRoleAsync(user, "Donor");
+
             await signInManager.SignInAsync(user, isPersistent: true);
+
+            var roles = await userManager.GetRolesAsync(user);
 
             return Ok(new
             {
                 isAuthenticated = true,
                 userName = user.UserName,
                 email = user.Email,
-                roles = Array.Empty<string>()
+                roles
             });
         }
 
