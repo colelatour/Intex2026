@@ -96,6 +96,34 @@
   cursor: not-allowed;
 }
 
+.login-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+
+.login-password-wrapper input {
+  margin-top: 0;
+  padding-right: 2.5rem;
+}
+
+.login-password-toggle {
+  position: absolute;
+  right: 0.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray-600);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.login-password-toggle:hover {
+  color: var(--navy);
+}
+
 .login-error {
   background: #fdecea;
   color: var(--red);
