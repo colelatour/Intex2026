@@ -1,4 +1,5 @@
 // src/components/home/ImpactSection.tsx
+import activities from '../../images/activities.png';
 
 const IMPACT_ITEMS = [
   'Funding is transparently tracked and allocated across safehouse programs',
@@ -26,14 +27,11 @@ export default function ImpactSection() {
           </ul>
         </div>
 
-        <div className="impact__video-placeholder">
-          <svg width="36" height="36" fill="none" stroke="#e8c06a" strokeWidth="1.5" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M10 8l6 4-6 4V8z" fill="#e8c06a" stroke="none" />
-          </svg>
-          <span style={{ color: 'var(--gold)', fontSize: '0.8rem' }}>Learner Testimony</span>
-          <span style={{ color: '#c8950f', fontSize: '0.7rem' }}>Click to watch</span>
-        </div>
+        <img
+          src={activities}
+          alt="Residents participating in activities at Sheltered Light"
+          className="impact__image"
+        />
       </div>
     </div>
   );

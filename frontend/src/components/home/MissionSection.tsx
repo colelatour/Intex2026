@@ -1,20 +1,16 @@
 // src/components/home/MissionSection.tsx
+import counseling from '../../images/counseling.png';
 
 export default function MissionSection() {
   return (
     <div className="section" style={{ background: 'white' }}>
       <div className="section__inner">
         <div className="mission-grid">
-          <div className="mission__img-placeholder">
-            <svg width="36" height="36" fill="none" stroke="#c8952a" strokeWidth="1.5" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M3 9l4-4 4 4 4-4 4 4" />
-              <circle cx="8.5" cy="14.5" r="1.5" />
-              <path d="M21 15l-5-5-5 5" />
-            </svg>
-            <span>Watch: Our Story &amp; Safehouses</span>
-            <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>Video placeholder</span>
-          </div>
+          <img
+            src={counseling}
+            alt="Counseling session at Sheltered Light"
+            className="mission__img"
+          />
 
           <div className="mission__text">
             <div className="section-eyebrow">Our Mission</div>

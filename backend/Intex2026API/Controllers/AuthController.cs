@@ -103,6 +103,28 @@ namespace Intex2026API.Controllers
             });
         }
 
+        public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+                return Unauthorized(new { message = "Not authenticated" });
+
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized(new { message = "User not found" });
+
+            var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                return BadRequest(new { message = errors });
+            }
+
+            return Ok(new { message = "Password updated successfully" });
+        }
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {

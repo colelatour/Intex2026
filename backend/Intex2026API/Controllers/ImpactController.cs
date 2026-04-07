@@ -36,6 +36,20 @@ public record EmotionalTransformationDto(
     Dictionary<string, int> EndStateBreakdown
 );
 
+public record RegionSafehouseDto(string Code, string City, int Capacity, int Occupied, string Status);
+
+public record RegionDto(
+    string RegionKey, string Name,
+    int TotalCapacity, int TotalOccupied,
+    string OpenSince,
+    int GirlsServed, int CurrentlyInCare, int Reintegrated,
+    int? RiskImprovedPct,
+    decimal DonationsPhp,
+    List<RegionSafehouseDto> Safehouses
+);
+
+public record RegionsResponseDto(List<RegionDto> Regions);
+
 // ── Controller ──────────────────────────────────────────────────────────────
 
 [ApiController]
@@ -64,15 +78,6 @@ public class ImpactController : ControllerBase
             .CountAsync(s => s.Status != null && s.Status.ToLower() == "active");
 
         // ── Risk improvement ────────────────────────────────────────────────
-        static int RiskRank(string? level) => level?.Trim().ToLower() switch
-        {
-            "critical" => 4,
-            "high"     => 3,
-            "medium"   => 2,
-            "low"      => 1,
-            _          => 0
-        };
-
         var riskImprovedCount = allResidents.Count(r =>
             RiskRank(r.CurrentRiskLevel) > 0 &&
             RiskRank(r.InitialRiskLevel) > 0 &&
@@ -247,6 +252,97 @@ public class ImpactController : ControllerBase
         ));
     }
 
+    // GET /api/impact/regions
+    [HttpGet("regions")]
+    public async Task<ActionResult<RegionsResponseDto>> GetRegions()
+    {
+        var safehouses = await _context.Safehouses
+            .Select(s => new { s.SafehouseId, s.SafehouseCode, s.City, s.Region,
+                               s.Status, s.CapacityGirls, s.CurrentOccupancy, s.OpenDate })
+            .ToListAsync();
+
+        var residents = await _context.Residents
+            .Select(r => new { r.SafehouseId, r.CaseStatus, r.ReintegrationStatus,
+                               r.InitialRiskLevel, r.CurrentRiskLevel })
+            .ToListAsync();
+
+        var allocations = await _context.DonationAllocations
+            .Where(a => a.SafehouseId != null && a.AmountAllocated.HasValue)
+            .Select(a => new { a.SafehouseId, a.AmountAllocated })
+            .ToListAsync();
+
+        var donationBySafehouse = allocations
+            .GroupBy(a => a.SafehouseId!)
+            .ToDictionary(g => g.Key, g => g.Sum(a => a.AmountAllocated!.Value));
+
+        var residentsBySafehouse = residents
+            .Where(r => r.SafehouseId != null)
+            .GroupBy(r => r.SafehouseId!)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var regionMap = new Dictionary<string, (string key, string name)>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Luzon"]    = ("luzon",    "Luzon"),
+            ["Visayas"]  = ("visayas",  "Visayas"),
+            ["Mindanao"] = ("mindanao", "Mindanao"),
+        };
+
+        var regionDtos = safehouses
+            .Where(s => s.Region != null && regionMap.ContainsKey(s.Region))
+            .GroupBy(s => s.Region!)
+            .Select(g =>
+            {
+                var (key, name) = regionMap[g.Key];
+
+                int totalCapacity = g.Sum(s => int.TryParse(s.CapacityGirls,    out var c) ? c : 0);
+                int totalOccupied = g.Sum(s => int.TryParse(s.CurrentOccupancy, out var o) ? o : 0);
+
+                var minDate = g.Where(s => s.OpenDate.HasValue)
+                               .Select(s => s.OpenDate!.Value)
+                               .OrderBy(d => d).FirstOrDefault();
+                string openSince = minDate != default ? minDate.ToString("MMMM yyyy") : "Unknown";
+
+                var safehouseIds = g.Where(s => s.SafehouseId != null)
+                                    .Select(s => s.SafehouseId!).ToHashSet();
+                var regionResidents = safehouseIds
+                    .Where(id => residentsBySafehouse.ContainsKey(id))
+                    .SelectMany(id => residentsBySafehouse[id]).ToList();
+
+                int girlsServed     = regionResidents.Count;
+                int currentlyInCare = regionResidents.Count(r =>
+                    string.Equals(r.CaseStatus, "Active", StringComparison.OrdinalIgnoreCase));
+                int reintegrated    = regionResidents.Count(r =>
+                    string.Equals(r.ReintegrationStatus, "Completed", StringComparison.OrdinalIgnoreCase));
+
+                var riskEligible = regionResidents.Where(r =>
+                    RiskRank(r.InitialRiskLevel) > 0 && RiskRank(r.CurrentRiskLevel) > 0).ToList();
+                int? riskImproved = riskEligible.Count > 0
+                    ? (int?)((int)Math.Round(
+                        riskEligible.Count(r => RiskRank(r.CurrentRiskLevel) < RiskRank(r.InitialRiskLevel))
+                        * 100.0 / riskEligible.Count))
+                    : null;
+
+                decimal donations = safehouseIds
+                    .Where(id => donationBySafehouse.ContainsKey(id))
+                    .Sum(id => donationBySafehouse[id]);
+
+                var shDtos = g.Select(s => new RegionSafehouseDto(
+                    Code:     s.SafehouseCode ?? s.SafehouseId ?? "",
+                    City:     s.City ?? "",
+                    Capacity: int.TryParse(s.CapacityGirls,    out var cap) ? cap : 0,
+                    Occupied: int.TryParse(s.CurrentOccupancy, out var occ) ? occ : 0,
+                    Status:   s.Status ?? ""
+                )).ToList();
+
+                return new RegionDto(key, name, totalCapacity, totalOccupied,
+                    openSince, girlsServed, currentlyInCare, reintegrated,
+                    riskImproved, donations, shDtos);
+            })
+            .ToList();
+
+        return Ok(new RegionsResponseDto(regionDtos));
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private static bool IsTruthy(string? value) =>
@@ -279,4 +375,13 @@ public class ImpactController : ControllerBase
             "hopeful" or "happy" or "positive" => 5,
             _                       => 0
         };
+
+    private static int RiskRank(string? level) => level?.Trim().ToLower() switch
+    {
+        "critical" => 4,
+        "high"     => 3,
+        "medium"   => 2,
+        "low"      => 1,
+        _          => 0
+    };
 }
