@@ -34,10 +34,9 @@ export default function Admin() {
           </div>
           <div className="admin-actions">
             <button className="btn-export">Export Report</button>
-            {activeSection === 'resident-directory'
-              ? <button className="btn-add" onClick={() => setShowCreate(true)}>+ New Resident</button>
-              : <button className="btn-add">+ Add Record</button>
-            }
+            {activeSection === 'resident-directory' && (
+              <button className="btn-add" onClick={() => setShowCreate(true)}>+ New Resident</button>
+            )}
           </div>
         </div>
 

@@ -499,9 +499,10 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const handleCreateSave = async () => {
     setCreating(true);
     try {
-      const res = await fetch('http://localhost:5000/Residents', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(createDraft),
       });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
