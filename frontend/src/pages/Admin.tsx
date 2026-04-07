@@ -17,6 +17,7 @@ const SECTION_TITLES: Record<string, string> = {
 
 export default function Admin() {
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [showCreate, setShowCreate]       = useState(false);
 
   return (
     <div className="admin-layout">
@@ -33,7 +34,10 @@ export default function Admin() {
           </div>
           <div className="admin-actions">
             <button className="btn-export">Export Report</button>
-            <button className="btn-add">+ Add Record</button>
+            {activeSection === 'resident-directory'
+              ? <button className="btn-add" onClick={() => setShowCreate(true)}>+ New Resident</button>
+              : <button className="btn-add">+ Add Record</button>
+            }
           </div>
         </div>
 
@@ -52,7 +56,9 @@ export default function Admin() {
           </>
         )}
 
-        {activeSection === 'resident-directory' && <ResidentDirectory />}
+        {activeSection === 'resident-directory' && (
+          <ResidentDirectory showCreate={showCreate} setShowCreate={setShowCreate} />
+        )}
       </div>
     </div>
   );
