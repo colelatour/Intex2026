@@ -465,3 +465,114 @@
 .btn-outline-white2:hover {
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* ── Mobile Responsive ─────────────────── */
+@media (max-width: 768px) {
+  .hero__inner {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .hero__image-logo {
+    max-width: 200px;
+    height: auto;
+    margin: 0 auto;
+    padding-top: 1.5rem;
+  }
+
+  .hero__content {
+    padding: 1.5rem 1.25rem;
+    max-width: 100%;
+    text-align: center;
+    align-items: center;
+  }
+
+  .hero__body {
+    max-width: 100%;
+  }
+
+  .hero__btns {
+    justify-content: center;
+  }
+
+  .section {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .section__title {
+    font-size: 1.5rem;
+  }
+
+  .stats-bar {
+    padding: 1rem 1.25rem;
+  }
+
+  .stats-bar__inner {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .stat-item {
+    flex: 1 1 40%;
+    min-width: 120px;
+  }
+
+  .stat-item:not(:last-child)::after {
+    display: none;
+  }
+
+  .mission-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .mission__img {
+    height: 220px;
+  }
+
+  .healing-section {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .impact-section {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .impact-section__inner {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .impact__image {
+    max-width: 100%;
+    height: 220px;
+  }
+
+  .cta-banner {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .cta-banner h2 {
+    font-size: 1.5rem;
+  }
+
+  .cta-banner__btns {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-item {
+    flex: 1 1 100%;
+  }
+}

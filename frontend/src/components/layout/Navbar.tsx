@@ -10,6 +10,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,6 +28,12 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
   async function handleLogout() {
     await logout();
@@ -46,19 +53,30 @@ export default function Navbar() {
         <img src={navbarLogo} alt="Sheltered Light" className="navbar__logo-img" />
       </Link>
 
-      <ul className="navbar__links">
+      <button
+        className="navbar__hamburger"
+        onClick={() => setMobileMenuOpen((prev) => !prev)}
+        aria-label="Toggle menu"
+        aria-expanded={mobileMenuOpen}
+      >
+        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
+        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
+        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
+      </button>
+
+      <ul className={`navbar__links${mobileMenuOpen ? " navbar__links--open" : ""}`}>
         <li>
-          <Link to="/" className={pathname === "/" ? "active" : ""}>
+          <Link to="/" className={pathname === "/" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
             Home
           </Link>
         </li>
         <li>
-          <Link to="/" className="">
+          <Link to="/" className="" onClick={() => setMobileMenuOpen(false)}>
             Our Mission
           </Link>
         </li>
         <li>
-          <Link to="/impact" className={pathname === "/impact" ? "active" : ""}>
+          <Link to="/impact" className={pathname === "/impact" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
             Impact
           </Link>
         </li>
@@ -66,6 +84,7 @@ export default function Navbar() {
           <Link
             to="/regions"
             className={pathname === "/regions" ? "active" : ""}
+            onClick={() => setMobileMenuOpen(false)}
           >
             Our Regions
           </Link>
@@ -77,27 +96,23 @@ export default function Navbar() {
             style={{
               color: pathname === "/donate" ? undefined : "var(--gold)",
             }}
+            onClick={() => setMobileMenuOpen(false)}
           >
             Donate
           </Link>
         </li>
         <li>
-          <Link to="/" className="">
+          <Link to="/" className="" onClick={() => setMobileMenuOpen(false)}>
             Contact
           </Link>
         </li>
         {isAdmin && (
           <li>
-            <Link to="/admin" className={pathname === "/admin" ? "active" : ""}>
+            <Link to="/admin" className={pathname === "/admin" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
               Admin
             </Link>
           </li>
         )}
-        <li>
-          <Link to="/donate" className="navbar__cta">
-            Donate Now
-          </Link>
-        </li>
 
         {isAuthenticated ? (
           <li className="navbar__profile-wrapper" ref={profileRef}>
@@ -137,14 +152,20 @@ export default function Navbar() {
           <li>
             <Link
               to="/login"
-              className="navbar__cta"
-              style={{ background: "var(--navy)" }}
+              className={pathname === "/login" ? "active" : ""}
+              onClick={() => setMobileMenuOpen(false)}
             >
               Login
             </Link>
           </li>
         )}
       </ul>
+
+      {/* Backdrop overlay for mobile menu */}
+      <div
+        className={`navbar__overlay${mobileMenuOpen ? " navbar__overlay--visible" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
     </nav>
   );
 }
