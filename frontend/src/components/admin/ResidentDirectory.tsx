@@ -431,6 +431,11 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
         return res.json();
       })
       .then((data: Resident[]) => {
+        data.sort((a, b) => {
+          const idA = parseInt(a.residentId ?? '0', 10);
+          const idB = parseInt(b.residentId ?? '0', 10);
+          return idA - idB;
+        });
         setResidents(data);
         setLoading(false);
       })
