@@ -68,29 +68,40 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Seed roles and default admin on startup
+// Ensure Identity database is created and seed roles/admin
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-    string[] roles = { "Admin", "Worker", "Donor" };
-    foreach (var role in roles)
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
     {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
+        var identityDb = scope.ServiceProvider.GetRequiredService<AuthIdentityDbContext>();
+        await identityDb.Database.EnsureCreatedAsync();
+
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        string[] roles = { "Admin", "Worker", "Donor" };
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+                await roleManager.CreateAsync(new IdentityRole(role));
+        }
+
+        // Seed a default admin from environment variables (or fallback for dev)
+        var adminEmail = builder.Configuration["AdminEmail"] ?? "admin@safehaven.org";
+        var adminPassword = builder.Configuration["AdminPassword"] ?? "Admin123!@#";
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+            if (result.Succeeded)
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
     }
-
-    // Seed a default admin from environment variables (or fallback for dev)
-    var adminEmail = builder.Configuration["AdminEmail"] ?? "admin@safehaven.org";
-    var adminPassword = builder.Configuration["AdminPassword"] ?? "Admin123!@#";
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
+    catch (Exception ex)
     {
-        adminUser = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
-        var result = await userManager.CreateAsync(adminUser, adminPassword);
-        if (result.Succeeded)
-            await userManager.AddToRoleAsync(adminUser, "Admin");
+        logger.LogError(ex, "Failed to initialize Identity database. Auth endpoints may not work.");
     }
 }
 
