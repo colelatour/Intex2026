@@ -58,12 +58,12 @@ export default function Admin() {
             <BottomCharts />
           </>
         )}
-
+        {activeSection === 'resident-directory' && (
+                  <ResidentDirectory showCreate={showCreate} setShowCreate={setShowCreate} />
+                )}
         {activeSection === 'donors' && <DonorDashboard />}
         {activeSection === 'process-recordings' && <ProcessRecordings />}
-        {activeSection === 'resident-directory' && (
-          <ResidentDirectory showCreate={showCreate} setShowCreate={setShowCreate} />
-        )}
+        
       </div>
     </div>
   );
