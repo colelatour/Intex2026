@@ -1,5 +1,7 @@
+using Intex2026API.Controllers;
 using Intex2026API.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,13 @@ builder.Services.AddDbContext<LighthouseContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("LighthouseConnection"));
 });
+builder.Services.AddDbContext<AuthIdentityDbContext>(options =>
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString("LighthouseIdentityConnection"));
+});
+
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<AuthIdentityDbContext>();
+
 
 var app = builder.Build();
 
@@ -38,6 +47,10 @@ app.UseCors("frontend");
 
 app.UseAuthorization();
 
+app.UseAuthorization();
+
 app.MapControllers();
+
+app.MapGroup("api/auth").MapIdentityApi<ApplicationUser>();
 
 app.Run();
