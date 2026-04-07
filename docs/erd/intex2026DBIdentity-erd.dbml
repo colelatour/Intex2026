@@ -1,0 +1,68 @@
+// intex2026DBIdentity — Azure SQL (Identity)
+// Regenerate: python docs/erd/generate_azure_sqlserver_erd.py
+Azure SQL database: intex2026DBIdentity (ASP.NET Core Identity)
+FKs from inline CONSTRAINTs in LighthouseIdentity.sqlserver.sql
+Column labels in snake_case for Mermaid PNG (DB columns remain PascalCase).
+
+Table AspNetRoleClaims {
+  Id int [pk]
+  RoleId nvarchar(450) [ref: > AspNetRoles.Id]
+  ClaimType nvarchar(max)
+  ClaimValue nvarchar(max)
+}
+
+Table AspNetRoles {
+  Id nvarchar(450) [pk]
+  Name nvarchar(256)
+  NormalizedName nvarchar(256)
+  ConcurrencyStamp nvarchar(max)
+}
+
+Table AspNetUserClaims {
+  Id int [pk]
+  UserId nvarchar(450) [ref: > AspNetUsers.Id]
+  ClaimType nvarchar(max)
+  ClaimValue nvarchar(max)
+}
+
+Table AspNetUserLogins {
+  LoginProvider nvarchar(450) [pk]
+  ProviderKey nvarchar(450) [pk]
+  ProviderDisplayName nvarchar(max)
+  UserId nvarchar(450) [ref: > AspNetUsers.Id]
+}
+
+Table AspNetUserRoles {
+  UserId nvarchar(450) [pk, ref: > AspNetUsers.Id]
+  RoleId nvarchar(450) [pk, ref: > AspNetRoles.Id]
+}
+
+Table AspNetUserTokens {
+  UserId nvarchar(450) [pk, ref: > AspNetUsers.Id]
+  LoginProvider nvarchar(450) [pk]
+  Name nvarchar(450) [pk]
+  Value nvarchar(max)
+}
+
+Table AspNetUsers {
+  Id nvarchar(450) [pk]
+  UserName nvarchar(256)
+  NormalizedUserName nvarchar(256)
+  Email nvarchar(256)
+  NormalizedEmail nvarchar(256)
+  EmailConfirmed bit
+  PasswordHash nvarchar(max)
+  SecurityStamp nvarchar(max)
+  ConcurrencyStamp nvarchar(max)
+  PhoneNumber nvarchar(max)
+  PhoneNumberConfirmed bit
+  TwoFactorEnabled bit
+  LockoutEnd datetimeoffset(7)
+  LockoutEnabled bit
+  AccessFailedCount int
+}
+
+Table "__EFMigrationsHistory" {
+  MigrationId nvarchar(150) [pk]
+  ProductVersion nvarchar(32)
+}

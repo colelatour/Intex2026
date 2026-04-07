@@ -1,5 +1,5 @@
-%% lighthouse.sqlite — PK/FK from SQLite or inferred (see generate_lighthouse_erd.py)
-%% Regenerate: python docs/erd/generate_lighthouse_erd.py
+%% lighthouse.sqlite — legacy SQLite-oriented ERD (historical).
+%% For Azure SQL (intex2026DB + intex2026DBIdentity): intex2026DB-erd.mmd / intex2026DBIdentity-erd.mmd — python docs/erd/generate_azure_sqlserver_erd.py
 %% PNG: npx -y @mermaid-js/mermaid-cli -i lighthouse.sqlite-erd.mmd -o lighthouse.sqlite-erd.png -b white -w 5200 -H 4000 -s 2
 erDiagram
   donations ||--o{ donation_allocations : "donation_id"
