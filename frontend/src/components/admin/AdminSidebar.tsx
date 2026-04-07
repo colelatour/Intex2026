@@ -5,8 +5,9 @@ const NAV_SECTIONS = [
   {
     label: 'Main',
     items: [
-      { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'  },
-      { id: 'resident-directory', label: 'Resident Directory', icon: 'users' },
+      { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'      },
+      { id: 'resident-directory', label: 'Resident Directory', icon: 'users'     },
+      { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
       { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
     ],
   },
