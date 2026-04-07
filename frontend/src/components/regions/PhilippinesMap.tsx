@@ -87,7 +87,7 @@ interface Props {
 const VB_W = 500;
 const VB_H = 620;
 
-const TOPO_URL = 'https://cdn.jsdelivr.net/npm/datamaps@0.5.10/src/js/data/phl.topo.json';
+const TOPO_URL = '/phl.topo.json';
 
 export default function PhilippinesMap({ selectedRegion, onSelectRegion, safehouses, occupancyByCode }: Props) {
   const svgRef    = useRef<SVGSVGElement>(null);
