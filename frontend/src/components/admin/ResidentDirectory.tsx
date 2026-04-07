@@ -64,107 +64,117 @@ function hasValue(v: string | null): v is string {
   return v !== null && v.trim() !== '';
 }
 
-function DetailPanel({ resident }: { resident: Resident }) {
-  const sections: {
-    title: string;
-    type?: 'tags';
-    fields: { label: string; value: string | null }[];
-  }[] = [
-    {
-      title: 'Personal Info',
-      fields: [
-        { label: 'Sex',               value: resident.sex },
-        { label: 'Date of Birth',     value: resident.dateOfBirth },
-        { label: 'Birth Status',      value: resident.birthStatus },
-        { label: 'Place of Birth',    value: resident.placeOfBirth },
-        { label: 'Religion',          value: resident.religion },
-        { label: 'Age on Admission',  value: resident.ageUponAdmission },
-        { label: 'Present Age',       value: resident.presentAge },
-        { label: 'Is PWD',            value: resident.isPwd },
-        { label: 'PWD Type',          value: resident.pwdType },
-        { label: 'Has Special Needs', value: resident.hasSpecialNeeds },
-        { label: 'Special Needs Diagnosis', value: resident.specialNeedsDiagnosis },
-      ],
-    },
-    {
-      title: 'Case Details',
-      fields: [
-        { label: 'Case Category',          value: resident.caseCategory },
-        { label: 'Case Status',            value: resident.caseStatus },
-        { label: 'Initial Case Assessment',value: resident.initialCaseAssessment },
-        { label: 'Initial Risk Level',     value: resident.initialRiskLevel },
-        { label: 'Current Risk Level',     value: resident.currentRiskLevel },
-        { label: 'Assigned Social Worker', value: resident.assignedSocialWorker },
-        { label: 'Referral Source',        value: resident.referralSource },
-        { label: 'Referring Agency/Person',value: resident.referringAgencyPerson },
-        { label: 'Date of Admission',      value: resident.dateOfAdmission },
-        { label: 'Length of Stay',         value: resident.lengthOfStay },
-        { label: 'Date Enrolled',          value: resident.dateEnrolled },
-        { label: 'Date Closed',            value: resident.dateClosed },
-      ],
-    },
-    {
-      title: 'Case Subcategories',
-      type: 'tags',
-      fields: [
-        { label: 'Orphaned',      value: resident.subCatOrphaned },
-        { label: 'Trafficked',    value: resident.subCatTrafficked },
-        { label: 'Child Labor',   value: resident.subCatChildLabor },
-        { label: 'Physical Abuse',value: resident.subCatPhysicalAbuse },
-        { label: 'Sexual Abuse',  value: resident.subCatSexualAbuse },
-        { label: 'OSAEC',         value: resident.subCatOsaec },
-        { label: 'CICL',          value: resident.subCatCicl },
-        { label: 'At Risk',       value: resident.subCatAtRisk },
-        { label: 'Street Child',  value: resident.subCatStreetChild },
-        { label: 'Child w/ HIV',  value: resident.subCatChildWithHiv },
-      ],
-    },
-    {
-      title: 'Family Background',
-      fields: [
-        { label: 'Family Is 4Ps',          value: resident.familyIs4ps },
-        { label: 'Solo Parent',            value: resident.familySoloParent },
-        { label: 'Indigenous',             value: resident.familyIndigenous },
-        { label: 'Parent PWD',             value: resident.familyParentPwd },
-        { label: 'Informal Settler',       value: resident.familyInformalSettler },
-      ],
-    },
-    {
-      title: 'Administrative',
-      fields: [
-        { label: 'Internal Code',           value: resident.internalCode },
-        { label: 'Safehouse ID',            value: resident.safehouseId },
-        { label: 'Case Control No.',        value: resident.caseControlNo },
-        { label: 'Date COLB Registered',    value: resident.dateColbRegistered },
-        { label: 'Date COLB Obtained',      value: resident.dateColbObtained },
-        { label: 'Date Case Study Prepared',value: resident.dateCaseStudyPrepared },
-        { label: 'Reintegration Type',      value: resident.reintegrationType },
-        { label: 'Reintegration Status',    value: resident.reintegrationStatus },
-        { label: 'Notes (Restricted)',      value: resident.notesRestricted },
-        { label: 'Created At',              value: resident.createdAt },
-      ],
-    },
-  ];
+// ── Shared section definitions ──────────────────────────────────────────────
+type SectionDef = {
+  title: string;
+  type?: 'tags';
+  fields: { label: string; key: keyof Resident }[];
+};
 
+const SECTIONS: SectionDef[] = [
+  {
+    title: 'Personal Info',
+    fields: [
+      { label: 'Sex',                     key: 'sex' },
+      { label: 'Date of Birth',           key: 'dateOfBirth' },
+      { label: 'Birth Status',            key: 'birthStatus' },
+      { label: 'Place of Birth',          key: 'placeOfBirth' },
+      { label: 'Religion',                key: 'religion' },
+      { label: 'Age on Admission',        key: 'ageUponAdmission' },
+      { label: 'Present Age',             key: 'presentAge' },
+      { label: 'Is PWD',                  key: 'isPwd' },
+      { label: 'PWD Type',                key: 'pwdType' },
+      { label: 'Has Special Needs',       key: 'hasSpecialNeeds' },
+      { label: 'Special Needs Diagnosis', key: 'specialNeedsDiagnosis' },
+    ],
+  },
+  {
+    title: 'Case Details',
+    fields: [
+      { label: 'Case Category',           key: 'caseCategory' },
+      { label: 'Case Status',             key: 'caseStatus' },
+      { label: 'Initial Case Assessment', key: 'initialCaseAssessment' },
+      { label: 'Initial Risk Level',      key: 'initialRiskLevel' },
+      { label: 'Current Risk Level',      key: 'currentRiskLevel' },
+      { label: 'Assigned Social Worker',  key: 'assignedSocialWorker' },
+      { label: 'Referral Source',         key: 'referralSource' },
+      { label: 'Referring Agency/Person', key: 'referringAgencyPerson' },
+      { label: 'Date of Admission',       key: 'dateOfAdmission' },
+      { label: 'Length of Stay',          key: 'lengthOfStay' },
+      { label: 'Date Enrolled',           key: 'dateEnrolled' },
+      { label: 'Date Closed',             key: 'dateClosed' },
+    ],
+  },
+  {
+    title: 'Case Subcategories',
+    type: 'tags',
+    fields: [
+      { label: 'Orphaned',       key: 'subCatOrphaned' },
+      { label: 'Trafficked',     key: 'subCatTrafficked' },
+      { label: 'Child Labor',    key: 'subCatChildLabor' },
+      { label: 'Physical Abuse', key: 'subCatPhysicalAbuse' },
+      { label: 'Sexual Abuse',   key: 'subCatSexualAbuse' },
+      { label: 'OSAEC',          key: 'subCatOsaec' },
+      { label: 'CICL',           key: 'subCatCicl' },
+      { label: 'At Risk',        key: 'subCatAtRisk' },
+      { label: 'Street Child',   key: 'subCatStreetChild' },
+      { label: 'Child w/ HIV',   key: 'subCatChildWithHiv' },
+    ],
+  },
+  {
+    title: 'Family Background',
+    fields: [
+      { label: 'Family Is 4Ps',      key: 'familyIs4ps' },
+      { label: 'Solo Parent',        key: 'familySoloParent' },
+      { label: 'Indigenous',         key: 'familyIndigenous' },
+      { label: 'Parent PWD',         key: 'familyParentPwd' },
+      { label: 'Informal Settler',   key: 'familyInformalSettler' },
+    ],
+  },
+  {
+    title: 'Administrative',
+    fields: [
+      { label: 'Internal Code',            key: 'internalCode' },
+      { label: 'Safehouse ID',             key: 'safehouseId' },
+      { label: 'Case Control No.',         key: 'caseControlNo' },
+      { label: 'Date COLB Registered',     key: 'dateColbRegistered' },
+      { label: 'Date COLB Obtained',       key: 'dateColbObtained' },
+      { label: 'Date Case Study Prepared', key: 'dateCaseStudyPrepared' },
+      { label: 'Reintegration Type',       key: 'reintegrationType' },
+      { label: 'Reintegration Status',     key: 'reintegrationStatus' },
+      { label: 'Notes (Restricted)',       key: 'notesRestricted' },
+      { label: 'Created At',               key: 'createdAt' },
+    ],
+  },
+];
+
+// ── Read-only detail panel ───────────────────────────────────────────────────
+interface DetailPanelProps {
+  resident: Resident;
+  onEditStart: () => void;
+  onDelete: () => void;
+}
+
+function DetailPanel({ resident, onEditStart, onDelete }: DetailPanelProps) {
   return (
     <div className="detail-panel">
-      {sections.map((section) => {
+      {SECTIONS.map((section) => {
         if (section.type === 'tags') {
-          const active = section.fields.filter((f) => hasValue(f.value));
+          const active = section.fields.filter((f) => hasValue(resident[f.key] as string | null));
           if (active.length === 0) return null;
           return (
             <div className="detail-section" key={section.title}>
               <div className="detail-section__title">{section.title}</div>
               <div className="subcat-tags">
                 {active.map((f) => (
-                  <span key={f.label} className="badge badge-risk">{f.label}</span>
+                  <span key={f.key} className="badge badge-risk">{f.label}</span>
                 ))}
               </div>
             </div>
           );
         }
 
-        const visible = section.fields.filter((f) => hasValue(f.value));
+        const visible = section.fields.filter((f) => hasValue(resident[f.key] as string | null));
         if (visible.length === 0) return null;
 
         return (
@@ -172,25 +182,165 @@ function DetailPanel({ resident }: { resident: Resident }) {
             <div className="detail-section__title">{section.title}</div>
             <div className="detail-grid">
               {visible.map((f) => (
-                <div key={f.label}>
+                <div key={f.key}>
                   <div className="detail-field__label">{f.label}</div>
-                  <div className="detail-field__value">{f.value}</div>
+                  <div className="detail-field__value">{resident[f.key] as string}</div>
                 </div>
               ))}
             </div>
           </div>
         );
       })}
+
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--gray-200)' }}>
+        <button className="btn-add" onClick={(e) => { e.stopPropagation(); onEditStart(); }}>
+           Edit Record
+        </button>
+        <button
+          className="btn-export"
+          style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        >
+          🗑 Delete Record
+        </button>
+      </div>
     </div>
   );
 }
 
+// ── Dropdown options for enum / boolean fields ───────────────────────────────
+const BOOL_OPTIONS = ['True', 'False'];
+
+const FIELD_OPTIONS: Partial<Record<keyof Resident, string[]>> = {
+  caseStatus:           ['Active', 'Closed', 'Transferred'],
+  sex:                  ['F', 'M'],
+  birthStatus:          ['Marital', 'Non-Marital'],
+  caseCategory:         ['Surrendered', 'Abandoned', 'Foundling', 'Neglected'],
+  initialRiskLevel:     ['Low', 'Medium', 'High', 'Critical'],
+  currentRiskLevel:     ['Low', 'Medium', 'High', 'Critical'],
+  reintegrationType:    ['None', 'Family Reunification', 'Foster Care', 'Independent Living', 'Adoption (Domestic)', 'Adoption (Inter-Country)'],
+  reintegrationStatus:  ['Not Started', 'In Progress', 'On Hold', 'Completed'],
+  religion:             ['Roman Catholic', 'Evangelical', 'Seventh-day Adventist', 'Islam', "Jehovah's Witness", 'Buddhism', 'Unspecified', 'Other'],
+  referralSource:       ['Government Agency', 'Police', 'Court Order', 'NGO', 'Community', 'Self-Referral'],
+  initialCaseAssessment:['For Reunification', 'For Continued Care', 'For Foster Care', 'For Independent Living', 'For Adoption'],
+  safehouseId:          ['1','2','3','4','5','6','7','8','9'],
+  pwdType:              ['', 'Hearing', 'Intellectual'],
+  specialNeedsDiagnosis:['', 'Learning Disability', 'Speech Impairment', 'Developmental Delay'],
+  isPwd:                BOOL_OPTIONS,
+  hasSpecialNeeds:      BOOL_OPTIONS,
+  familyIs4ps:          BOOL_OPTIONS,
+  familySoloParent:     BOOL_OPTIONS,
+  familyIndigenous:     BOOL_OPTIONS,
+  familyParentPwd:      BOOL_OPTIONS,
+  familyInformalSettler:BOOL_OPTIONS,
+  subCatOrphaned:       BOOL_OPTIONS,
+  subCatTrafficked:     BOOL_OPTIONS,
+  subCatChildLabor:     BOOL_OPTIONS,
+  subCatPhysicalAbuse:  BOOL_OPTIONS,
+  subCatSexualAbuse:    BOOL_OPTIONS,
+  subCatOsaec:          BOOL_OPTIONS,
+  subCatCicl:           BOOL_OPTIONS,
+  subCatAtRisk:         BOOL_OPTIONS,
+  subCatStreetChild:    BOOL_OPTIONS,
+  subCatChildWithHiv:   BOOL_OPTIONS,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  marginTop: '0.15rem',
+  padding: '5px 8px',
+  border: '1.5px solid var(--gray-200)',
+  borderRadius: '6px',
+  fontSize: '0.82rem',
+  fontFamily: 'DM Sans, sans-serif',
+  color: 'var(--gray-800)',
+  background: 'white',
+  outline: 'none',
+  boxSizing: 'border-box',
+};
+
+// ── Edit form panel ──────────────────────────────────────────────────────────
+interface EditPanelProps {
+  draft: Resident;
+  onChange: (key: keyof Resident, value: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  saving: boolean;
+}
+
+function EditPanel({ draft, onChange, onSave, onCancel, saving }: EditPanelProps) {
+  return (
+    <div className="detail-panel">
+      {SECTIONS.map((section) => (
+        <div className="detail-section" key={section.title}>
+          <div className="detail-section__title">{section.title}</div>
+          <div className="detail-grid">
+            {section.fields.map((f) => {
+              const options = FIELD_OPTIONS[f.key];
+              const value = (draft[f.key] as string | null) ?? '';
+              return (
+                <div key={f.key}>
+                  <div className="detail-field__label">{f.label}</div>
+                  {options ? (
+                    <select
+                      value={value}
+                      onChange={(e) => onChange(f.key, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={inputStyle}
+                    >
+                      <option value="">— select —</option>
+                      {options.map((opt) => (
+                        <option key={opt} value={opt}>{opt || '(none)'}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) => onChange(f.key, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={inputStyle}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* Save / Cancel */}
+      <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--gray-200)' }}>
+        <button
+          className="btn-add"
+          onClick={(e) => { e.stopPropagation(); onSave(); }}
+          disabled={saving}
+        >
+          {saving ? 'Saving…' : ' Save Changes'}
+        </button>
+        <button
+          className="btn-export"
+          onClick={(e) => { e.stopPropagation(); onCancel(); }}
+          disabled={saving}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
 export default function ResidentDirectory() {
   const [residents, setResidents]   = useState<Resident[]>([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
   const [search, setSearch]         = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editingId, setEditingId]   = useState<string | null>(null);
+  const [editDraft, setEditDraft]   = useState<Resident | null>(null);
+  const [saving, setSaving]         = useState(false);
 
   useEffect(() => {
     fetch('http://localhost:5000/Residents')
@@ -215,7 +365,56 @@ export default function ResidentDirectory() {
   );
 
   const toggleExpand = (id: string | null) => {
+    if (editingId) return; // block collapse while editing
     setExpandedId((prev) => (prev === id ? null : id));
+  };
+
+  const handleEditStart = (resident: Resident) => {
+    setEditingId(resident.residentId);
+    setEditDraft({ ...resident });
+  };
+
+  const handleEditChange = (key: keyof Resident, value: string) => {
+    setEditDraft((prev) => prev ? { ...prev, [key]: value || null } : prev);
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditDraft(null);
+  };
+
+  const handleEditSave = async () => {
+    if (!editDraft?.residentId) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`http://localhost:5000/Residents/${editDraft.residentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editDraft),
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      setResidents((prev) =>
+        prev.map((r) => (r.residentId === editDraft.residentId ? editDraft : r))
+      );
+      setEditingId(null);
+      setEditDraft(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to save changes');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete resident ${id}? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`http://localhost:5000/Residents/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      setResidents((prev) => prev.filter((r) => r.residentId !== id));
+      setExpandedId(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete resident');
+    }
   };
 
   return (
@@ -254,11 +453,12 @@ export default function ResidentDirectory() {
             <tbody>
               {filtered.map((r) => {
                 const isExpanded = expandedId === r.residentId;
+                const isEditing  = editingId  === r.residentId;
                 return (
                   <>
                     <tr
                       key={r.residentId}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: editingId ? 'default' : 'pointer' }}
                       onClick={() => toggleExpand(r.residentId)}
                     >
                       <td className="resident-id">{r.residentId ?? '—'}</td>
@@ -269,13 +469,30 @@ export default function ResidentDirectory() {
                         </span>
                       </td>
                       <td style={{ textAlign: 'right', color: 'var(--gray-400)', fontSize: '0.78rem' }}>
-                        {isExpanded ? '▲ collapse' : '▼ expand'}
+                        {isEditing ? '✏️ editing' : isExpanded ? '▲ collapse' : '▼ expand'}
                       </td>
                     </tr>
-                    {isExpanded && (
+                    {isExpanded && !isEditing && (
                       <tr key={`${r.residentId}-detail`}>
                         <td colSpan={4} style={{ padding: 0 }}>
-                          <DetailPanel resident={r} />
+                          <DetailPanel
+                            resident={r}
+                            onEditStart={() => handleEditStart(r)}
+                            onDelete={() => handleDelete(r.residentId!)}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                    {isEditing && editDraft && (
+                      <tr key={`${r.residentId}-edit`}>
+                        <td colSpan={4} style={{ padding: 0 }}>
+                          <EditPanel
+                            draft={editDraft}
+                            onChange={handleEditChange}
+                            onSave={handleEditSave}
+                            onCancel={handleEditCancel}
+                            saving={saving}
+                          />
                         </td>
                       </tr>
                     )}
