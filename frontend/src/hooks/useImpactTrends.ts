@@ -23,7 +23,7 @@ export function useImpactTrends(): UseImpactTrendsResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/impact/trends')
+    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/trends`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
         return res.json();

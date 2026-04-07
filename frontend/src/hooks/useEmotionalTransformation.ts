@@ -20,7 +20,7 @@ export function useEmotionalTransformation(): UseEmotionalTransformationResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/impact/emotional-transformation')
+    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/emotional-transformation`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
         return res.json();
