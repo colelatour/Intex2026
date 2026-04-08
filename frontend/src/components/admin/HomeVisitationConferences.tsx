@@ -453,8 +453,8 @@ export default function HomeVisitationConferences() {
       setShowVisitForm(false);
       setEditingVisitId(null);
       loadResidentData();
-    } catch {
-      setError('Could not save home visit.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save home visit.');
     } finally {
       setSavingVisit(false);
     }
@@ -478,8 +478,8 @@ export default function HomeVisitationConferences() {
       setShowPlanForm(false);
       setEditingPlanId(null);
       loadResidentData();
-    } catch {
-      setError('Could not save case conference record.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save case conference record.');
     } finally {
       setSavingPlan(false);
     }
@@ -490,8 +490,8 @@ export default function HomeVisitationConferences() {
       await api('/api/HomeVisitations/' + id, { method: 'DELETE' });
       setDeleteVisitId(null);
       loadResidentData();
-    } catch {
-      setError('Failed to delete visit.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete visit.');
     }
   }
 
@@ -500,8 +500,8 @@ export default function HomeVisitationConferences() {
       await api('/api/InterventionPlans/' + id, { method: 'DELETE' });
       setDeletePlanId(null);
       loadResidentData();
-    } catch {
-      setError('Failed to delete plan.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete plan.');
     }
   }
 
