@@ -1,7 +1,8 @@
 // src/components/admin/ProcessRecordings.tsx
 import { useEffect, useState } from 'react';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
+import { API_BASE_URL } from '../../lib/api';
+const API = API_BASE_URL;
 
 interface Recording {
   recordingId: string | null;
