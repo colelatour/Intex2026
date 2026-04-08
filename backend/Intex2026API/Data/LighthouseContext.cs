@@ -54,14 +54,13 @@ public partial class LighthouseContext : DbContext
 
         modelBuilder.Entity<DonorChurnScore>(entity =>
         {
-            entity.HasKey(e => new { e.SupporterId, e.ScoredAt });
+            entity.HasKey(e => e.SupporterId);
             entity.ToTable("donor_churn_scores");
 
             entity.Property(e => e.SupporterId).HasColumnName("supporter_id");
-            entity.Property(e => e.ScoredAt).HasColumnName("scored_at");
+            entity.Property(e => e.ScoredAt).HasColumnName("scored_at").HasColumnType("datetime2");
             entity.Property(e => e.ChurnProbability).HasColumnName("churn_probability");
             entity.Property(e => e.ChurnRiskLabel).HasColumnName("churn_risk_label");
-            entity.Property(e => e.ModelVersion).HasColumnName("model_version");
         });
 
         modelBuilder.Entity<Donation>(entity =>

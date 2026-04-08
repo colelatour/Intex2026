@@ -10,9 +10,8 @@ public record ChurnScoreDto(
     string? DisplayName,
     string? Email,
     DateTime ScoredAt,
-    decimal ChurnProbability,
-    string? ChurnRiskLabel,
-    string? ModelVersion
+    double ChurnProbability,
+    string? ChurnRiskLabel
 );
 
 [ApiController]
@@ -52,8 +51,7 @@ public class ChurnController : ControllerBase
                     sup?.Email,
                     s.ScoredAt,
                     s.ChurnProbability,
-                    s.ChurnRiskLabel,
-                    s.ModelVersion
+                    s.ChurnRiskLabel
                 );
             })
             .ToList();
@@ -84,8 +82,7 @@ public class ChurnController : ControllerBase
             sup?.Email,
             s.ScoredAt,
             s.ChurnProbability,
-            s.ChurnRiskLabel,
-            s.ModelVersion
+            s.ChurnRiskLabel
         ));
 
         return Ok(result);
