@@ -2,6 +2,9 @@
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import { Navigate, Outlet, useLocation, useOutletContext } from 'react-router-dom';
 
+import { useState, type Dispatch, type SetStateAction } from 'react';
+import { Navigate, Outlet, useLocation, useOutletContext } from 'react-router-dom';
+
 import '../styles/Admin.css';
 
 import AdminSidebar from '../components/admin/AdminSidebar';
@@ -24,6 +27,8 @@ export const SECTION_TITLES: Record<string, string> = {
   donors: 'Donor Dashboard',
   'process-recordings': 'Process Recordings',
   'safehouse-management': 'Safehouse Management',
+  'user-management': 'User Management',
+  'home-visits': 'Home Visitation & Case Conferences',
   'user-management': 'User Management',
   'home-visits': 'Home Visitation & Case Conferences',
 };
