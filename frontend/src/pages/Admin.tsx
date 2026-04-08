@@ -11,12 +11,14 @@ import BottomCharts      from '../components/admin/BottomCharts';
 import ResidentDirectory from '../components/admin/ResidentDirectory';
 import DonorDashboard    from '../components/admin/DonorDashboard';
 import ProcessRecordings from '../components/admin/ProcessRecordings';
+import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
 
 const SECTION_TITLES: Record<string, string> = {
   'dashboard':          'Admin Dashboard',
   'resident-directory': 'Resident Directory',
   'donors':             'Donor Dashboard',
   'process-recordings': 'Process Recordings',
+  'home-visits':        'Home Visitation & Case Conferences',
 };
 
 export default function Admin() {
@@ -62,7 +64,7 @@ export default function Admin() {
                 )}
         {activeSection === 'donors' && <DonorDashboard />}
         {activeSection === 'process-recordings' && <ProcessRecordings />}
-        
+        {activeSection === 'home-visits' && <HomeVisitationConferences />}
       </div>
     </div>
   );

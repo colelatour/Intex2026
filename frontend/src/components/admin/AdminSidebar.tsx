@@ -9,6 +9,7 @@ const NAV_SECTIONS = [
       { id: 'resident-directory', label: 'Resident Directory', icon: 'users'     },
       { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
       { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
+      { id: 'home-visits',        label: 'Visits & Conferences', icon: 'house' },
     ],
   },
 ];
