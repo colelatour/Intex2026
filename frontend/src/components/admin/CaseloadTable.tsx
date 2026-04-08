@@ -1,34 +1,35 @@
 // src/components/admin/CaseloadTable.tsx
 import { useState } from 'react';
-
-const RESIDENTS = [
-  { id: '#RES-001', safehouse: 'House A', caseType: 'Trafficking',    worker: 'J. Santos', status: 'Progressing' },
-  { id: '#RES-002', safehouse: 'House B', caseType: 'Physical Abuse', worker: 'M. Reyes',  status: 'Monitoring' },
-  { id: '#RES-003', safehouse: 'House A', caseType: 'Neglect',        worker: 'J. Santos', status: 'At Risk' },
-  { id: '#RES-004', safehouse: 'House C', caseType: 'Trafficking',    worker: 'L. Cruz',   status: 'Reintegration' },
-  { id: '#RES-005', safehouse: 'House B', caseType: 'Sexual Abuse',   worker: 'M. Reyes',  status: 'Progressing' },
-];
+import type { CaseloadRow } from '../../types/AdminDashboard';
 
 const STATUS_CLASS: Record<string, string> = {
   Progressing:   'badge-prog',
   Monitoring:    'badge-mon',
   'At Risk':     'badge-risk',
-  Reintegration: 'badge-re',
+  Reintegrated:  'badge-re',
 };
 
-export default function CaseloadTable() {
+interface Props {
+  rows: CaseloadRow[];
+  loading?: boolean;
+}
+
+export default function CaseloadTable({ rows, loading }: Props) {
   const [search, setSearch] = useState('');
 
-  const filtered = RESIDENTS.filter((r) =>
-    r.id.toLowerCase().includes(search.toLowerCase()) ||
-    r.caseType.toLowerCase().includes(search.toLowerCase()) ||
-    r.worker.toLowerCase().includes(search.toLowerCase()) ||
-    r.safehouse.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = rows.filter((r) => {
+    const q = search.toLowerCase();
+    return (
+      search === '' ||
+      r.residentId.toLowerCase().includes(q) ||
+      (r.caseType ?? '').toLowerCase().includes(q) ||
+      (r.worker ?? '').toLowerCase().includes(q) ||
+      (r.safehouseName ?? '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div>
-      {/* Toolbar */}
       <div className="table-toolbar">
         <h3>Caseload Overview</h3>
         <div className="table-right">
@@ -38,18 +39,14 @@ export default function CaseloadTable() {
             </svg>
             <input
               type="text"
-              placeholder="Search residents, donors, records…"
+              placeholder="Search residents, cases, workers…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <button className="filter-btn">Filter ▾</button>
-          <button className="filter-btn">Safehouse ▾</button>
-          <button className="filter-btn">Status ▾</button>
         </div>
       </div>
 
-      {/* Table */}
       <div className="data-table">
         <table>
           <thead>
@@ -59,27 +56,37 @@ export default function CaseloadTable() {
               <th>Case Type</th>
               <th>Social Worker</th>
               <th>Status</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((r) => (
-              <tr key={r.id}>
-                <td className="resident-id">{r.id}</td>
-                <td>{r.safehouse}</td>
-                <td>{r.caseType}</td>
-                <td>{r.worker}</td>
-                <td>
-                  <span className={`badge ${STATUS_CLASS[r.status]}`}>{r.status}</span>
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} style={{ opacity: 0.4 }}>
+                    <td colSpan={5}>Loading…</td>
+                  </tr>
+                ))
+              : filtered.map((r) => (
+                  <tr key={r.residentId}>
+                    <td className="resident-id">{r.residentId}</td>
+                    <td>{r.safehouseName ?? r.safehouseId ?? '—'}</td>
+                    <td>{r.caseType ?? '—'}</td>
+                    <td>{r.worker ?? '—'}</td>
+                    <td>
+                      <span className={`badge ${STATUS_CLASS[r.status] ?? ''}`}>{r.status}</span>
+                    </td>
+                  </tr>
+                ))}
+            {!loading && filtered.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--gray-600)', padding: '2rem' }}>
+                  No residents match your search.
                 </td>
-                <td><span className="view-link">View</span></td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         <div className="table-footer">
-          <span>Showing 1–{filtered.length} of {RESIDENTS.length} residents</span>
-          <span className="next-link">Next →</span>
+          <span>Showing {filtered.length} of {rows.length} residents</span>
         </div>
       </div>
     </div>
