@@ -166,7 +166,8 @@ using (var scope = app.Services.CreateScope())
 
         // Seed a default admin from environment variables (or fallback for dev)
         var adminEmail = builder.Configuration["AdminEmail"] ?? "admin@safehaven.org";
-        var adminPassword = builder.Configuration["AdminPassword"] ?? "Admin123!@#";
+        // Keep the dev fallback password aligned with the configured Identity password policy (>= 14 chars).
+        var adminPassword = builder.Configuration["AdminPassword"] ?? "Admin123!@#4567";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser == null)
         {

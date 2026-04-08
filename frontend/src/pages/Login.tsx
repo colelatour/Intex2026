@@ -1,6 +1,7 @@
 import { useState, FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { login, register, getGoogleLoginUrl } from "../lib/authApi";
+import { MIN_PASSWORD_LENGTH, isPasswordLongEnough, passwordMinLengthMessage } from "../lib/passwordPolicy";
 import "../styles/Login.css";
 
 export default function Login() {
@@ -22,7 +23,7 @@ export default function Login() {
     if (lower.includes("is already taken"))
       return "An account with this email already exists. Try logging in instead.";
     if (lower.includes("must be at least") && lower.includes("character"))
-      return "Your password must be at least 14 characters long.";
+      return passwordMinLengthMessage();
     if (lower.includes("network") || lower.includes("failed to fetch"))
       return "Unable to connect to the server. Please check your internet connection and try again.";
     if (lower.includes("500") || lower.includes("internal server"))
@@ -37,9 +38,34 @@ export default function Login() {
     return raw || "Something went wrong. Please try again.";
   }
 
+  function isValidEmailDomain(emailAddr: string): boolean {
+    const atIndex = emailAddr.lastIndexOf("@");
+    if (atIndex < 1) return false;
+    const domain = emailAddr.substring(atIndex + 1).toLowerCase();
+    const lastDot = domain.lastIndexOf(".");
+    if (lastDot < 1) return false;
+    const tld = domain.substring(lastDot);
+    const allowedTlds = new Set([
+      ".com", ".net", ".org", ".edu", ".gov", ".io", ".co",
+      ".us", ".uk", ".ca", ".de", ".fr", ".au", ".info", ".biz", ".me",
+    ]);
+    return allowedTlds.has(tld);
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (mode === "register" && !isValidEmailDomain(email)) {
+      setError("Please use a valid email address with a recognized domain (e.g. .com, .net, .org, .edu).");
+      return;
+    }
+
+    if (mode === "register" && !isPasswordLongEnough(password)) {
+      setError(passwordMinLengthMessage());
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -96,6 +122,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={mode === "register" ? MIN_PASSWORD_LENGTH : undefined}
               />
               <button
                 type="button"

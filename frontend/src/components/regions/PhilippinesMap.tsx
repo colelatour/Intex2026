@@ -51,12 +51,12 @@ function getRegion(name: string | null | undefined): RegionKey | null {
 // ── Colors ───────────────────────────────────────────────────────────────────
 
 const REGION_COLORS: Record<RegionKey, { base: string; selected: string; hover: string }> = {
-  luzon:    { base: '#9FE1CB', selected: '#1D9E75', hover: '#7ECFB5' },
-  visayas:  { base: '#5DCAA5', selected: '#0F6E56', hover: '#3DB88A' },
-  mindanao: { base: '#E1F5EE', selected: '#085041', hover: '#C5EAD9' },
+  luzon:    { base: '#e6eff2', selected: '#356272', hover: '#c9dbe2' },
+  visayas:  { base: '#f6edd1', selected: '#d4a018', hover: '#ecdca7' },
+  mindanao: { base: '#d9e2ea', selected: '#022846', hover: '#b9c9d7' },
 };
-const COLOR_OTHER  = '#D3D1C7';
-const COLOR_HOVER_OTHER = '#BFBDB3';
+const COLOR_OTHER  = '#e7edf2';
+const COLOR_HOVER_OTHER = '#d3dee8';
 
 function getFill(name: string | undefined, selected: RegionKey): string {
   const r = getRegion(name);
@@ -81,15 +81,25 @@ interface Props {
   onSelectRegion: (r: RegionKey) => void;
   safehouses: SafehouseInfo[];
   occupancyByCode: Record<string, number>; // code → girls in care
+  contextParagraph?: string;
 }
 
 // ── SVG viewBox dimensions ───────────────────────────────────────────────────
 const VB_W = 500;
 const VB_H = 620;
+const SAFEHOUSE_PIN_RADIUS = 6;
+const SAFEHOUSE_PIN_HOVER_RADIUS = 9;
+const SAFEHOUSE_PIN_TRANSITION_MS = 180;
 
 const TOPO_URL = '/phl.topo.json';
 
-export default function PhilippinesMap({ selectedRegion, onSelectRegion, safehouses, occupancyByCode }: Props) {
+export default function PhilippinesMap({
+  selectedRegion,
+  onSelectRegion,
+  safehouses,
+  occupancyByCode,
+  contextParagraph,
+}: Props) {
   const svgRef    = useRef<SVGSVGElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   // Tooltip position is in CSS pixels relative to the wrapper div
@@ -98,10 +108,7 @@ export default function PhilippinesMap({ selectedRegion, onSelectRegion, safehou
   useEffect(() => {
     const svg = d3.select(svgRef.current!);
 
-    const projection = d3.geoMercator()
-      .center([122, 12])
-      .scale(1800)
-      .translate([VB_W / 2, VB_H / 2]);
+    const projection = d3.geoMercator();
 
     const pathGen = d3.geoPath().projection(projection);
 
@@ -110,6 +117,7 @@ export default function PhilippinesMap({ selectedRegion, onSelectRegion, safehou
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const geo = topojson.feature(topo, (topo.objects as any).phl as GeometryCollection);
+      projection.fitExtent([[16, 16], [VB_W - 16, VB_H - 16]], geo as GeoJSON.GeoJSON);
 
       // Province paths
       const g = svg.append('g');
@@ -146,12 +154,18 @@ export default function PhilippinesMap({ selectedRegion, onSelectRegion, safehou
         svg.append('circle')
           .attr('cx', cx)
           .attr('cy', cy)
-          .attr('r', 6)
+          .attr('r', SAFEHOUSE_PIN_RADIUS)
           .attr('fill', 'white')
           .attr('stroke', pinColor)
           .attr('stroke-width', 2)
           .style('cursor', 'pointer')
           .on('mouseenter', (event: MouseEvent) => {
+            d3.select(event.currentTarget as SVGCircleElement)
+              .interrupt()
+              .transition()
+              .duration(SAFEHOUSE_PIN_TRANSITION_MS)
+              .attr('r', SAFEHOUSE_PIN_HOVER_RADIUS);
+
             const rect = wrapperRef.current!.getBoundingClientRect();
             setTooltip({
               x: event.clientX - rect.left,
@@ -159,7 +173,15 @@ export default function PhilippinesMap({ selectedRegion, onSelectRegion, safehou
               text: `${sh.city} — ${girlsInCare} girls in care`,
             });
           })
-          .on('mouseleave', () => setTooltip(null))
+          .on('mouseleave', (event: MouseEvent) => {
+            d3.select(event.currentTarget as SVGCircleElement)
+              .interrupt()
+              .transition()
+              .duration(SAFEHOUSE_PIN_TRANSITION_MS)
+              .attr('r', SAFEHOUSE_PIN_RADIUS);
+
+            setTooltip(null);
+          })
           .on('click', () => onSelectRegion(sh.region));
       });
     }
@@ -179,42 +201,8 @@ export default function PhilippinesMap({ selectedRegion, onSelectRegion, safehou
   return (
     <div
       className="map-container"
-      role="img"
-      aria-label="Interactive map of Lighthouse Sanctuary regions in the Philippines"
+      aria-label="Interactive map of Sheltered Light regions in the Philippines"
     >
-      {/* Wrapper gives tooltip its positioning context */}
-      <div ref={wrapperRef} style={{ position: 'relative' }}>
-        {/* SVG is fully D3-owned — no React children inside */}
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${VB_W} ${VB_H}`}
-          preserveAspectRatio="xMidYMid meet"
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-        />
-
-        {/* Tooltip lives outside SVG so D3's selectAll('*').remove() can't kill it */}
-        {tooltip && (
-          <div
-            style={{
-              position: 'absolute',
-              left: tooltip.x,
-              top: tooltip.y - 40,
-              transform: 'translateX(-50%)',
-              background: 'rgba(30,24,20,0.85)',
-              color: '#fff',
-              fontSize: 11,
-              padding: '4px 10px',
-              borderRadius: 4,
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              zIndex: 10,
-            }}
-          >
-            {tooltip.text}
-          </div>
-        )}
-      </div>
-
       {/* Legend */}
       <div className="map-legend" aria-label="Map legend">
         {(['luzon', 'visayas', 'mindanao'] as RegionKey[]).map(r => (
@@ -230,6 +218,45 @@ export default function PhilippinesMap({ selectedRegion, onSelectRegion, safehou
           </button>
         ))}
       </div>
+
+      {/* Wrapper gives tooltip its positioning context */}
+      <div ref={wrapperRef} className="map-canvas-wrap">
+        {/* SVG is fully D3-owned — no React children inside */}
+        <svg
+          className="map-canvas"
+          ref={svgRef}
+          viewBox={`0 0 ${VB_W} ${VB_H}`}
+          preserveAspectRatio="xMidYMid meet"
+        />
+
+        {/* Tooltip lives outside SVG so D3's selectAll('*').remove() can't kill it */}
+        {tooltip && (
+          <div
+            style={{
+              position: 'absolute',
+              left: tooltip.x,
+              top: tooltip.y - 40,
+              transform: 'translateX(-50%)',
+              background: 'rgba(2,40,70,0.9)',
+              color: '#fff',
+              fontSize: 11,
+              padding: '4px 10px',
+              borderRadius: 4,
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+              zIndex: 10,
+            }}
+          >
+            {tooltip.text}
+          </div>
+        )}
+      </div>
+
+      {contextParagraph && (
+        <div className="map-context">
+          <p>{contextParagraph}</p>
+        </div>
+      )}
     </div>
   );
 }
