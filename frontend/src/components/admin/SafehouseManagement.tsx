@@ -51,7 +51,6 @@ const EDITABLE_FIELDS: { label: string; key: keyof Safehouse; type?: string; opt
   { label: 'Status',            key: 'status', options: ['Active', 'Inactive', 'Closed'] },
   { label: 'Capacity (Girls)',  key: 'capacityGirls', type: 'number' },
   { label: 'Capacity (Staff)',  key: 'capacityStaff', type: 'number' },
-  { label: 'Current Occupancy', key: 'currentOccupancy', type: 'number' },
   { label: 'Notes',             key: 'notes' },
 ];
 
@@ -77,13 +76,23 @@ export default function SafehouseManagement() {
   const [adding, setAdding]                 = useState(false);
 
   useEffect(() => {
-    get<Safehouse[]>('/api/Safehouses')
-      .then((data) => {
-        setSafehouses(data);
+    Promise.all([
+      get<Safehouse[]>('/api/Safehouses'),
+      get<{ safehouseId: string | null }[]>('/api/Residents'),
+    ])
+      .then(([houses, residents]) => {
+        const counts: Record<string, number> = {};
+        for (const r of residents) {
+          if (r.safehouseId) counts[r.safehouseId] = (counts[r.safehouseId] ?? 0) + 1;
+        }
+        setSafehouses(houses.map((h) => ({
+          ...h,
+          currentOccupancy: String(counts[h.safehouseId ?? ''] ?? 0),
+        })));
         setLoading(false);
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : 'Failed to fetch safehouses');
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
         setLoading(false);
       });
   }, []);
@@ -150,7 +159,7 @@ export default function SafehouseManagement() {
       const n = Number(s.safehouseId ?? '');
       return !isNaN(n) && n > max ? n : max;
     }, 0);
-    setAddForm({ safehouseId: String(maxId + 1), safehouseCode: nextSafehouseCode() });
+    setAddForm({ safehouseId: String(maxId + 1), safehouseCode: nextSafehouseCode(), currentOccupancy: '0' });
     setAddError(null);
     setShowAddForm(true);
   }
