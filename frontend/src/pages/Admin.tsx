@@ -14,6 +14,7 @@ import ProcessRecordings          from '../components/admin/ProcessRecordings';
 import SafehouseManagement        from '../components/admin/SafehouseManagement';
 import UserManagement             from '../components/admin/UserManagement';
 import HomeVisitationConferences  from '../components/admin/HomeVisitationConferences';
+import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
 const SECTION_TITLES: Record<string, string> = {
   'dashboard':            'Admin Dashboard',
@@ -28,6 +29,7 @@ const SECTION_TITLES: Record<string, string> = {
 export default function Admin() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showCreate, setShowCreate]       = useState(false);
+  const { data: dash, loading: dashLoading, error: dashError, refresh } = useAdminDashboard();
 
   return (
     <div className="admin-layout">
@@ -43,6 +45,11 @@ export default function Admin() {
             <h1>{SECTION_TITLES[activeSection]}</h1>
           </div>
           <div className="admin-actions">
+            {activeSection === 'dashboard' && (
+              <button className="filter-btn" onClick={refresh} disabled={dashLoading}>
+                {dashLoading ? 'Refreshing…' : '↻ Refresh'}
+              </button>
+            )}
             {activeSection === 'resident-directory' && (
               <button className="btn-add" onClick={() => setShowCreate(true)}>+ New Resident</button>
             )}
@@ -52,15 +59,23 @@ export default function Admin() {
         {/* Content */}
         {activeSection === 'dashboard' && (
           <>
-            <KpiCards />
+            {dashError && (
+              <p style={{ padding: '1rem', color: 'var(--red)' }}>Error: {dashError}</p>
+            )}
+            <KpiCards kpis={dash?.kpis ?? null} loading={dashLoading} />
             <div className="admin-mid-row">
-              <CaseloadTable />
+              <CaseloadTable rows={dash?.caseload ?? []} loading={dashLoading} />
               <div className="admin-mid-right">
-                <RecentActivity />
+                <RecentActivity items={dash?.activity ?? []} loading={dashLoading} />
                 <QuickActions />
               </div>
             </div>
-            <BottomCharts />
+            <BottomCharts
+              donationsMonthly={dash?.donationsMonthly ?? []}
+              residentOutcomes={dash?.residentOutcomes ?? []}
+              upcomingEvents={dash?.upcomingEvents ?? []}
+              loading={dashLoading}
+            />
           </>
         )}
         {activeSection === 'resident-directory' && (

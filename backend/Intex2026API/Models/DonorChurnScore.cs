@@ -6,9 +6,7 @@ public partial class DonorChurnScore
 
     public DateTime ScoredAt { get; set; }
 
-    public decimal ChurnProbability { get; set; }
+    public double ChurnProbability { get; set; }
 
     public string? ChurnRiskLabel { get; set; }
-
-    public string? ModelVersion { get; set; }
 }
