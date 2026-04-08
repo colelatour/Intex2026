@@ -10,7 +10,6 @@ It re-derives the coefficient/importance table from the full dataset on each run
 """
 
 import os
-import urllib
 import warnings
 from datetime import datetime, timezone
 from pathlib import Path
@@ -43,16 +42,9 @@ def main():
         username = os.environ['AZURE_SQL_USERNAME']
         password = os.environ['AZURE_SQL_PASSWORD']
 
-        params = urllib.parse.quote_plus(
-            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-            f"SERVER={server};"
-            f"DATABASE={database};"
-            f"UID={username};"
-            f"PWD={password};"
-            f"Encrypt=yes;"
-            f"TrustServerCertificate=no;"
+        engine = create_engine(
+            f"mssql+pymssql://{username}:{password}@{server}/{database}"
         )
-        engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
 
         # ── Load tables ───────────────────────────────────────────────────────
         posts     = pd.read_sql("SELECT * FROM social_media_posts", engine)
