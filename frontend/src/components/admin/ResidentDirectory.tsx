@@ -421,8 +421,22 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const [statusFilter, setStatusFilter] = useState('');
   const [createDraft, setCreateDraft]   = useState<Partial<Resident>>({});
   const [creating, setCreating]         = useState(false);
-  const [pageSize, setPageSize]         = useState(10);
-  const [currentPage, setCurrentPage]   = useState(1);
+  const [pageSize, setPageSize]               = useState(10);
+  const [currentPage, setCurrentPage]         = useState(1);
+  const [categoryFilter, setCategoryFilter]   = useState('');
+  const [safehouseFilter, setSafehouseFilter] = useState('');
+  const [riskFilter, setRiskFilter]           = useState('');
+  const [referralFilter, setReferralFilter]   = useState('');
+  const [safehouses, setSafehouses]           = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Safehouses`, { credentials: 'include' })
+      .then((res) => res.ok ? res.json() : [])
+      .then((data: { safehouseId: string; name: string }[]) => {
+        setSafehouses(data.map((s) => ({ id: s.safehouseId, name: s.name ?? s.safehouseId })));
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents`, { credentials: 'include' })
@@ -441,9 +455,18 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   }, []);
 
   const filtered = residents.filter((r) => {
-    const matchesSearch = search === '' || (r.residentId ?? '').toLowerCase() === search.toLowerCase();
-    const matchesStatus = statusFilter === '' || r.caseStatus === statusFilter;
-    return matchesSearch && matchesStatus;
+    const q = search.toLowerCase();
+    const matchesSearch =
+      search === '' ||
+      (r.residentId ?? '').toLowerCase() === q ||
+      (r.caseControlNo ?? '').toLowerCase().includes(q) ||
+      (r.internalCode ?? '').toLowerCase().includes(q);
+    const matchesStatus    = statusFilter    === '' || r.caseStatus       === statusFilter;
+    const matchesCategory  = categoryFilter  === '' || r.caseCategory     === categoryFilter;
+    const matchesSafehouse = safehouseFilter === '' || r.safehouseId      === safehouseFilter;
+    const matchesRisk      = riskFilter      === '' || r.currentRiskLevel === riskFilter;
+    const matchesReferral  = referralFilter  === '' || r.referralSource   === referralFilter;
+    return matchesSearch && matchesStatus && matchesCategory && matchesSafehouse && matchesRisk && matchesReferral;
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -540,9 +563,9 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
             </svg>
             <input
               type="text"
-              placeholder="Search by resident ID…"
+              placeholder="Search by resident ID, case control no., or internal code…"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
             />
           </div>
           <select
@@ -553,6 +576,50 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
           >
             <option value="">All Statuses</option>
             {FIELD_OPTIONS.caseStatus!.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <select
+            className="filter-btn"
+            value={categoryFilter}
+            onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
+          >
+            <option value="">All Categories</option>
+            {FIELD_OPTIONS.caseCategory!.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <select
+            className="filter-btn"
+            value={safehouseFilter}
+            onChange={(e) => { setSafehouseFilter(e.target.value); setCurrentPage(1); }}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
+          >
+            <option value="">All Safehouses</option>
+            {safehouses.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <select
+            className="filter-btn"
+            value={riskFilter}
+            onChange={(e) => { setRiskFilter(e.target.value); setCurrentPage(1); }}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
+          >
+            <option value="">All Risk Levels</option>
+            {FIELD_OPTIONS.currentRiskLevel!.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <select
+            className="filter-btn"
+            value={referralFilter}
+            onChange={(e) => { setReferralFilter(e.target.value); setCurrentPage(1); }}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
+          >
+            <option value="">All Referral Sources</option>
+            {FIELD_OPTIONS.referralSource!.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
