@@ -409,11 +409,10 @@
 
 /* ─── CTA Banner ────────────────────────── */
 .cta-banner {
-  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 100%);
+  background: var(--navy-deep);
   padding: 3.5rem 3rem;
   text-align: center;
   color: white;
-  border-top: 4px solid var(--gold);
 }
 
 .cta-banner h2 {
