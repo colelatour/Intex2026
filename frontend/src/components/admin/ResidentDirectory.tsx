@@ -519,7 +519,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   }, []);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents`, { credentials: 'include' })
+    fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/Residents`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
         return res.json();
@@ -590,7 +590,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
     if (!editDraft?.residentId) return;
     setSaving(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents/${editDraft.residentId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/Residents/${editDraft.residentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -616,7 +616,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const handleCreateSave = async () => {
     setCreating(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/Residents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -651,7 +651,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const handleDelete = async (id: string) => {
     if (!window.confirm(`Are you sure you want to permanently delete resident ${id}? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/Residents/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       setResidents((prev) => prev.filter((r) => r.residentId !== id));
       setExpandedId(null);

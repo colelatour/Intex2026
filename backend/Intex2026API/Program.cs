@@ -3,6 +3,7 @@ using Intex2026API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.Google;
 
 static string? FindDotEnvFile()
 {
@@ -55,6 +56,9 @@ if (dotEnvPath != null)
 
 var builder = WebApplication.CreateBuilder(args);
 
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -78,6 +82,18 @@ if (string.IsNullOrWhiteSpace(identityConnection))
     throw new InvalidOperationException(
         "ConnectionStrings:LighthouseIdentityConnection is missing or empty. Set it in appsettings.json or in backend/.env " +
         "as ConnectionStrings__LighthouseIdentityConnection=...");
+}
+
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+        options.CallbackPath = "/signin-google";
+    });
 }
 
 builder.Services.AddCors(options =>
