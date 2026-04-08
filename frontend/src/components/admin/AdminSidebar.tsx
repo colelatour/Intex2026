@@ -8,7 +8,8 @@ const NAV_SECTIONS = [
       { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'      },
       { id: 'resident-directory', label: 'Resident Directory', icon: 'users'     },
       { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
-      { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
+      { id: 'process-recordings',   label: 'Process Recordings',   icon: 'clipboard' },
+      { id: 'safehouse-management', label: 'Safehouse Management', icon: 'house'     },
     ],
   },
 ];
