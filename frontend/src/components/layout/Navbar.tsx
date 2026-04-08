@@ -90,9 +90,6 @@ export default function Navbar() {
           <Link
             to="/donate"
             className={pathname === "/donate" ? "active" : ""}
-            style={{
-              color: pathname === "/donate" ? undefined : "var(--gold)",
-            }}
             onClick={() => setMobileMenuOpen(false)}
           >
             Donate
