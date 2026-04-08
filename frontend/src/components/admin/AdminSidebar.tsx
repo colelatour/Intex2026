@@ -18,6 +18,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
       { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
       { id: 'user-management',    label: 'User Management',    icon: 'user',  adminOnly: true },
+      { id: 'home-visits',        label: 'Visits & Conferences', icon: 'house' },
     ],
   },
 ];
