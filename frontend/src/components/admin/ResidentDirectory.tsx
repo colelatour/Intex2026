@@ -54,10 +54,11 @@ interface Resident {
 }
 
 const STATUS_CLASS: Record<string, string> = {
-  Active:     'badge-prog',
-  Closed:     'badge-re',
-  'At Risk':  'badge-risk',
-  Monitoring: 'badge-mon',
+  Active:       'badge-prog',
+  Closed:       'badge-re',
+  Transferred:  'badge-transfer',
+  'At Risk':    'badge-risk',
+  Monitoring:   'badge-mon',
 };
 
 function hasValue(v: string | null): v is string {
@@ -151,58 +152,137 @@ const SECTIONS: SectionDef[] = [
 // ── Read-only detail panel ───────────────────────────────────────────────────
 interface DetailPanelProps {
   resident: Resident;
+  safehouses: { id: string; name: string }[];
   onEditStart: () => void;
   onDelete: () => void;
+  onReassign: (newSafehouseId: string) => Promise<void>;
 }
 
-function DetailPanel({ resident, onEditStart, onDelete }: DetailPanelProps) {
+function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign }: DetailPanelProps) {
+  const [showReassign, setShowReassign]     = useState(false);
+  const [selectedSafehouse, setSelectedSafehouse] = useState('');
+  const [reassigning, setReassigning]       = useState(false);
+
+  const handleReassignConfirm = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!selectedSafehouse) return;
+    setReassigning(true);
+    try {
+      await onReassign(selectedSafehouse);
+      setShowReassign(false);
+      setSelectedSafehouse('');
+    } finally {
+      setReassigning(false);
+    }
+  };
+
   return (
     <div className="detail-panel">
-      {SECTIONS.map((section) => {
-        if (section.type === 'tags') {
-          const active = section.fields.filter((f) => hasValue(resident[f.key] as string | null));
-          if (active.length === 0) return null;
-          return (
-            <div className="detail-section" key={section.title}>
-              <div className="detail-section__title">{section.title}</div>
-              <div className="subcat-tags">
-                {active.map((f) => (
-                  <span key={f.key} className="badge badge-risk">{f.label}</span>
-                ))}
+      <div className="row g-3">
+        {SECTIONS.map((section) => {
+          if (section.type === 'tags') {
+            const active = section.fields.filter((f) => hasValue(resident[f.key] as string | null));
+            if (active.length === 0) return null;
+            return (
+              <div className="col-12" key={section.title}>
+                <div className="detail-section__title">{section.title}</div>
+                <div className="subcat-tags mt-1">
+                  {active.map((f) => (
+                    <span key={f.key} className="badge badge-risk">{f.label}</span>
+                  ))}
+                </div>
               </div>
+            );
+          }
+
+          const visible = section.fields.filter((f) => hasValue(resident[f.key] as string | null));
+          if (visible.length === 0) return null;
+
+          return (
+            <div className="col-12 col-lg-6" key={section.title}>
+              <div className="detail-section__title">{section.title}</div>
+              <table className="table table-sm table-bordered table-striped mb-0" style={{ fontSize: '0.875rem' }}>
+                <tbody>
+                  {visible.map((f) => (
+                    <tr key={f.key}>
+                      <td style={{ width: '45%', fontWeight: 600, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>
+                        {f.label}
+                      </td>
+                      <td style={{ color: 'var(--gray-800)' }}>{resident[f.key] as string}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           );
-        }
+        })}
+      </div>
 
-        const visible = section.fields.filter((f) => hasValue(resident[f.key] as string | null));
-        if (visible.length === 0) return null;
-
-        return (
-          <div className="detail-section" key={section.title}>
-            <div className="detail-section__title">{section.title}</div>
-            <div className="detail-grid">
-              {visible.map((f) => (
-                <div key={f.key}>
-                  <div className="detail-field__label">{f.label}</div>
-                  <div className="detail-field__value">{resident[f.key] as string}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
+      {/* Reassign safehouse inline form */}
+      {showReassign && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            marginTop: '1rem',
+            padding: '0.85rem 1rem',
+            background: 'white',
+            border: '1.5px solid var(--gray-200)',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--gray-800)', whiteSpace: 'nowrap' }}>
+            Reassign to:
+          </span>
+          <select
+            value={selectedSafehouse}
+            onChange={(e) => setSelectedSafehouse(e.target.value)}
+            style={{ ...inputStyle, width: 'auto', flex: 1, minWidth: '180px' }}
+          >
+            <option value="">— select safehouse —</option>
+            {safehouses.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <button
+            className="btn-add"
+            onClick={handleReassignConfirm}
+            disabled={!selectedSafehouse || reassigning}
+          >
+            {reassigning ? 'Saving…' : 'Confirm'}
+          </button>
+          <button
+            className="btn-export"
+            onClick={(e) => { e.stopPropagation(); setShowReassign(false); setSelectedSafehouse(''); }}
+            disabled={reassigning}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
 
       {/* Action buttons */}
-      <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--gray-200)' }}>
-        <button className="btn-add" onClick={(e) => { e.stopPropagation(); onEditStart(); }}>
-           Edit Record
-        </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.6rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--gray-200)' }}>
+        <div style={{ display: 'flex', gap: '0.6rem' }}>
+          <button className="btn-add" onClick={(e) => { e.stopPropagation(); onEditStart(); }}>
+            Edit Record
+          </button>
+          <button
+            className="btn-export"
+            style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          >
+            🗑 Delete Record
+          </button>
+        </div>
         <button
           className="btn-export"
-          style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          onClick={(e) => { e.stopPropagation(); setShowReassign((v) => !v); setSelectedSafehouse(''); }}
         >
-          🗑 Delete Record
+          Reassign Safehouse
         </button>
       </div>
     </div>
@@ -469,9 +549,18 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
     return matchesSearch && matchesStatus && matchesCategory && matchesSafehouse && matchesRisk && matchesReferral;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const displayed = search === ''
+    ? [...filtered].sort((a, b) => {
+        const idA = Number(a.residentId ?? '');
+        const idB = Number(b.residentId ?? '');
+        if (!isNaN(idA) && !isNaN(idB)) return idA - idB;
+        return (a.residentId ?? '').localeCompare(b.residentId ?? '');
+      })
+    : filtered;
+
+  const totalPages = Math.max(1, Math.ceil(displayed.length / pageSize));
   const safePage   = Math.min(currentPage, totalPages);
-  const paginated  = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const paginated  = displayed.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const toggleExpand = (id: string | null) => {
     if (editingId) return; // block collapse while editing
@@ -538,6 +627,20 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleReassign = async (residentId: string, newSafehouseId: string) => {
+    const resident = residents.find((r) => r.residentId === residentId);
+    if (!resident) return;
+    const updated = { ...resident, safehouseId: newSafehouseId };
+    const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents/${residentId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(updated),
+    });
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    setResidents((prev) => prev.map((r) => r.residentId === residentId ? updated : r));
   };
 
   const handleDelete = async (id: string) => {
@@ -668,7 +771,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
                           {r.caseStatus ?? '—'}
                         </span>
                       </td>
-                      <td style={{ textAlign: 'right', color: 'var(--gray-400)', fontSize: '0.78rem' }}>
+                      <td style={{ textAlign: 'right', color: 'var(--gray-600)', fontSize: '0.825rem' }}>
                         {isEditing ? '✏️ editing' : isExpanded ? '▲ collapse' : '▼ expand'}
                       </td>
                     </tr>
@@ -677,8 +780,10 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
                         <td colSpan={4} style={{ padding: 0 }}>
                           <DetailPanel
                             resident={r}
+                            safehouses={safehouses}
                             onEditStart={() => handleEditStart(r)}
                             onDelete={() => handleDelete(r.residentId!)}
+                            onReassign={(newId) => handleReassign(r.residentId!, newId)}
                           />
                         </td>
                       </tr>
@@ -703,7 +808,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
           </table>
           <div className="table-footer">
             <span>
-              Showing {filtered.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–{Math.min(safePage * pageSize, filtered.length)} of {filtered.length} residents
+              Showing {displayed.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–{Math.min(safePage * pageSize, displayed.length)} of {displayed.length} residents
             </span>
             <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
               <select
