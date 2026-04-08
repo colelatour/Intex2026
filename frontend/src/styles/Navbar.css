@@ -60,7 +60,7 @@
 
 .navbar__links a {
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--gray-600);
   padding: 6px 14px;
@@ -225,7 +225,7 @@
   }
 
   .navbar__links a {
-    font-size: 0.78rem;
+    font-size: 0.88rem;
     padding: 6px 8px;
   }
 }
