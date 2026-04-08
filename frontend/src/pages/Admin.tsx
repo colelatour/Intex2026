@@ -16,6 +16,7 @@ import ProcessRecordings from '../components/admin/ProcessRecordings';
 import SafehouseManagement from '../components/admin/SafehouseManagement';
 import UserManagement from '../components/admin/UserManagement';
 import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
+import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
 export const SECTION_TITLES: Record<string, string> = {
   dashboard: 'Admin Dashboard',
@@ -27,23 +28,37 @@ export const SECTION_TITLES: Record<string, string> = {
   'home-visits': 'Home Visitation & Case Conferences',
 };
 
+export type DashboardOutletState = ReturnType<typeof useAdminDashboard>;
+
 export type AdminOutletContext = {
   showCreate: boolean;
   setShowCreate: Dispatch<SetStateAction<boolean>>;
+  dashboard: DashboardOutletState;
 };
 
 export function AdminDashboard() {
+  const { dashboard } = useOutletContext<AdminOutletContext>();
+  const { data: dash, loading: dashLoading, error: dashError } = dashboard;
+
   return (
     <>
-      <KpiCards />
+      {dashError && (
+        <p style={{ padding: '1rem', color: 'var(--red)' }}>Error: {dashError}</p>
+      )}
+      <KpiCards kpis={dash?.kpis ?? null} loading={dashLoading} />
       <div className="admin-mid-row">
-        <CaseloadTable />
+        <CaseloadTable rows={dash?.caseload ?? []} loading={dashLoading} />
         <div className="admin-mid-right">
-          <RecentActivity />
+          <RecentActivity items={dash?.activity ?? []} loading={dashLoading} />
           <QuickActions />
         </div>
       </div>
-      <BottomCharts />
+      <BottomCharts
+        donationsMonthly={dash?.donationsMonthly ?? []}
+        residentOutcomes={dash?.residentOutcomes ?? []}
+        upcomingEvents={dash?.upcomingEvents ?? []}
+        loading={dashLoading}
+      />
     </>
   );
 }
@@ -73,7 +88,6 @@ export function AdminHomeVisits() {
   return <HomeVisitationConferences />;
 }
 
-/** Redirect unknown `/admin/*` segments to dashboard */
 export function AdminCatchAll() {
   return <Navigate to="/admin/dashboard" replace />;
 }
@@ -81,9 +95,16 @@ export function AdminCatchAll() {
 export default function AdminLayout() {
   const location = useLocation();
   const [showCreate, setShowCreate] = useState(false);
+  const dashboard = useAdminDashboard();
 
   const segment = location.pathname.replace(/^\/admin\/?/, '').split('/')[0] || 'dashboard';
   const title = SECTION_TITLES[segment] ?? SECTION_TITLES.dashboard;
+
+  const outletContext: AdminOutletContext = {
+    showCreate,
+    setShowCreate,
+    dashboard,
+  };
 
   return (
     <div className="admin-layout">
@@ -98,6 +119,16 @@ export default function AdminLayout() {
             <h1>{title}</h1>
           </div>
           <div className="admin-actions">
+            {segment === 'dashboard' && (
+              <button
+                type="button"
+                className="filter-btn"
+                onClick={dashboard.refresh}
+                disabled={dashboard.loading}
+              >
+                {dashboard.loading ? 'Refreshing…' : '↻ Refresh'}
+              </button>
+            )}
             {segment === 'resident-directory' && (
               <button type="button" className="btn-add" onClick={() => setShowCreate(true)}>
                 + New Resident
@@ -106,7 +137,7 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <Outlet context={{ showCreate, setShowCreate } satisfies AdminOutletContext} />
+        <Outlet context={outletContext} />
       </div>
     </div>
   );
