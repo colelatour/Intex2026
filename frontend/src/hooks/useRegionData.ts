@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { get } from '../lib/api';
 
 export type RegionKey = 'luzon' | 'visayas' | 'mindanao';
 
@@ -119,11 +120,7 @@ export function useRegionData(): UseRegionDataResult {
   const [error,   setError]   = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/regions`, { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json() as Promise<ApiRegionsResponse>;
-      })
+    get<ApiRegionsResponse>('/api/impact/regions')
       .then(json => {
         const record = {} as Record<RegionKey, RegionData>;
         for (const r of json.regions) {
