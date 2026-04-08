@@ -1,7 +1,7 @@
 /* ── Footer.css ── */
 
 .footer {
-  background: var(--navy-deep);
+  background: transparent;
   padding: 1.75rem 3rem;
   display: flex;
   justify-content: space-between;

@@ -90,9 +90,6 @@ export default function Navbar() {
           <Link
             to="/donate"
             className={pathname === "/donate" ? "active" : ""}
-            style={{
-              color: pathname === "/donate" ? undefined : "var(--gold)",
-            }}
             onClick={() => setMobileMenuOpen(false)}
           >
             Donate
@@ -100,7 +97,11 @@ export default function Navbar() {
         </li>
         {isStaff && (
           <li>
-            <Link to="/admin" className={pathname === "/admin" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              to="/admin"
+              className={pathname.startsWith("/admin") ? "active" : ""}
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Admin
             </Link>
           </li>
