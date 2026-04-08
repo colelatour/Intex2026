@@ -1,9 +1,8 @@
 // src/components/admin/ProcessRecordings.tsx
 import { useEffect, useState } from 'react';
 
-import { API_BASE_URL } from '../../lib/api';
+import { get, post, put, api } from '../../lib/api';
 import '../../styles/HomeVisitationConferences.css';
-const API = API_BASE_URL;
 
 interface Recording {
   recordingId: string | null;
@@ -73,9 +72,8 @@ export default function ProcessRecordings() {
 
   // Load residents for the selector
   useEffect(() => {
-    fetch(`${API}/Residents`, { credentials: 'include' })
-      .then((r) => r.json())
-      .then((data: { residentId: string; assignedSocialWorker?: string }[]) => {
+    get<{ residentId: string; assignedSocialWorker?: string }[]>('/api/Residents')
+      .then((data) => {
         const opts = data
           .filter((r) => r.residentId)
           .map((r) => ({
@@ -95,9 +93,8 @@ export default function ProcessRecordings() {
       return;
     }
     setLoading(true);
-    fetch(`${API}/ProcessRecordings`, { credentials: 'include' })
-      .then((r) => r.json())
-      .then((data: Recording[]) => {
+    get<Recording[]>('/api/ProcessRecordings')
+      .then((data) => {
         const filtered = data
           .filter((r) => r.residentId === selectedResident)
           .sort((a, b) => {
@@ -156,22 +153,10 @@ export default function ProcessRecordings() {
 
     try {
       if (editingId) {
-        const res = await fetch(`${API}/ProcessRecordings/${editingId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ recordingId: editingId, ...form }),
-        });
-        if (!res.ok) throw new Error('Failed to update');
+        await put('/api/ProcessRecordings/' + editingId, { recordingId: editingId, ...form });
       } else {
         const newId = `PR-${Date.now()}`;
-        const res = await fetch(`${API}/ProcessRecordings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ recordingId: newId, ...form }),
-        });
-        if (!res.ok) throw new Error('Failed to create');
+        await post('/api/ProcessRecordings', { recordingId: newId, ...form });
       }
       closeForm();
       // Refresh
@@ -189,11 +174,7 @@ export default function ProcessRecordings() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API}/ProcessRecordings/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error();
+      await api('/api/ProcessRecordings/' + id, { method: 'DELETE' });
       setRecordings((prev) => prev.filter((r) => r.recordingId !== id));
       setDeleteConfirm(null);
     } catch {

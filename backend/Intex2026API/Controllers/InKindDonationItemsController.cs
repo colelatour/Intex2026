@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Intex2026API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 [Authorize(Roles = "Admin,Worker")]
 public class InKindDonationItemsController : ControllerBase
 {
