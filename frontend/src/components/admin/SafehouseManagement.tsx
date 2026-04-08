@@ -1,6 +1,6 @@
 // src/components/admin/SafehouseManagement.tsx
 import { useEffect, useState } from 'react';
-import { get } from '../../lib/api';
+import { get, put, del } from '../../lib/api';
 
 interface Safehouse {
   safehouseId: string | null;
@@ -40,6 +40,21 @@ const FIELDS: { label: string; key: keyof Safehouse }[] = [
   { label: 'Notes',              key: 'notes' },
 ];
 
+const EDITABLE_FIELDS: { label: string; key: keyof Safehouse; type?: string; options?: string[] }[] = [
+  { label: 'Safehouse Code',    key: 'safehouseCode' },
+  { label: 'Name',              key: 'name' },
+  { label: 'Region',            key: 'region' },
+  { label: 'City',              key: 'city' },
+  { label: 'Province',          key: 'province' },
+  { label: 'Country',           key: 'country' },
+  { label: 'Open Date',         key: 'openDate', type: 'date' },
+  { label: 'Status',            key: 'status', options: ['Active', 'Inactive', 'Closed'] },
+  { label: 'Capacity (Girls)',  key: 'capacityGirls', type: 'number' },
+  { label: 'Capacity (Staff)',  key: 'capacityStaff', type: 'number' },
+  { label: 'Current Occupancy', key: 'currentOccupancy', type: 'number' },
+  { label: 'Notes',             key: 'notes' },
+];
+
 function hasValue(v: string | null): v is string {
   return v !== null && v.trim() !== '';
 }
@@ -52,6 +67,10 @@ export default function SafehouseManagement() {
   const [search, setSearch]               = useState('');
   const [regionFilter, setRegionFilter]   = useState('');
   const [capacityFilter, setCapacityFilter] = useState('');
+  const [editingSafehouse, setEditingSafehouse] = useState<Safehouse | null>(null);
+  const [editForm, setEditForm]             = useState<Partial<Safehouse>>({});
+  const [saving, setSaving]                 = useState(false);
+  const [saveError, setSaveError]           = useState<string | null>(null);
 
   useEffect(() => {
     get<Safehouse[]>('/api/Safehouses')
@@ -64,6 +83,52 @@ export default function SafehouseManagement() {
         setLoading(false);
       });
   }, []);
+
+  function handleEditOpen(s: Safehouse) {
+    setEditingSafehouse(s);
+    setEditForm({ ...s });
+    setSaveError(null);
+  }
+
+  function handleEditClose() {
+    setEditingSafehouse(null);
+    setEditForm({});
+    setSaveError(null);
+  }
+
+  async function handleEditSave() {
+    if (!editingSafehouse?.safehouseId) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await put(`/api/Safehouses/${editingSafehouse.safehouseId}`, {
+        ...editForm,
+        safehouseId: editingSafehouse.safehouseId,
+      });
+      setSafehouses((prev) =>
+        prev.map((s) =>
+          s.safehouseId === editingSafehouse.safehouseId
+            ? { ...s, ...editForm }
+            : s
+        )
+      );
+      handleEditClose();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      await del(`/api/Safehouses/${id}`);
+      setSafehouses((prev) => prev.filter((s) => s.safehouseId !== id));
+      if (expandedId === id) setExpandedId(null);
+    } catch {
+      // cancelled or failed — do nothing
+    }
+  }
 
   const filtered = safehouses
     .filter((s) => {
@@ -200,6 +265,21 @@ export default function SafehouseManagement() {
                                     ))}
                                   </tbody>
                                 </table>
+
+                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                                  <button
+                                    className="btn-add"
+                                    onClick={(e) => { e.stopPropagation(); handleEditOpen(s); }}
+                                  >
+                                    Edit Safehouse
+                                  </button>
+                                  <button
+                                    className="btn-export"
+                                    onClick={(e) => { e.stopPropagation(); handleDelete(s.safehouseId!); }}
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -222,6 +302,70 @@ export default function SafehouseManagement() {
 
           <div className="table-footer">
             <span>Showing {filtered.length} of {safehouses.length} safehouses</span>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingSafehouse && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+            zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+          onClick={handleEditClose}
+        >
+          <div
+            style={{
+              background: '#fff', borderRadius: '12px', padding: '2rem',
+              width: '100%', maxWidth: '560px', maxHeight: '90vh',
+              overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h4 style={{ marginBottom: '1.25rem', color: 'var(--navy)', fontFamily: 'DM Serif Display, serif' }}>
+              Edit Safehouse — {editingSafehouse.name ?? editingSafehouse.safehouseId}
+            </h4>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              {EDITABLE_FIELDS.map((f) => (
+                <div key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {f.label}
+                  </label>
+                  {f.options ? (
+                    <select
+                      value={(editForm[f.key] as string) ?? ''}
+                      onChange={(e) => setEditForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                      style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--gray-200)', fontSize: '0.85rem', fontFamily: 'DM Sans, sans-serif' }}
+                    >
+                      <option value="">— Select —</option>
+                      {f.options.map((o) => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  ) : (
+                    <input
+                      type={f.type ?? 'text'}
+                      value={(editForm[f.key] as string) ?? ''}
+                      onChange={(e) => setEditForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                      style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--gray-200)', fontSize: '0.85rem', fontFamily: 'DM Sans, sans-serif' }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {saveError && (
+              <p style={{ color: 'var(--red)', fontSize: '0.82rem', marginTop: '0.75rem' }}>{saveError}</p>
+            )}
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+              <button className="btn-export" onClick={handleEditClose}>
+                Cancel
+              </button>
+              <button className="btn-add" onClick={handleEditSave} disabled={saving}>
+                {saving ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
           </div>
         </div>
       )}
