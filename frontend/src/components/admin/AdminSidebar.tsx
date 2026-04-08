@@ -1,5 +1,6 @@
 // src/components/admin/AdminSidebar.tsx
 import { type ReactNode, useEffect, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { getSession } from '../../lib/authApi';
 
 interface NavItem {
@@ -16,10 +17,10 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'      },
       { id: 'resident-directory', label: 'Resident Directory', icon: 'users'     },
       { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
-      { id: 'process-recordings',   label: 'Process Recordings',   icon: 'clipboard' },
-      { id: 'safehouse-management', label: 'Safehouse Management', icon: 'house'     },
-      { id: 'user-management',      label: 'User Management',      icon: 'user', adminOnly: true },
-      { id: 'home-visits',          label: 'Visits & Conferences', icon: 'house'     },
+      { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
+      { id: 'safehouse-management', label: 'Safehouse Management', icon: 'home' },
+      { id: 'user-management',    label: 'User Management',    icon: 'user',  adminOnly: true },
+      { id: 'home-visits',        label: 'Visits & Conferences', icon: 'house' },
     ],
   },
 ];
@@ -91,12 +92,7 @@ const ICONS: Record<string, ReactNode> = {
   ),
 };
 
-interface AdminSidebarProps {
-  activeSection: string;
-  onSectionChange: (id: string) => void;
-}
-
-export default function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
+export default function AdminSidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -115,14 +111,14 @@ export default function AdminSidebar({ activeSection, onSectionChange }: AdminSi
           {section.items
             .filter(item => !item.adminOnly || isAdmin)
             .map((item) => (
-            <button
+            <NavLink
               key={item.id}
-              className={`sidebar__link${activeSection === item.id ? ' active' : ''}`}
-              onClick={() => onSectionChange(item.id)}
+              to={`/admin/${item.id}`}
+              className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
             >
               {ICONS[item.icon]}
               {item.label}
-            </button>
+            </NavLink>
           ))}
         </div>
       ))}

@@ -7,7 +7,6 @@ Loads the trained reintegration readiness model, runs feature engineering
 """
 
 import os
-import urllib
 import warnings
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,16 +38,10 @@ def main():
         username = os.environ['AZURE_SQL_USERNAME']
         password = os.environ['AZURE_SQL_PASSWORD']
 
-        params = urllib.parse.quote_plus(
-            f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-            f"SERVER={server};"
-            f"DATABASE={database};"
-            f"UID={username};"
-            f"PWD={password};"
-            f"Encrypt=yes;"
-            f"TrustServerCertificate=no;"
+        _host, _, _port = server.partition(',')
+        engine = create_engine(
+            f"mssql+pymssql://{username}:{password}@{_host}:{_port or 1433}/{database}"
         )
-        engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
 
         # ── Load tables ───────────────────────────────────────────────────────
         residents          = pd.read_sql("SELECT * FROM residents", engine)

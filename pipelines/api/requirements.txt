@@ -6,6 +6,6 @@ scikit-learn
 xgboost
 statsmodels
 sqlalchemy
-pyodbc
+pymssql
 python-dotenv
 joblib
