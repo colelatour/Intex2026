@@ -38,9 +38,28 @@ export default function Login() {
     return raw || "Something went wrong. Please try again.";
   }
 
+  function isValidEmailDomain(emailAddr: string): boolean {
+    const atIndex = emailAddr.lastIndexOf("@");
+    if (atIndex < 1) return false;
+    const domain = emailAddr.substring(atIndex + 1).toLowerCase();
+    const lastDot = domain.lastIndexOf(".");
+    if (lastDot < 1) return false;
+    const tld = domain.substring(lastDot);
+    const allowedTlds = new Set([
+      ".com", ".net", ".org", ".edu", ".gov", ".io", ".co",
+      ".us", ".uk", ".ca", ".de", ".fr", ".au", ".info", ".biz", ".me",
+    ]);
+    return allowedTlds.has(tld);
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (mode === "register" && !isValidEmailDomain(email)) {
+      setError("Please use a valid email address with a recognized domain (e.g. .com, .net, .org, .edu).");
+      return;
+    }
 
     if (mode === "register" && !isPasswordLongEnough(password)) {
       setError(passwordMinLengthMessage());
