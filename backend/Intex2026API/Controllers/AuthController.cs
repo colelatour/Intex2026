@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Intex2026API.Data;
+using Microsoft.AspNetCore.Authentication.Google;
+
 
 namespace Intex2026API.Controllers
 {
@@ -11,7 +13,8 @@ namespace Intex2026API.Controllers
     [AllowAnonymous]
     public class AuthController(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager) : ControllerBase
+        SignInManager<ApplicationUser> signInManager,
+        IConfiguration configuration) : ControllerBase
     {
         public record LoginRequest(string Email, string Password);
         public record RegisterRequest(string Email, string Password);
@@ -40,9 +43,49 @@ namespace Intex2026API.Controllers
             });
         }
 
+        private static readonly HashSet<string> AllowedTlds = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".com", ".net", ".org", ".edu", ".gov", ".io", ".co", ".us", ".uk", ".ca", ".de", ".fr", ".au", ".info", ".biz", ".me"
+        };
+
+        private static readonly HashSet<string> BlockedDomains = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "example.com", "example.net", "example.org", "test.com", "tempmail.com",
+            "throwaway.email", "mailinator.com", "guerrillamail.com", "yopmail.com",
+            "sharklasers.com", "guerrillamailblock.com", "grr.la", "dispostable.com",
+            "trashmail.com", "fakeinbox.com", "tempail.com", "10minutemail.com"
+        };
+
+        private static bool IsValidEmailDomain(string email)
+        {
+            var atIndex = email.LastIndexOf('@');
+            if (atIndex < 0)
+                return false;
+
+            var domain = email[(atIndex + 1)..].ToLowerInvariant();
+
+            // Block known fake/disposable domains
+            if (BlockedDomains.Contains(domain))
+                return false;
+
+            // Must have at least one dot (e.g. gmail.com)
+            var lastDot = domain.LastIndexOf('.');
+            if (lastDot < 1)
+                return false;
+
+            // Check TLD is in the allowed list
+            var tld = domain[lastDot..];
+            return AllowedTlds.Contains(tld);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
+            if (!IsValidEmailDomain(request.Email))
+            {
+                return BadRequest(new { message = "Please use a valid email address with a recognized domain (e.g. .com, .net, .org, .edu)." });
+            }
+
             var user = new ApplicationUser
             {
                 UserName = request.Email,
@@ -131,5 +174,153 @@ namespace Intex2026API.Controllers
             await signInManager.SignOutAsync();
             return Ok(new { message = "Logged out successfully" });
         }
+
+         [HttpGet("providers")]
+    public IActionResult GetExternalProviders()
+    {
+        var providers = new List<object>();
+
+        if (IsGoogleConfigured())
+        {
+            providers.Add(new
+            {
+                name = GoogleDefaults.AuthenticationScheme,
+                displayName = "Google"
+            });
+        }
+
+        return Ok(providers);
+    }
+
+    [HttpGet("external-login")]
+    public IActionResult ExternalLogin(
+        [FromQuery] string provider,
+        [FromQuery] string? returnPath = null)
+    {
+        if (!string.Equals(provider, GoogleDefaults.AuthenticationScheme, StringComparison.OrdinalIgnoreCase) ||
+            !IsGoogleConfigured())
+        {
+            return BadRequest(new
+            {
+                message = "The requested external login provider is not available."
+            });
+        }
+
+        var callbackUrl = Url.Action(nameof(ExternalLoginCallback), new
+        {
+            returnPath = NormalizeReturnPath(returnPath)
+        });
+
+        if (string.IsNullOrWhiteSpace(callbackUrl))
+        {
+            return Problem("Unable to create the external login callback URL.");
+        }
+
+        var properties = signInManager.ConfigureExternalAuthenticationProperties(
+            GoogleDefaults.AuthenticationScheme,
+            callbackUrl);
+
+        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+    }
+
+    [HttpGet("external-callback")]
+    public async Task<IActionResult> ExternalLoginCallback([FromQuery] string? returnPath = null, [FromQuery] string? remoteError = null)
+    {
+        if (!string.IsNullOrWhiteSpace(remoteError))
+        {
+            return Redirect(BuildFrontendErrorUrl("External login failed."));
+        }
+
+        var info = await signInManager.GetExternalLoginInfoAsync();
+
+        if (info is null)
+        {
+            return Redirect(BuildFrontendErrorUrl("External login information was unavailable."));
+        }
+
+        var signInResult = await signInManager.ExternalLoginSignInAsync(
+            info.LoginProvider,
+            info.ProviderKey,
+            isPersistent: false,
+            bypassTwoFactor: true);
+
+        if (signInResult.Succeeded)
+        {
+            return Redirect(BuildFrontendSuccessUrl(returnPath));
+        }
+
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email) ??
+            info.Principal.FindFirstValue("email");
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Redirect(BuildFrontendErrorUrl("The external provider did not return an email address."));
+        }
+
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user is null)
+        {
+            user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true
+            };
+
+            var createUserResult = await userManager.CreateAsync(user);
+
+            if (!createUserResult.Succeeded)
+            {
+                return Redirect(BuildFrontendErrorUrl("Unable to create a local account for the external login."));
+            }
+
+            await userManager.AddToRoleAsync(user, "Donor");
+        }
+
+        var addLoginResult = await userManager.AddLoginAsync(user, info);
+
+        if (!addLoginResult.Succeeded)
+        {
+            return Redirect(BuildFrontendErrorUrl("Unable to associate the external login with the local account."));
+        }
+
+        await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+        return Redirect(BuildFrontendSuccessUrl(returnPath));
+    }
+
+    // ── Helper methods ───────────────────────────────────────────────
+
+    private bool IsGoogleConfigured()
+    {
+        var clientId = configuration["Authentication:Google:ClientId"];
+        var clientSecret = configuration["Authentication:Google:ClientSecret"];
+        return !string.IsNullOrWhiteSpace(clientId) && !string.IsNullOrWhiteSpace(clientSecret);
+    }
+
+    private string GetFrontendOrigin()
+    {
+        var origins = configuration.GetSection("AllowedOrigins").Get<string[]>();
+        return origins?.FirstOrDefault() ?? "http://localhost:3000";
+    }
+
+    private string BuildFrontendSuccessUrl(string? returnPath)
+    {
+        var path = NormalizeReturnPath(returnPath);
+        return $"{GetFrontendOrigin()}{path}";
+    }
+
+    private string BuildFrontendErrorUrl(string message)
+    {
+        var encoded = Uri.EscapeDataString(message);
+        return $"{GetFrontendOrigin()}/login?error={encoded}";
+    }
+
+    private static string NormalizeReturnPath(string? returnPath)
+    {
+        if (string.IsNullOrWhiteSpace(returnPath) || !returnPath.StartsWith('/'))
+            return "/";
+        return returnPath;
+    }
     }
 }

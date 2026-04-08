@@ -38,7 +38,7 @@ export default function OutcomeHighlights({ data, loading }: Props) {
             78.5%
           </div>
           <div className="outcome-card__label">
-            average education progress — +22 points improvement over the program period
+            average education progress: +22 points improvement over the program period
           </div>
         </div>
 

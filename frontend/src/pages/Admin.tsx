@@ -19,6 +19,17 @@ const SECTION_TITLES: Record<string, string> = {
   'donors':               'Donor Dashboard',
   'process-recordings':   'Process Recordings',
   'safehouse-management': 'Safehouse Management',
+import ProcessRecordings from '../components/admin/ProcessRecordings';
+import UserManagement    from '../components/admin/UserManagement';
+import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
+
+const SECTION_TITLES: Record<string, string> = {
+  'dashboard':          'Admin Dashboard',
+  'resident-directory': 'Resident Directory',
+  'donors':             'Donor Dashboard',
+  'process-recordings': 'Process Recordings',
+  'user-management':    'User Management',
+  'home-visits':        'Home Visitation & Case Conferences',
 };
 
 export default function Admin() {
@@ -66,6 +77,9 @@ export default function Admin() {
         {activeSection === 'process-recordings' && <ProcessRecordings />}
         {activeSection === 'safehouse-management' && <SafehouseManagement />}
         
+        {activeSection === 'user-management' && <UserManagement />}
+
+        {activeSection === 'home-visits' && <HomeVisitationConferences />}
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 // src/components/admin/ProcessRecordings.tsx
 import { useEffect, useState } from 'react';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
+import { API_BASE_URL } from '../../lib/api';
+const API = API_BASE_URL;
 
 interface Recording {
   recordingId: string | null;
@@ -61,6 +62,11 @@ export default function ProcessRecordings() {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+  const [filterWorker, setFilterWorker] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 5;
 
   // Load residents for the selector
   useEffect(() => {
@@ -73,7 +79,7 @@ export default function ProcessRecordings() {
             residentId: r.residentId,
             label: `${r.residentId}${r.assignedSocialWorker ? ` — ${r.assignedSocialWorker}` : ''}`,
           }))
-          .sort((a, b) => a.residentId.localeCompare(b.residentId));
+          .sort((a, b) => a.residentId.localeCompare(b.residentId, undefined, { numeric: true }));
         setResidents(opts);
       })
       .catch(() => setResidents([]));
@@ -195,6 +201,36 @@ export default function ProcessRecordings() {
   function updateField(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value || null }));
   }
+
+  // Unique social workers from loaded recordings (for filter dropdown)
+  const uniqueWorkers = Array.from(
+    new Set(recordings.map(r => r.socialWorker).filter(Boolean) as string[])
+  ).sort();
+
+  // Apply filters to recordings
+  const filteredRecordings = recordings.filter(r => {
+    if (filterDateFrom && (r.sessionDate ?? '') < filterDateFrom) return false;
+    if (filterDateTo && (r.sessionDate ?? '') > filterDateTo) return false;
+    if (filterWorker && r.socialWorker !== filterWorker) return false;
+    return true;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredRecordings.length / PAGE_SIZE));
+  const paginatedRecordings = filteredRecordings.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [filterDateFrom, filterDateTo, filterWorker]);
+
+  // Reset filters when resident changes
+  useEffect(() => {
+    setFilterDateFrom('');
+    setFilterDateTo('');
+    setFilterWorker('');
+    setCurrentPage(1);
+  }, [selectedResident]);
 
   // Filter residents by search
   const filteredResidents = searchQuery
@@ -418,9 +454,54 @@ export default function ProcessRecordings() {
         {selectedResident && !loading && recordings.length > 0 && !showForm && (
           <div className="pr-timeline">
             <div className="pr-timeline__header">
-              <h3>{recordings.length} Session{recordings.length !== 1 ? 's' : ''} Recorded</h3>
+              <h3>{filteredRecordings.length} Session{filteredRecordings.length !== 1 ? 's' : ''}{filteredRecordings.length !== recordings.length ? ` (of ${recordings.length})` : ''} Recorded</h3>
             </div>
-            {recordings.map((rec) => (
+
+            {/* Filters */}
+            <div className="supporter-filters" style={{ marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>From</label>
+                <input
+                  type="date"
+                  value={filterDateFrom}
+                  onChange={e => setFilterDateFrom(e.target.value)}
+                  style={{ padding: '0.4rem 0.6rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>To</label>
+                <input
+                  type="date"
+                  value={filterDateTo}
+                  onChange={e => setFilterDateTo(e.target.value)}
+                  style={{ padding: '0.4rem 0.6rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
+                />
+              </div>
+              <select
+                value={filterWorker}
+                onChange={e => setFilterWorker(e.target.value)}
+              >
+                <option value="">All social workers</option>
+                {uniqueWorkers.map(w => <option key={w} value={w}>{w}</option>)}
+              </select>
+              {(filterDateFrom || filterDateTo || filterWorker) && (
+                <button
+                  className="btn-export"
+                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                  onClick={() => { setFilterDateFrom(''); setFilterDateTo(''); setFilterWorker(''); }}
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+
+            {paginatedRecordings.length === 0 && (
+              <div className="pr-placeholder">
+                <p>No sessions match your filters.</p>
+              </div>
+            )}
+
+            {paginatedRecordings.map((rec) => (
               <div key={rec.recordingId} className="pr-card">
                 <div className="pr-card__top">
                   <div className="pr-card__date-badge">
@@ -545,6 +626,15 @@ export default function ProcessRecordings() {
                 )}
               </div>
             ))}
+
+            {/* Pagination */}
+            {filteredRecordings.length > PAGE_SIZE && (
+              <div className="supporter-pagination">
+                <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}>← Prev</button>
+                <span>Page {currentPage} of {totalPages} &nbsp;·&nbsp; {filteredRecordings.length} total</span>
+                <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}>Next →</button>
+              </div>
+            )}
           </div>
         )}
       </div>

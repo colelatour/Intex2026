@@ -50,7 +50,7 @@ public class SocialMediaPostsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteSocialMediaPost(string id)
     {
         var post = await _context.SocialMediaPosts.FindAsync(id);

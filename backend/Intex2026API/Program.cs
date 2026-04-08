@@ -3,6 +3,7 @@ using Intex2026API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.Google;
 
 static string? FindDotEnvFile()
 {
@@ -55,6 +56,9 @@ if (dotEnvPath != null)
 
 var builder = WebApplication.CreateBuilder(args);
 
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -78,6 +82,18 @@ if (string.IsNullOrWhiteSpace(identityConnection))
     throw new InvalidOperationException(
         "ConnectionStrings:LighthouseIdentityConnection is missing or empty. Set it in appsettings.json or in backend/.env " +
         "as ConnectionStrings__LighthouseIdentityConnection=...");
+}
+
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+        options.CallbackPath = "/signin-google";
+    });
 }
 
 builder.Services.AddCors(options =>
@@ -150,7 +166,8 @@ using (var scope = app.Services.CreateScope())
 
         // Seed a default admin from environment variables (or fallback for dev)
         var adminEmail = builder.Configuration["AdminEmail"] ?? "admin@safehaven.org";
-        var adminPassword = builder.Configuration["AdminPassword"] ?? "Admin123!@#";
+        // Keep the dev fallback password aligned with the configured Identity password policy (>= 14 chars).
+        var adminPassword = builder.Configuration["AdminPassword"] ?? "Admin123!@#4567";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser == null)
         {

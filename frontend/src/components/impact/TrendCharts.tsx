@@ -9,6 +9,12 @@ interface Props {
   loading: boolean;
 }
 
+const BRAND_NAVY = '#022846';
+const BRAND_GOLD = '#d4a018';
+const BRAND_TEAL = '#356272';
+const GRID_COLOR = '#d9e2ea';
+const TICK_COLOR = '#4d6478';
+
 function fmtMonth(yyyyMM: string): string {
   const [year, month] = yyyyMM.split('-');
   const date = new Date(Number(year), Number(month) - 1, 1);
@@ -45,17 +51,17 @@ export default function TrendCharts({ data, loading }: Props) {
           ) : (
             <ResponsiveContainer width="100%" height={240} aria-label="Education progress trend line chart">
               <LineChart data={educationData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ede8e2" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9a8e88' }} />
-                <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#9a8e88' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: TICK_COLOR }} />
+                <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: TICK_COLOR }} />
                 <Tooltip formatter={(v) => [typeof v === 'number' ? `${v.toFixed(1)}%` : String(v ?? ''), 'Avg Progress']} />
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#2a7a6a"
+                  stroke={BRAND_TEAL}
                   strokeWidth={2.5}
                   dot={false}
-                  activeDot={{ r: 5 }}
+                  activeDot={{ r: 5, fill: BRAND_TEAL, stroke: BRAND_NAVY, strokeWidth: 1 }}
                   name="Education Progress"
                 />
               </LineChart>
@@ -85,17 +91,17 @@ export default function TrendCharts({ data, loading }: Props) {
           ) : (
             <ResponsiveContainer width="100%" height={240} aria-label="Health score trend line chart">
               <LineChart data={healthData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ede8e2" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9a8e88' }} />
-                <YAxis domain={[2.5, 5]} tickCount={6} tick={{ fontSize: 11, fill: '#9a8e88' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: TICK_COLOR }} />
+                <YAxis domain={[2.5, 5]} tickCount={6} tick={{ fontSize: 11, fill: TICK_COLOR }} />
                 <Tooltip formatter={(v) => [typeof v === 'number' ? v.toFixed(2) : String(v ?? ''), 'Avg Health Score']} />
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#e07b5a"
+                  stroke={BRAND_GOLD}
                   strokeWidth={2.5}
                   dot={false}
-                  activeDot={{ r: 5 }}
+                  activeDot={{ r: 5, fill: BRAND_GOLD, stroke: BRAND_NAVY, strokeWidth: 1 }}
                   name="Health Score"
                 />
               </LineChart>

@@ -6,34 +6,19 @@ interface Props {
   error: string | null;
 }
 
-// Warm muted palette for "arrive" states
-const ARRIVE_COLORS: Record<string, string> = {
-  Sad:        '#b08060',
-  Anxious:    '#b89070',
-  Angry:      '#c07858',
-  Withdrawn:  '#a09080',
-  Distressed: '#a06850',
-  Neutral:    '#9a9080',
-  Calm:       '#8aaa98',
-  Hopeful:    '#6aaa88',
-  Happy:      '#5a9a78',
-  Engaged:    '#7aaa90',
-  Positive:   '#5aaa80',
-};
-
-// Teal/green palette for "leave" states
-const LEAVE_COLORS: Record<string, string> = {
-  Hopeful:    '#1D9E75',
-  Calm:       '#2aaa88',
-  Happy:      '#38b890',
-  Engaged:    '#2a9a80',
-  Positive:   '#22a878',
-  Neutral:    '#6ab0a0',
-  Sad:        '#b08878',
-  Anxious:    '#b09080',
-  Withdrawn:  '#a09898',
-  Angry:      '#b07868',
-  Distressed: '#a07868',
+// One shared palette so each emotion always has the same color.
+const STATE_COLORS: Record<string, string> = {
+  Sad:        '#022846',
+  Anxious:    '#113754',
+  Angry:      '#1e4660',
+  Withdrawn:  '#295368',
+  Distressed: '#315f70',
+  Neutral:    '#4b7a86',
+  Calm:       '#5a8f9c',
+  Hopeful:    '#6794a0',
+  Happy:      '#729fac',
+  Engaged:    '#82afba',
+  Positive:   '#d4a018',
 };
 
 function StateBar({
@@ -106,7 +91,7 @@ export default function EmotionalTransformationSection({ data, loading, error }:
                 label={label}
                 count={count}
                 maxCount={maxStart}
-                color={ARRIVE_COLORS[label] ?? '#a09080'}
+                color={STATE_COLORS[label] ?? '#356272'}
               />
             ))
           )}
@@ -126,27 +111,12 @@ export default function EmotionalTransformationSection({ data, loading, error }:
                 label={label}
                 count={count}
                 maxCount={maxEnd}
-                color={LEAVE_COLORS[label] ?? '#1D9E75'}
+                color={STATE_COLORS[label] ?? '#356272'}
               />
             ))
           )}
         </div>
       </div>
-
-      {/* Interpretation callout */}
-      {!loading && !error && (
-        <div className="chart-interpretation emo-interpretation">
-          <p>
-            <strong>What this means in real life:</strong>{' '}
-            Many girls arrive to their sessions carrying the weight of the day — feeling sad,
-            anxious, or shut down. In 66% of all recorded sessions, a girl left that room in a
-            measurably better emotional state than when she walked in. That shift — from withdrawn
-            to calm, from anxious to hopeful — is the daily work of healing. It doesn't happen by
-            accident. It happens because of skilled, consistent, caring support funded by people
-            like you.
-          </p>
-        </div>
-      )}
 
       {/* Footnote */}
       {!loading && !error && (

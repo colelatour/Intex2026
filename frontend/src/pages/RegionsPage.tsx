@@ -21,14 +21,14 @@ export default function RegionsPage() {
   );
 
   return (
-    <div className="regions-page">
+    <main className="regions-page" aria-label="Regions page">
 
       {/* ── Part 1: Page header ─────────────────────────────────────────────── */}
       <div className="regions-header">
         <div className="regions-header__inner">
           <h1 className="regions-header__title">Where we work</h1>
           <p className="regions-header__subtitle">
-            Lighthouse Sanctuary operates {allSafehouses.length} safehouses across three regions of the Philippines.
+            Sheltered Light operates {allSafehouses.length} safehouses across three regions of the Philippines.
             Click a region to learn more and support the girls there.
           </p>
         </div>
@@ -45,6 +45,7 @@ export default function RegionsPage() {
               onSelectRegion={setSelected}
               safehouses={allSafehouses}
               occupancyByCode={occupancyByCode}
+              contextParagraph={regionData?.[selected]?.contextParagraph}
             />
           )}
         </div>
@@ -77,15 +78,9 @@ export default function RegionsPage() {
           >
             Donate to any region
           </button>
-          <button
-            className="cta-btn-outline-dark"
-            onClick={() => navigate('/impact')}
-          >
-            Back to our impact
-          </button>
         </div>
       </div>
 
-    </div>
+    </main>
   );
 }

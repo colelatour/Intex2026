@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSession } from '../lib/authApi';
 import { post } from '../lib/api';
+import { MIN_PASSWORD_LENGTH, isPasswordLongEnough, passwordMinLengthMessage } from '../lib/passwordPolicy';
 import type { AuthSession } from '../types/AuthSession';
 import Footer from '../components/layout/Footer';
 import '../styles/Account.css';
@@ -34,6 +35,11 @@ export default function Account() {
     e.preventDefault();
     setMessage(null);
 
+    if (!isPasswordLongEnough(newPassword)) {
+      setMessage({ type: 'error', text: passwordMinLengthMessage('New password') });
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setMessage({ type: 'error', text: 'New passwords do not match.' });
       return;
@@ -50,9 +56,15 @@ export default function Account() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
+      const raw = err instanceof Error ? err.message : '';
+      const lower = raw.toLowerCase();
+      const normalized =
+        lower.includes('must be at least') && lower.includes('character')
+          ? passwordMinLengthMessage('New password')
+          : (raw || 'Failed to update password.');
       setMessage({
         type: 'error',
-        text: err instanceof Error ? err.message : 'Failed to update password.',
+        text: normalized,
       });
     } finally {
       setSaving(false);
@@ -100,6 +112,7 @@ export default function Account() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
+                  minLength={MIN_PASSWORD_LENGTH}
                 />
               </div>
               <div className="account__field">
@@ -110,6 +123,7 @@ export default function Account() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  minLength={MIN_PASSWORD_LENGTH}
                 />
               </div>
 

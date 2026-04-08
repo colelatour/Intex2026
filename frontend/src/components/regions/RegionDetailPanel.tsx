@@ -9,7 +9,7 @@ interface Props {
 
 function StatTile({ value, label }: { value: string; label: string }) {
   return (
-    <div className="region-stat-tile">
+    <div className="region-stat-tile" role="listitem">
       <div className="region-stat-tile__num">{value}</div>
       <div className="region-stat-tile__label">{label}</div>
     </div>
@@ -57,30 +57,27 @@ export default function RegionDetailPanel({ regionKey, data }: Props) {
         ))}
       </div>
 
-      {/* Context paragraph */}
-      <div className="chart-interpretation region-context">
-        <p>{data.contextParagraph}</p>
-      </div>
+      <div className="region-panel__footer">
+        {/* Donations */}
+        <div className="region-donations">
+          <span className="region-donations__label">Donations received</span>
+          <span className="region-donations__amount">
+            ₱{data.donationsPhp.toLocaleString()}
+          </span>
+        </div>
 
-      {/* Donations */}
-      <div className="region-donations">
-        <span className="region-donations__label">Donations received</span>
-        <span className="region-donations__amount">
-          ₱{data.donationsPhp.toLocaleString()}
-        </span>
+        {/* CTA */}
+        <button
+          className="region-cta-btn"
+          onClick={() => navigate(`/donate?region=${regionKey}`)}
+          aria-label={`Donate to ${data.name} region`}
+        >
+          Donate to {data.name}
+        </button>
+        <p className="region-cta-note">
+          Your donation to this region goes directly to safehouses in {data.name}.
+        </p>
       </div>
-
-      {/* CTA */}
-      <button
-        className="region-cta-btn"
-        onClick={() => navigate(`/donate?region=${regionKey}`)}
-        aria-label={`Donate to ${data.name} region`}
-      >
-        Donate to {data.name}
-      </button>
-      <p className="region-cta-note">
-        Your donation to this region goes directly to safehouses in {data.name}.
-      </p>
     </div>
   );
 }

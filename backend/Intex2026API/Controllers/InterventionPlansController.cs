@@ -50,7 +50,7 @@ public class InterventionPlansController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteInterventionPlan(string id)
     {
         var interventionPlan = await _context.InterventionPlans.FindAsync(id);

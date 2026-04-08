@@ -1,4 +1,4 @@
-import { get, post } from "./api";
+import { get, post, API_BASE_URL } from "./api";
 import type { AuthSession } from "../types/AuthSession";
 
 export function getSession(): Promise<AuthSession> {
@@ -18,4 +18,8 @@ export function register(
   password: string
 ): Promise<AuthSession> {
   return post<AuthSession>("/api/auth/register", { email, password });
+}
+
+export function getGoogleLoginUrl(returnPath: string = "/"): string {
+  return `${API_BASE_URL}/api/auth/external-login?provider=Google&returnPath=${encodeURIComponent(returnPath)}`;
 }

@@ -1,5 +1,6 @@
 // src/components/admin/ResidentDirectory.tsx
 import { useEffect, useState } from 'react';
+import { getSession } from '../../lib/authApi';
 
 interface Resident {
   residentId: string | null;
@@ -156,9 +157,10 @@ interface DetailPanelProps {
   onEditStart: () => void;
   onDelete: () => void;
   onReassign: (newSafehouseId: string) => Promise<void>;
+  isAdmin: boolean;
 }
 
-function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign }: DetailPanelProps) {
+function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign, isAdmin }: DetailPanelProps) {
   const [showReassign, setShowReassign]     = useState(false);
   const [selectedSafehouse, setSelectedSafehouse] = useState('');
   const [reassigning, setReassigning]       = useState(false);
@@ -270,13 +272,15 @@ function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign }
           <button className="btn-add" onClick={(e) => { e.stopPropagation(); onEditStart(); }}>
             Edit Record
           </button>
-          <button
-            className="btn-export"
-            style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          >
-            🗑 Delete Record
-          </button>
+          {isAdmin && (
+            <button
+              className="btn-export"
+              style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            >
+              🗑 Delete Record
+            </button>
+          )}
         </div>
         <button
           className="btn-export"
@@ -493,6 +497,11 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const [residents, setResidents]   = useState<Resident[]>([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
+  const [isAdmin, setIsAdmin]       = useState(false);
+
+  useEffect(() => {
+    getSession().then(s => setIsAdmin(s.roles.includes('Admin')));
+  }, []);
   const [search, setSearch]         = useState('');
   const [expandedId, setExpandedId]     = useState<string | null>(null);
   const [editingId, setEditingId]       = useState<string | null>(null);
@@ -519,12 +528,17 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   }, []);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents`, { credentials: 'include' })
+    fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/Residents`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
         return res.json();
       })
       .then((data: Resident[]) => {
+        data.sort((a, b) => {
+          const idA = parseInt(a.residentId ?? '0', 10);
+          const idB = parseInt(b.residentId ?? '0', 10);
+          return idA - idB;
+        });
         setResidents(data);
         setLoading(false);
       })
@@ -585,7 +599,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
     if (!editDraft?.residentId) return;
     setSaving(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents/${editDraft.residentId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/Residents/${editDraft.residentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -611,7 +625,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const handleCreateSave = async () => {
     setCreating(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/Residents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -646,7 +660,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const handleDelete = async (id: string) => {
     if (!window.confirm(`Are you sure you want to permanently delete resident ${id}? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Residents/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/Residents/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       setResidents((prev) => prev.filter((r) => r.residentId !== id));
       setExpandedId(null);
@@ -784,6 +798,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
                             onEditStart={() => handleEditStart(r)}
                             onDelete={() => handleDelete(r.residentId!)}
                             onReassign={(newId) => handleReassign(r.residentId!, newId)}
+                            isAdmin={isAdmin}
                           />
                         </td>
                       </tr>

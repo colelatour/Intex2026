@@ -17,21 +17,21 @@ export default function CallToActionBanner({ data }: Props) {
       </h2>
       <p className="cta-banner__body">
         {total > 0
-          ? `${total} girls have found safety, healing, and education through Lighthouse Sanctuary. Join ${supporters} supporters who are making it possible.`
-          : 'Girls have found safety, healing, and education through Lighthouse Sanctuary. Join our community of supporters making it possible.'}
+          ? `${total} girls have found safety, healing, and education through Sheltered Light. Join ${supporters} supporters who are making it possible.`
+          : 'Girls have found safety, healing, and education through Sheltered Light. Join our community of supporters making it possible.'}
       </p>
       <div className="cta-banner__btns">
         <button
           className="cta-btn-primary"
           onClick={() => navigate('/donate')}
-          aria-label="Donate now to Lighthouse Sanctuary"
+          aria-label="Donate now to Sheltered Light"
         >
           Donate Now
         </button>
         <button
           className="cta-btn-outline"
           onClick={() => navigate('/about')}
-          aria-label="Learn more about Lighthouse Sanctuary"
+          aria-label="Learn more about Sheltered Light"
         >
           Learn More
         </button>

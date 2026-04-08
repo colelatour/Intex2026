@@ -7,11 +7,11 @@ interface Props {
 function OccupancyPill({ pct }: { pct: number }) {
   let style: React.CSSProperties;
   if (pct >= 100) {
-    style = { background: '#FCEBEB', color: '#A32D2D' };
+    style = { background: '#f3dede', color: '#6d1f1f' };
   } else if (pct >= 80) {
-    style = { background: '#FAEEDA', color: '#854F0B' };
+    style = { background: '#f6edd1', color: '#8a6710' };
   } else {
-    style = { background: '#E1F5EE', color: '#085041' };
+    style = { background: '#e6eff2', color: '#356272' };
   }
   return (
     <span style={{

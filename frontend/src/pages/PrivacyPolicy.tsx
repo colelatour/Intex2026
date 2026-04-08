@@ -165,7 +165,7 @@ export default function PrivacyPolicy() {
             <ul>
               <li>All data in transit is encrypted using TLS (HTTPS). HTTP connections are automatically redirected to HTTPS</li>
               <li>Passwords are hashed using industry-standard algorithms via ASP.NET Core Identity — plaintext passwords are never stored</li>
-              <li>Authentication requires passwords of at least 14 characters, encouraging strong passphrases</li>
+              <li>Authentication requires passwords of 14 characters or more, encouraging strong passphrases</li>
               <li>Session cookies are HTTP-only and Secure, preventing interception and client-side access</li>
               <li>Content Security Policy (CSP) headers restrict which scripts and resources may execute in the browser</li>
               <li>Role-based access control (RBAC) ensures users can only access data appropriate to their role</li>

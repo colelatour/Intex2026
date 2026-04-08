@@ -36,6 +36,18 @@ export default function ImpactDashboard() {
         <HeroMetricCards data={summary.data} loading={summary.loading} />
       )}
 
+      {!summaryError && (
+        <OutcomeHighlights data={summary.data} loading={summary.loading} />
+      )}
+
+      {!summaryError && (
+        <DonationsSection data={summary.data} loading={summary.loading} />
+      )}
+
+      {!summaryError && (
+        <TrendCharts data={trends.data} loading={trends.loading} />
+      )}
+
       <EducationJourneyChart
         data={journey.data}
         loading={journey.loading}
@@ -43,15 +55,7 @@ export default function ImpactDashboard() {
       />
 
       {!summaryError && (
-        <DonationsSection data={summary.data} loading={summary.loading} />
-      )}
-
-      {!summaryError && (
-        <>
-          <OutcomeHighlights data={summary.data} loading={summary.loading} />
-          <TrendCharts data={trends.data} loading={trends.loading} />
-          <CareIntensityRow  data={summary.data} loading={summary.loading} />
-        </>
+        <CareIntensityRow  data={summary.data} loading={summary.loading} />
       )}
 
       <EmotionalTransformationSection
