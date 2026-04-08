@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 
 import { API_BASE_URL } from '../../lib/api';
+import '../../styles/HomeVisitationConferences.css';
 const API = API_BASE_URL;
 
 interface Recording {
@@ -65,6 +66,8 @@ export default function ProcessRecordings() {
   const [filterDateFrom, setFilterDateFrom] = useState('');
   const [filterDateTo, setFilterDateTo] = useState('');
   const [filterWorker, setFilterWorker] = useState('');
+  const [filterSessionType, setFilterSessionType] = useState('');
+  const [filterContentSearch, setFilterContentSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 5;
 
@@ -212,6 +215,23 @@ export default function ProcessRecordings() {
     if (filterDateFrom && (r.sessionDate ?? '') < filterDateFrom) return false;
     if (filterDateTo && (r.sessionDate ?? '') > filterDateTo) return false;
     if (filterWorker && r.socialWorker !== filterWorker) return false;
+    if (filterSessionType && r.sessionType !== filterSessionType) return false;
+    if (filterContentSearch) {
+      const q = filterContentSearch.trim().toLowerCase();
+      const hay = [
+        r.socialWorker,
+        r.sessionNarrative,
+        r.interventionsApplied,
+        r.followUpActions,
+        r.progressNoted,
+        r.concernsFlagged,
+        r.referralMade,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
 
@@ -222,15 +242,27 @@ export default function ProcessRecordings() {
   );
 
   // Reset page when filters change
-  useEffect(() => { setCurrentPage(1); }, [filterDateFrom, filterDateTo, filterWorker]);
+  useEffect(() => { setCurrentPage(1); }, [filterDateFrom, filterDateTo, filterWorker, filterSessionType, filterContentSearch]);
 
   // Reset filters when resident changes
   useEffect(() => {
     setFilterDateFrom('');
     setFilterDateTo('');
     setFilterWorker('');
+    setFilterSessionType('');
+    setFilterContentSearch('');
     setCurrentPage(1);
   }, [selectedResident]);
+
+  const listFiltersActive = Boolean(filterDateFrom || filterDateTo || filterWorker || filterSessionType || filterContentSearch);
+
+  function clearAllFilters() {
+    setFilterDateFrom('');
+    setFilterDateTo('');
+    setFilterWorker('');
+    setFilterSessionType('');
+    setFilterContentSearch('');
+  }
 
   // Filter residents by search
   const filteredResidents = searchQuery
@@ -458,41 +490,77 @@ export default function ProcessRecordings() {
             </div>
 
             {/* Filters */}
-            <div className="supporter-filters" style={{ marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>From</label>
-                <input
-                  type="date"
-                  value={filterDateFrom}
-                  onChange={e => setFilterDateFrom(e.target.value)}
-                  style={{ padding: '0.4rem 0.6rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
-                />
+            <div className="hvc-filters" aria-label="Filter sessions">
+              <div className="hvc-filters__head">
+                <span className="hvc-filters__title">Filter results</span>
+                {listFiltersActive && (
+                  <button type="button" className="hvc-filters__clear" onClick={clearAllFilters}>
+                    Clear all filters
+                  </button>
+                )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>To</label>
-                <input
-                  type="date"
-                  value={filterDateTo}
-                  onChange={e => setFilterDateTo(e.target.value)}
-                  style={{ padding: '0.4rem 0.6rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
-                />
+              <div className="hvc-filters__grid">
+                <div className="hvc-filters__group">
+                  <span className="hvc-filters__label">Session details</span>
+                  <div className="hvc-filters__row">
+                    <select
+                      className="hvc-filters__control"
+                      value={filterSessionType}
+                      onChange={e => setFilterSessionType(e.target.value)}
+                      aria-label="Session type"
+                    >
+                      <option value="">All session types</option>
+                      {SESSION_TYPES.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="hvc-filters__control"
+                      value={filterWorker}
+                      onChange={e => setFilterWorker(e.target.value)}
+                      aria-label="Social worker"
+                    >
+                      <option value="">All social workers</option>
+                      {uniqueWorkers.map(w => (
+                        <option key={w} value={w}>{w}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="hvc-filters__row hvc-filters__row--dates">
+                    <div className="hvc-filters__field">
+                      <label htmlFor="pr-date-from">From</label>
+                      <input
+                        id="pr-date-from"
+                        className="hvc-filters__control"
+                        type="date"
+                        value={filterDateFrom}
+                        onChange={e => setFilterDateFrom(e.target.value)}
+                      />
+                    </div>
+                    <div className="hvc-filters__field">
+                      <label htmlFor="pr-date-to">To</label>
+                      <input
+                        id="pr-date-to"
+                        className="hvc-filters__control"
+                        type="date"
+                        value={filterDateTo}
+                        onChange={e => setFilterDateTo(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="hvc-filters__field hvc-filters__field--full">
+                    <label htmlFor="pr-content-search">Search in session notes</label>
+                    <input
+                      id="pr-content-search"
+                      className="hvc-filters__control"
+                      type="search"
+                      placeholder="Narrative, interventions, concerns, referrals…"
+                      value={filterContentSearch}
+                      onChange={e => setFilterContentSearch(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
-              <select
-                value={filterWorker}
-                onChange={e => setFilterWorker(e.target.value)}
-              >
-                <option value="">All social workers</option>
-                {uniqueWorkers.map(w => <option key={w} value={w}>{w}</option>)}
-              </select>
-              {(filterDateFrom || filterDateTo || filterWorker) && (
-                <button
-                  className="btn-export"
-                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
-                  onClick={() => { setFilterDateFrom(''); setFilterDateTo(''); setFilterWorker(''); }}
-                >
-                  Clear filters
-                </button>
-              )}
             </div>
 
             {paginatedRecordings.length === 0 && (

@@ -78,7 +78,6 @@ export default function Admin() {
         {activeSection === 'safehouse-management' && <SafehouseManagement />}
         
         {activeSection === 'user-management' && <UserManagement />}
-
         {activeSection === 'home-visits' && <HomeVisitationConferences />}
       </div>
     </div>
