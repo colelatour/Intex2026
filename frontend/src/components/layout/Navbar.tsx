@@ -73,11 +73,6 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link to="/" className="" onClick={() => setMobileMenuOpen(false)}>
-            Our Mission
-          </Link>
-        </li>
-        <li>
           <Link to="/impact" className={pathname === "/impact" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
             Impact
           </Link>
@@ -101,11 +96,6 @@ export default function Navbar() {
             onClick={() => setMobileMenuOpen(false)}
           >
             Donate
-          </Link>
-        </li>
-        <li>
-          <Link to="/" className="" onClick={() => setMobileMenuOpen(false)}>
-            Contact
           </Link>
         </li>
         {isStaff && (
