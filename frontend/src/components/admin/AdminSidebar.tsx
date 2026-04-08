@@ -1,7 +1,6 @@
 // src/components/admin/AdminSidebar.tsx
 import { type ReactNode, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { NavLink } from 'react-router-dom';
 import { getSession } from '../../lib/authApi';
 
 interface NavItem {
@@ -94,7 +93,6 @@ const ICONS: Record<string, ReactNode> = {
 };
 
 export default function AdminSidebar() {
-export default function AdminSidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -114,16 +112,12 @@ export default function AdminSidebar() {
             .filter(item => !item.adminOnly || isAdmin)
             .map((item) => (
             <NavLink
-            <NavLink
               key={item.id}
-              to={`/admin/${item.id}`}
-              className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
               to={`/admin/${item.id}`}
               className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
             >
               {ICONS[item.icon]}
               {item.label}
-            </NavLink>
             </NavLink>
           ))}
         </div>
