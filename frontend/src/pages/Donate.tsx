@@ -31,7 +31,9 @@ export default function Donate() {
         </div>
       </section>
 
-      <Footer variant="donate" />
+      <div className="cta-footer-wrap">
+        <Footer variant="donate" />
+      </div>
     </>
   );
 }
