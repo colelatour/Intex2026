@@ -2,7 +2,7 @@
 
 /* ─── Hero ─────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, #fdf8f0 0%, #f5e6c0 100%);
+  background: var(--cream);
   color: var(--navy);
   padding: 0;
   position: relative;
@@ -407,28 +407,34 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
 }
 
+/* ─── CTA + Footer wrapper ──────────────── */
+.cta-footer-wrap {
+  background: linear-gradient(135deg, #022846 0%, #356272 100%);
+  width: 100%;
+}
+
 /* ─── CTA Banner ────────────────────────── */
-.cta-banner {
-  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 100%);
+.home-cta-banner {
+  background: transparent;
+  width: 100%;
   padding: 3.5rem 3rem;
   text-align: center;
   color: white;
-  border-top: 4px solid var(--gold);
 }
 
-.cta-banner h2 {
+.home-cta-banner h2 {
   font-family: 'DM Serif Display', serif;
   font-size: 2rem;
   margin-bottom: 0.75rem;
 }
 
-.cta-banner p {
+.home-cta-banner p {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
   margin-bottom: 2rem;
 }
 
-.cta-banner__btns {
+.home-cta-banner__btns {
   display: flex;
   gap: 1rem;
   justify-content: center;
@@ -553,15 +559,15 @@
     height: 220px;
   }
 
-  .cta-banner {
+  .home-cta-banner {
     padding: 2.5rem 1.25rem;
   }
 
-  .cta-banner h2 {
+  .home-cta-banner h2 {
     font-size: 1.5rem;
   }
 
-  .cta-banner__btns {
+  .home-cta-banner__btns {
     flex-direction: column;
     align-items: center;
   }

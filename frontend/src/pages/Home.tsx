@@ -15,8 +15,10 @@ export default function Home() {
 <MissionSection />
       <HealingSteps />
       <ImpactSection />
-      <CtaBanner />
-      <Footer variant="default" />
+      <div className="cta-footer-wrap">
+        <CtaBanner />
+        <Footer variant="default" />
+      </div>
     </>
   );
 }

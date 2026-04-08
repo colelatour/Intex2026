@@ -2,7 +2,7 @@
 
 /* ─── Hero ──────────────────────────────── */
 .donate-hero {
-  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 60%, var(--blue) 100%);
+  background: linear-gradient(135deg, #022846 0%, #356272 100%);
   color: white;
   padding: 3rem 3rem 2.5rem;
   text-align: center;
