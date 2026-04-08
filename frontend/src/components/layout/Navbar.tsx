@@ -110,7 +110,11 @@ export default function Navbar() {
         </li>
         {isStaff && (
           <li>
-            <Link to="/admin" className={pathname === "/admin" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              to="/admin"
+              className={pathname.startsWith("/admin") ? "active" : ""}
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Admin
             </Link>
           </li>
