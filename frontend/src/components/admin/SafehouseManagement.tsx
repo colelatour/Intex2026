@@ -1,5 +1,6 @@
 // src/components/admin/SafehouseManagement.tsx
 import { useEffect, useState } from 'react';
+import { get } from '../../lib/api';
 
 interface Safehouse {
   safehouseId: string | null;
@@ -53,12 +54,8 @@ export default function SafehouseManagement() {
   const [capacityFilter, setCapacityFilter] = useState('');
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/Safehouses`, { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
-      .then((data: Safehouse[]) => {
+    get<Safehouse[]>('/api/Safehouses')
+      .then((data) => {
         setSafehouses(data);
         setLoading(false);
       })

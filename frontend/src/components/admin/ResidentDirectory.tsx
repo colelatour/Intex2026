@@ -1,6 +1,7 @@
 // src/components/admin/ResidentDirectory.tsx
 import { useEffect, useState } from 'react';
 import { getSession } from '../../lib/authApi';
+import { get, post, put, api } from '../../lib/api';
 
 interface Resident {
   residentId: string | null;
@@ -519,21 +520,16 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const [safehouses, setSafehouses]           = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/Safehouses`, { credentials: 'include' })
-      .then((res) => res.ok ? res.json() : [])
-      .then((data: { safehouseId: string; name: string }[]) => {
+    get<{ safehouseId: string; name: string }[]>('/api/Safehouses')
+      .then((data) => {
         setSafehouses(data.map((s) => ({ id: s.safehouseId, name: s.name ?? s.safehouseId })));
       })
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/api/Residents`, { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
-      .then((data: Resident[]) => {
+    get<Resident[]>('/api/Residents')
+      .then((data) => {
         data.sort((a, b) => {
           const idA = parseInt(a.residentId ?? '0', 10);
           const idB = parseInt(b.residentId ?? '0', 10);
@@ -599,13 +595,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
     if (!editDraft?.residentId) return;
     setSaving(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/api/Residents/${editDraft.residentId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(editDraft),
-      });
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      await put<Resident>('/api/Residents/' + editDraft.residentId, editDraft);
       setResidents((prev) =>
         prev.map((r) => (r.residentId === editDraft.residentId ? editDraft : r))
       );
@@ -625,14 +615,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const handleCreateSave = async () => {
     setCreating(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/api/Residents`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(createDraft),
-      });
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      const created: Resident = await res.json();
+      const created = await post<Resident>('/api/Residents', createDraft);
       setResidents((prev) => [created, ...prev]);
       setShowCreate(false);
       setCreateDraft({});
@@ -647,21 +630,14 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
     const resident = residents.find((r) => r.residentId === residentId);
     if (!resident) return;
     const updated = { ...resident, safehouseId: newSafehouseId };
-    const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/Residents/${residentId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(updated),
-    });
-    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    await put<Resident>('/api/Residents/' + residentId, updated);
     setResidents((prev) => prev.map((r) => r.residentId === residentId ? updated : r));
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm(`Are you sure you want to permanently delete resident ${id}? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'https://localhost:5001'}/api/Residents/${id}`, { method: 'DELETE', credentials: 'include' });
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      await api<Resident>('/api/Residents/' + id, { method: 'DELETE' });
       setResidents((prev) => prev.filter((r) => r.residentId !== id));
       setExpandedId(null);
     } catch (err) {
