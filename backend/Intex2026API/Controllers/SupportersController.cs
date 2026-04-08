@@ -334,7 +334,7 @@ public class SupportersController : ControllerBase
 
     // DELETE /api/supporters/{id}
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteSupporter(string id)
     {
         var supporter = await _context.Supporters.FindAsync(id);

@@ -50,7 +50,7 @@ public class PartnerAssignmentsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeletePartnerAssignment(string id)
     {
         var assignment = await _context.PartnerAssignments.FindAsync(id);

@@ -50,7 +50,7 @@ public class DonationAllocationsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteDonationAllocation(string id)
     {
         var allocation = await _context.DonationAllocations.FindAsync(id);

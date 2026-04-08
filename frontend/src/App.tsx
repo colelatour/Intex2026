@@ -26,7 +26,7 @@ export default function App() {
         <Route path="/account" element={<Account />} />
         <Route path="/donate"  element={<Donate />} />
         <Route path="/admin"   element={
-          <ProtectedRoute requiredRoles={["Admin"]}>
+          <ProtectedRoute requiredRoles={["Admin", "Worker"]}>
             <Admin />
           </ProtectedRoute>
         } />
