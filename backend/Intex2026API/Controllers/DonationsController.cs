@@ -187,7 +187,7 @@ public class DonationsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteDonation(string id)
     {
         var donation = await _context.Donations.FindAsync(id);

@@ -50,7 +50,7 @@ public class InKindDonationItemsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteInKindDonationItem(string id)
     {
         var item = await _context.InKindDonationItems.FindAsync(id);

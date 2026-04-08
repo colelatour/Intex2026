@@ -50,7 +50,7 @@ public class SafehousesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteSafehouse(string id)
     {
         var safehouse = await _context.Safehouses.FindAsync(id);

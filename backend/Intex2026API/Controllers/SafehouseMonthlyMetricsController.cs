@@ -50,7 +50,7 @@ public class SafehouseMonthlyMetricsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteSafehouseMonthlyMetric(string id)
     {
         var metric = await _context.SafehouseMonthlyMetrics.FindAsync(id);

@@ -50,7 +50,7 @@ public class ProcessRecordingsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteProcessRecording(string id)
     {
         var recording = await _context.ProcessRecordings.FindAsync(id);

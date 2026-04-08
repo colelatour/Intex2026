@@ -11,6 +11,7 @@ import BottomCharts      from '../components/admin/BottomCharts';
 import ResidentDirectory from '../components/admin/ResidentDirectory';
 import DonorDashboard    from '../components/admin/DonorDashboard';
 import ProcessRecordings from '../components/admin/ProcessRecordings';
+import UserManagement    from '../components/admin/UserManagement';
 import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
 
 const SECTION_TITLES: Record<string, string> = {
@@ -18,6 +19,7 @@ const SECTION_TITLES: Record<string, string> = {
   'resident-directory': 'Resident Directory',
   'donors':             'Donor Dashboard',
   'process-recordings': 'Process Recordings',
+  'user-management':    'User Management',
   'home-visits':        'Home Visitation & Case Conferences',
 };
 
@@ -64,6 +66,8 @@ export default function Admin() {
                 )}
         {activeSection === 'donors' && <DonorDashboard />}
         {activeSection === 'process-recordings' && <ProcessRecordings />}
+        {activeSection === 'user-management' && <UserManagement />}
+
         {activeSection === 'home-visits' && <HomeVisitationConferences />}
       </div>
     </div>

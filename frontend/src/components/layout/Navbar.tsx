@@ -45,6 +45,8 @@ export default function Navbar() {
   const isAuthenticated = session?.isAuthenticated ?? false;
   const roles = session?.roles ?? [];
   const isAdmin = roles.includes("Admin");
+  const isWorker = roles.includes("Worker");
+  const isStaff = isAdmin || isWorker;
   const isDonor = roles.includes("Donor") || isAdmin;
 
   return (
@@ -106,7 +108,7 @@ export default function Navbar() {
             Contact
           </Link>
         </li>
-        {isAdmin && (
+        {isStaff && (
           <li>
             <Link to="/admin" className={pathname === "/admin" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
               Admin

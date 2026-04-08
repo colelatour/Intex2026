@@ -50,7 +50,7 @@ public class EducationRecordsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteEducationRecord(string id)
     {
         var educationRecord = await _context.EducationRecords.FindAsync(id);

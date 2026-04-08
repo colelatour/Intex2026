@@ -52,7 +52,7 @@ public class PublicImpactSnapshotsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeletePublicImpactSnapshot(string id)
     {
         var snapshot = await _context.PublicImpactSnapshots.FindAsync(id);
