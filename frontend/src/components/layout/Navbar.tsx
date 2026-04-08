@@ -73,11 +73,6 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link to="/" className="" onClick={() => setMobileMenuOpen(false)}>
-            Our Mission
-          </Link>
-        </li>
-        <li>
           <Link to="/impact" className={pathname === "/impact" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
             Impact
           </Link>
@@ -95,17 +90,9 @@ export default function Navbar() {
           <Link
             to="/donate"
             className={pathname === "/donate" ? "active" : ""}
-            style={{
-              color: pathname === "/donate" ? undefined : "var(--gold)",
-            }}
             onClick={() => setMobileMenuOpen(false)}
           >
             Donate
-          </Link>
-        </li>
-        <li>
-          <Link to="/" className="" onClick={() => setMobileMenuOpen(false)}>
-            Contact
           </Link>
         </li>
         {isStaff && (

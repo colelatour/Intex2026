@@ -18,7 +18,7 @@ public record SupporterListItemDto(
     int TotalDonations,
     decimal TotalValue,
     string? LatestDonationDate,
-    decimal? ChurnProbability,
+    double? ChurnProbability,
     string? ChurnRiskLabel
 );
 
@@ -56,7 +56,7 @@ public record SupporterDetailDto(
     string? CreatedAt,
     string? FirstDonationDate,
     List<DonationSummaryDto> Donations,
-    decimal? ChurnProbability,
+    double? ChurnProbability,
     string? ChurnRiskLabel
 );
 

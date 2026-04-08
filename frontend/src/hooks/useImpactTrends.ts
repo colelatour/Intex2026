@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { get } from '../lib/api';
 
 export interface TrendPoint {
   month: string;
@@ -23,12 +24,8 @@ export function useImpactTrends(): UseImpactTrendsResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/trends`, { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
-      .then((json: ImpactTrends) => {
+    get<ImpactTrends>('/api/impact/trends')
+      .then((json) => {
         setData(json);
         setLoading(false);
       })

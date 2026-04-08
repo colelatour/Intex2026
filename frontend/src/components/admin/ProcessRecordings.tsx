@@ -1,8 +1,8 @@
 // src/components/admin/ProcessRecordings.tsx
 import { useEffect, useState } from 'react';
 
-import { API_BASE_URL } from '../../lib/api';
-const API = API_BASE_URL;
+import { get, post, put, api } from '../../lib/api';
+import '../../styles/HomeVisitationConferences.css';
 
 interface Recording {
   recordingId: string | null;
@@ -65,14 +65,15 @@ export default function ProcessRecordings() {
   const [filterDateFrom, setFilterDateFrom] = useState('');
   const [filterDateTo, setFilterDateTo] = useState('');
   const [filterWorker, setFilterWorker] = useState('');
+  const [filterSessionType, setFilterSessionType] = useState('');
+  const [filterContentSearch, setFilterContentSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 5;
 
   // Load residents for the selector
   useEffect(() => {
-    fetch(`${API}/Residents`, { credentials: 'include' })
-      .then((r) => r.json())
-      .then((data: { residentId: string; assignedSocialWorker?: string }[]) => {
+    get<{ residentId: string; assignedSocialWorker?: string }[]>('/api/Residents')
+      .then((data) => {
         const opts = data
           .filter((r) => r.residentId)
           .map((r) => ({
@@ -92,9 +93,8 @@ export default function ProcessRecordings() {
       return;
     }
     setLoading(true);
-    fetch(`${API}/ProcessRecordings`, { credentials: 'include' })
-      .then((r) => r.json())
-      .then((data: Recording[]) => {
+    get<Recording[]>('/api/ProcessRecordings')
+      .then((data) => {
         const filtered = data
           .filter((r) => r.residentId === selectedResident)
           .sort((a, b) => {
@@ -153,22 +153,10 @@ export default function ProcessRecordings() {
 
     try {
       if (editingId) {
-        const res = await fetch(`${API}/ProcessRecordings/${editingId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ recordingId: editingId, ...form }),
-        });
-        if (!res.ok) throw new Error('Failed to update');
+        await put('/api/ProcessRecordings/' + editingId, { recordingId: editingId, ...form });
       } else {
         const newId = `PR-${Date.now()}`;
-        const res = await fetch(`${API}/ProcessRecordings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ recordingId: newId, ...form }),
-        });
-        if (!res.ok) throw new Error('Failed to create');
+        await post('/api/ProcessRecordings', { recordingId: newId, ...form });
       }
       closeForm();
       // Refresh
@@ -177,8 +165,8 @@ export default function ProcessRecordings() {
         setTimeout(() => setSelectedResident(prev), 0);
         return '';
       });
-    } catch {
-      setError('Failed to save recording. Please try again.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save recording. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -186,15 +174,11 @@ export default function ProcessRecordings() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API}/ProcessRecordings/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error();
+      await api('/api/ProcessRecordings/' + id, { method: 'DELETE' });
       setRecordings((prev) => prev.filter((r) => r.recordingId !== id));
       setDeleteConfirm(null);
-    } catch {
-      setError('Failed to delete recording.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete recording.');
     }
   }
 
@@ -212,6 +196,23 @@ export default function ProcessRecordings() {
     if (filterDateFrom && (r.sessionDate ?? '') < filterDateFrom) return false;
     if (filterDateTo && (r.sessionDate ?? '') > filterDateTo) return false;
     if (filterWorker && r.socialWorker !== filterWorker) return false;
+    if (filterSessionType && r.sessionType !== filterSessionType) return false;
+    if (filterContentSearch) {
+      const q = filterContentSearch.trim().toLowerCase();
+      const hay = [
+        r.socialWorker,
+        r.sessionNarrative,
+        r.interventionsApplied,
+        r.followUpActions,
+        r.progressNoted,
+        r.concernsFlagged,
+        r.referralMade,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
 
@@ -222,15 +223,27 @@ export default function ProcessRecordings() {
   );
 
   // Reset page when filters change
-  useEffect(() => { setCurrentPage(1); }, [filterDateFrom, filterDateTo, filterWorker]);
+  useEffect(() => { setCurrentPage(1); }, [filterDateFrom, filterDateTo, filterWorker, filterSessionType, filterContentSearch]);
 
   // Reset filters when resident changes
   useEffect(() => {
     setFilterDateFrom('');
     setFilterDateTo('');
     setFilterWorker('');
+    setFilterSessionType('');
+    setFilterContentSearch('');
     setCurrentPage(1);
   }, [selectedResident]);
+
+  const listFiltersActive = Boolean(filterDateFrom || filterDateTo || filterWorker || filterSessionType || filterContentSearch);
+
+  function clearAllFilters() {
+    setFilterDateFrom('');
+    setFilterDateTo('');
+    setFilterWorker('');
+    setFilterSessionType('');
+    setFilterContentSearch('');
+  }
 
   // Filter residents by search
   const filteredResidents = searchQuery
@@ -458,41 +471,77 @@ export default function ProcessRecordings() {
             </div>
 
             {/* Filters */}
-            <div className="supporter-filters" style={{ marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>From</label>
-                <input
-                  type="date"
-                  value={filterDateFrom}
-                  onChange={e => setFilterDateFrom(e.target.value)}
-                  style={{ padding: '0.4rem 0.6rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
-                />
+            <div className="hvc-filters" aria-label="Filter sessions">
+              <div className="hvc-filters__head">
+                <span className="hvc-filters__title">Filter results</span>
+                {listFiltersActive && (
+                  <button type="button" className="hvc-filters__clear" onClick={clearAllFilters}>
+                    Clear all filters
+                  </button>
+                )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>To</label>
-                <input
-                  type="date"
-                  value={filterDateTo}
-                  onChange={e => setFilterDateTo(e.target.value)}
-                  style={{ padding: '0.4rem 0.6rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
-                />
+              <div className="hvc-filters__grid">
+                <div className="hvc-filters__group">
+                  <span className="hvc-filters__label">Session details</span>
+                  <div className="hvc-filters__row">
+                    <select
+                      className="hvc-filters__control"
+                      value={filterSessionType}
+                      onChange={e => setFilterSessionType(e.target.value)}
+                      aria-label="Session type"
+                    >
+                      <option value="">All session types</option>
+                      {SESSION_TYPES.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="hvc-filters__control"
+                      value={filterWorker}
+                      onChange={e => setFilterWorker(e.target.value)}
+                      aria-label="Social worker"
+                    >
+                      <option value="">All social workers</option>
+                      {uniqueWorkers.map(w => (
+                        <option key={w} value={w}>{w}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="hvc-filters__row hvc-filters__row--dates">
+                    <div className="hvc-filters__field">
+                      <label htmlFor="pr-date-from">From</label>
+                      <input
+                        id="pr-date-from"
+                        className="hvc-filters__control"
+                        type="date"
+                        value={filterDateFrom}
+                        onChange={e => setFilterDateFrom(e.target.value)}
+                      />
+                    </div>
+                    <div className="hvc-filters__field">
+                      <label htmlFor="pr-date-to">To</label>
+                      <input
+                        id="pr-date-to"
+                        className="hvc-filters__control"
+                        type="date"
+                        value={filterDateTo}
+                        onChange={e => setFilterDateTo(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="hvc-filters__field hvc-filters__field--full">
+                    <label htmlFor="pr-content-search">Search in session notes</label>
+                    <input
+                      id="pr-content-search"
+                      className="hvc-filters__control"
+                      type="search"
+                      placeholder="Narrative, interventions, concerns, referrals…"
+                      value={filterContentSearch}
+                      onChange={e => setFilterContentSearch(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
-              <select
-                value={filterWorker}
-                onChange={e => setFilterWorker(e.target.value)}
-              >
-                <option value="">All social workers</option>
-                {uniqueWorkers.map(w => <option key={w} value={w}>{w}</option>)}
-              </select>
-              {(filterDateFrom || filterDateTo || filterWorker) && (
-                <button
-                  className="btn-export"
-                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
-                  onClick={() => { setFilterDateFrom(''); setFilterDateTo(''); setFilterWorker(''); }}
-                >
-                  Clear filters
-                </button>
-              )}
             </div>
 
             {paginatedRecordings.length === 0 && (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { get } from '../lib/api';
 
 export interface DonationArea {
   area: string;
@@ -46,12 +47,8 @@ export function useImpactSummary(): UseImpactSummaryResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/summary`, { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
-      .then((json: ImpactSummary) => {
+    get<ImpactSummary>('/api/impact/summary')
+      .then((json) => {
         setData(json);
         setLoading(false);
       })

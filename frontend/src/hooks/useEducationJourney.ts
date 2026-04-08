@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { get } from '../lib/api';
 
 export interface EducationJourneyPoint {
   monthOffset: number;
@@ -18,12 +19,8 @@ export function useEducationJourney(): UseEducationJourneyResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/education-journey`, { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
-      .then((json: EducationJourneyPoint[]) => {
+    get<EducationJourneyPoint[]>('/api/impact/education-journey')
+      .then((json) => {
         setData(json);
         setLoading(false);
       })

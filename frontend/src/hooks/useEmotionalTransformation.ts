@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { get } from '../lib/api';
 
 export interface EmotionalTransformationData {
   totalSessions: number;
@@ -20,12 +21,8 @@ export function useEmotionalTransformation(): UseEmotionalTransformationResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/impact/emotional-transformation`, { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
-      .then((json: EmotionalTransformationData) => {
+    get<EmotionalTransformationData>('/api/impact/emotional-transformation')
+      .then((json) => {
         setData(json);
         setLoading(false);
       })

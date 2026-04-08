@@ -2,7 +2,6 @@
 import '../styles/Home.css';
 
 import HeroSection    from '../components/home/HeroSection';
-import StatsBar       from '../components/home/StatsBar';
 import MissionSection from '../components/home/MissionSection';
 import HealingSteps   from '../components/home/HealingSteps';
 import ImpactSection  from '../components/home/ImpactSection';
@@ -13,12 +12,13 @@ export default function Home() {
   return (
     <>
       <HeroSection />
-      <StatsBar />
-      <MissionSection />
+<MissionSection />
       <HealingSteps />
       <ImpactSection />
-      <CtaBanner />
-      <Footer variant="default" />
+      <div className="cta-footer-wrap">
+        <CtaBanner />
+        <Footer variant="default" />
+      </div>
     </>
   );
 }

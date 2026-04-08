@@ -1,10 +1,8 @@
 // src/components/admin/HomeVisitationConferences.tsx
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { API_BASE_URL } from '../../lib/api';
+import { get, post, put, api } from '../../lib/api';
 import '../../styles/HomeVisitationConferences.css';
-
-const API = API_BASE_URL;
 
 interface HomeVisitation {
   visitationId: string | null;
@@ -197,9 +195,8 @@ export default function HomeVisitationConferences() {
   const [deletePlanId, setDeletePlanId] = useState<string | null>(null);
 
   const loadResidents = useCallback(() => {
-    fetch(`${API}/Residents`, { credentials: 'include' })
-      .then((r) => r.json())
-      .then((data: { residentId: string; assignedSocialWorker?: string }[]) => {
+    get<{ residentId: string; assignedSocialWorker?: string }[]>('/api/Residents')
+      .then((data) => {
         const opts = data
           .filter((r) => r.residentId)
           .map((r) => ({
@@ -221,8 +218,8 @@ export default function HomeVisitationConferences() {
     setLoading(true);
     setError('');
     Promise.all([
-      fetch(`${API}/HomeVisitations`, { credentials: 'include' }).then((r) => r.json()),
-      fetch(`${API}/InterventionPlans`, { credentials: 'include' }).then((r) => r.json()),
+      get<unknown[]>('/api/HomeVisitations'),
+      get<unknown[]>('/api/InterventionPlans'),
     ])
       .then(([vData, pData]) => {
         const rid = String(selectedResident);
@@ -448,28 +445,16 @@ export default function HomeVisitationConferences() {
     setError('');
     try {
       if (editingVisitId) {
-        const res = await fetch(`${API}/HomeVisitations/${editingVisitId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ visitationId: editingVisitId, ...visitForm }),
-        });
-        if (!res.ok) throw new Error('update visit');
+        await put('/api/HomeVisitations/' + editingVisitId, { visitationId: editingVisitId, ...visitForm });
       } else {
         const id = `HV-${Date.now()}`;
-        const res = await fetch(`${API}/HomeVisitations`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ visitationId: id, ...visitForm }),
-        });
-        if (!res.ok) throw new Error('create visit');
+        await post('/api/HomeVisitations', { visitationId: id, ...visitForm });
       }
       setShowVisitForm(false);
       setEditingVisitId(null);
       loadResidentData();
-    } catch {
-      setError('Could not save home visit.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save home visit.');
     } finally {
       setSavingVisit(false);
     }
@@ -485,37 +470,16 @@ export default function HomeVisitationConferences() {
     try {
       const nowIso = new Date().toISOString();
       if (editingPlanId) {
-        const res = await fetch(`${API}/InterventionPlans/${editingPlanId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            planId: editingPlanId,
-            ...planForm,
-            updatedAt: nowIso,
-          }),
-        });
-        if (!res.ok) throw new Error('update plan');
+        await put('/api/InterventionPlans/' + editingPlanId, { planId: editingPlanId, ...planForm, updatedAt: nowIso });
       } else {
         const id = `IP-${Date.now()}`;
-        const res = await fetch(`${API}/InterventionPlans`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            planId: id,
-            ...planForm,
-            createdAt: nowIso,
-            updatedAt: nowIso,
-          }),
-        });
-        if (!res.ok) throw new Error('create plan');
+        await post('/api/InterventionPlans', { planId: id, ...planForm, createdAt: nowIso, updatedAt: nowIso });
       }
       setShowPlanForm(false);
       setEditingPlanId(null);
       loadResidentData();
-    } catch {
-      setError('Could not save case conference record.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save case conference record.');
     } finally {
       setSavingPlan(false);
     }
@@ -523,29 +487,21 @@ export default function HomeVisitationConferences() {
 
   async function deleteVisit(id: string) {
     try {
-      const res = await fetch(`${API}/HomeVisitations/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error();
+      await api('/api/HomeVisitations/' + id, { method: 'DELETE' });
       setDeleteVisitId(null);
       loadResidentData();
-    } catch {
-      setError('Failed to delete visit.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete visit.');
     }
   }
 
   async function deletePlan(id: string) {
     try {
-      const res = await fetch(`${API}/InterventionPlans/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error();
+      await api('/api/InterventionPlans/' + id, { method: 'DELETE' });
       setDeletePlanId(null);
       loadResidentData();
-    } catch {
-      setError('Failed to delete plan.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete plan.');
     }
   }
 
