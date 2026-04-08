@@ -42,8 +42,9 @@ def main():
         username = os.environ['AZURE_SQL_USERNAME']
         password = os.environ['AZURE_SQL_PASSWORD']
 
+        _host, _, _port = server.partition(',')
         engine = create_engine(
-            f"mssql+pymssql://{username}:{password}@{server}/{database}"
+            f"mssql+pymssql://{username}:{password}@{_host}:{_port or 1433}/{database}"
         )
 
         # ── Load tables ───────────────────────────────────────────────────────
