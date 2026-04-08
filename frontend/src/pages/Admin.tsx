@@ -2,18 +2,18 @@
 import { useState } from 'react';
 import '../styles/Admin.css';
 
-import AdminSidebar      from '../components/admin/AdminSidebar';
-import KpiCards          from '../components/admin/KpiCards';
-import CaseloadTable     from '../components/admin/CaseloadTable';
-import RecentActivity    from '../components/admin/RecentActivity';
-import QuickActions      from '../components/admin/QuickActions';
-import BottomCharts      from '../components/admin/BottomCharts';
-import ResidentDirectory from '../components/admin/ResidentDirectory';
-import DonorDashboard    from '../components/admin/DonorDashboard';
-import ProcessRecordings from '../components/admin/ProcessRecordings';
-import SafehouseManagement  from '../components/admin/SafehouseManagement';
-import UserManagement    from '../components/admin/UserManagement';
-import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
+import AdminSidebar               from '../components/admin/AdminSidebar';
+import KpiCards                   from '../components/admin/KpiCards';
+import CaseloadTable              from '../components/admin/CaseloadTable';
+import RecentActivity             from '../components/admin/RecentActivity';
+import QuickActions               from '../components/admin/QuickActions';
+import BottomCharts               from '../components/admin/BottomCharts';
+import ResidentDirectory          from '../components/admin/ResidentDirectory';
+import DonorDashboard             from '../components/admin/DonorDashboard';
+import ProcessRecordings          from '../components/admin/ProcessRecordings';
+import SafehouseManagement        from '../components/admin/SafehouseManagement';
+import UserManagement             from '../components/admin/UserManagement';
+import HomeVisitationConferences  from '../components/admin/HomeVisitationConferences';
 
 const SECTION_TITLES: Record<string, string> = {
   'dashboard':            'Admin Dashboard',
