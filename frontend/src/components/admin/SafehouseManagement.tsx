@@ -53,7 +53,7 @@ export default function SafehouseManagement() {
   const [capacityFilter, setCapacityFilter] = useState('');
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/Safehouses`, { credentials: 'include' })
+    fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/Safehouses`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
         return res.json();

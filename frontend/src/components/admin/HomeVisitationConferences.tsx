@@ -197,7 +197,7 @@ export default function HomeVisitationConferences() {
   const [deletePlanId, setDeletePlanId] = useState<string | null>(null);
 
   const loadResidents = useCallback(() => {
-    fetch(`${API}/Residents`, { credentials: 'include' })
+    fetch(`${API}/api/Residents`, { credentials: 'include' })
       .then((r) => r.json())
       .then((data: { residentId: string; assignedSocialWorker?: string }[]) => {
         const opts = data
@@ -221,8 +221,8 @@ export default function HomeVisitationConferences() {
     setLoading(true);
     setError('');
     Promise.all([
-      fetch(`${API}/HomeVisitations`, { credentials: 'include' }).then((r) => r.json()),
-      fetch(`${API}/InterventionPlans`, { credentials: 'include' }).then((r) => r.json()),
+      fetch(`${API}/api/HomeVisitations`, { credentials: 'include' }).then((r) => r.json()),
+      fetch(`${API}/api/InterventionPlans`, { credentials: 'include' }).then((r) => r.json()),
     ])
       .then(([vData, pData]) => {
         const rid = String(selectedResident);
@@ -448,7 +448,7 @@ export default function HomeVisitationConferences() {
     setError('');
     try {
       if (editingVisitId) {
-        const res = await fetch(`${API}/HomeVisitations/${editingVisitId}`, {
+        const res = await fetch(`${API}/api/HomeVisitations/${editingVisitId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -457,7 +457,7 @@ export default function HomeVisitationConferences() {
         if (!res.ok) throw new Error('update visit');
       } else {
         const id = `HV-${Date.now()}`;
-        const res = await fetch(`${API}/HomeVisitations`, {
+        const res = await fetch(`${API}/api/HomeVisitations`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -485,7 +485,7 @@ export default function HomeVisitationConferences() {
     try {
       const nowIso = new Date().toISOString();
       if (editingPlanId) {
-        const res = await fetch(`${API}/InterventionPlans/${editingPlanId}`, {
+        const res = await fetch(`${API}/api/InterventionPlans/${editingPlanId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -498,7 +498,7 @@ export default function HomeVisitationConferences() {
         if (!res.ok) throw new Error('update plan');
       } else {
         const id = `IP-${Date.now()}`;
-        const res = await fetch(`${API}/InterventionPlans`, {
+        const res = await fetch(`${API}/api/InterventionPlans`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -523,7 +523,7 @@ export default function HomeVisitationConferences() {
 
   async function deleteVisit(id: string) {
     try {
-      const res = await fetch(`${API}/HomeVisitations/${id}`, {
+      const res = await fetch(`${API}/api/HomeVisitations/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -537,7 +537,7 @@ export default function HomeVisitationConferences() {
 
   async function deletePlan(id: string) {
     try {
-      const res = await fetch(`${API}/InterventionPlans/${id}`, {
+      const res = await fetch(`${API}/api/InterventionPlans/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

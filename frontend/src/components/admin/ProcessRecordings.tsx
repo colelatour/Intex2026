@@ -73,7 +73,7 @@ export default function ProcessRecordings() {
 
   // Load residents for the selector
   useEffect(() => {
-    fetch(`${API}/Residents`, { credentials: 'include' })
+    fetch(`${API}/api/Residents`, { credentials: 'include' })
       .then((r) => r.json())
       .then((data: { residentId: string; assignedSocialWorker?: string }[]) => {
         const opts = data
@@ -95,7 +95,7 @@ export default function ProcessRecordings() {
       return;
     }
     setLoading(true);
-    fetch(`${API}/ProcessRecordings`, { credentials: 'include' })
+    fetch(`${API}/api/ProcessRecordings`, { credentials: 'include' })
       .then((r) => r.json())
       .then((data: Recording[]) => {
         const filtered = data
@@ -156,7 +156,7 @@ export default function ProcessRecordings() {
 
     try {
       if (editingId) {
-        const res = await fetch(`${API}/ProcessRecordings/${editingId}`, {
+        const res = await fetch(`${API}/api/ProcessRecordings/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -165,7 +165,7 @@ export default function ProcessRecordings() {
         if (!res.ok) throw new Error('Failed to update');
       } else {
         const newId = `PR-${Date.now()}`;
-        const res = await fetch(`${API}/ProcessRecordings`, {
+        const res = await fetch(`${API}/api/ProcessRecordings`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -189,7 +189,7 @@ export default function ProcessRecordings() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${API}/ProcessRecordings/${id}`, {
+      const res = await fetch(`${API}/api/ProcessRecordings/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
