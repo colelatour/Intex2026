@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 
 import { API_BASE_URL } from '../../lib/api';
+import '../../styles/HomeVisitationConferences.css';
 const API = API_BASE_URL;
 
 interface Recording {
@@ -62,6 +63,13 @@ export default function ProcessRecordings() {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+  const [filterWorker, setFilterWorker] = useState('');
+  const [filterSessionType, setFilterSessionType] = useState('');
+  const [filterContentSearch, setFilterContentSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 5;
 
   // Load residents for the selector
   useEffect(() => {
@@ -195,6 +203,65 @@ export default function ProcessRecordings() {
 
   function updateField(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value || null }));
+  }
+
+  // Unique social workers from loaded recordings (for filter dropdown)
+  const uniqueWorkers = Array.from(
+    new Set(recordings.map(r => r.socialWorker).filter(Boolean) as string[])
+  ).sort();
+
+  // Apply filters to recordings
+  const filteredRecordings = recordings.filter(r => {
+    if (filterDateFrom && (r.sessionDate ?? '') < filterDateFrom) return false;
+    if (filterDateTo && (r.sessionDate ?? '') > filterDateTo) return false;
+    if (filterWorker && r.socialWorker !== filterWorker) return false;
+    if (filterSessionType && r.sessionType !== filterSessionType) return false;
+    if (filterContentSearch) {
+      const q = filterContentSearch.trim().toLowerCase();
+      const hay = [
+        r.socialWorker,
+        r.sessionNarrative,
+        r.interventionsApplied,
+        r.followUpActions,
+        r.progressNoted,
+        r.concernsFlagged,
+        r.referralMade,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredRecordings.length / PAGE_SIZE));
+  const paginatedRecordings = filteredRecordings.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [filterDateFrom, filterDateTo, filterWorker, filterSessionType, filterContentSearch]);
+
+  // Reset filters when resident changes
+  useEffect(() => {
+    setFilterDateFrom('');
+    setFilterDateTo('');
+    setFilterWorker('');
+    setFilterSessionType('');
+    setFilterContentSearch('');
+    setCurrentPage(1);
+  }, [selectedResident]);
+
+  const listFiltersActive = Boolean(filterDateFrom || filterDateTo || filterWorker || filterSessionType || filterContentSearch);
+
+  function clearAllFilters() {
+    setFilterDateFrom('');
+    setFilterDateTo('');
+    setFilterWorker('');
+    setFilterSessionType('');
+    setFilterContentSearch('');
   }
 
   // Filter residents by search
@@ -419,9 +486,90 @@ export default function ProcessRecordings() {
         {selectedResident && !loading && recordings.length > 0 && !showForm && (
           <div className="pr-timeline">
             <div className="pr-timeline__header">
-              <h3>{recordings.length} Session{recordings.length !== 1 ? 's' : ''} Recorded</h3>
+              <h3>{filteredRecordings.length} Session{filteredRecordings.length !== 1 ? 's' : ''}{filteredRecordings.length !== recordings.length ? ` (of ${recordings.length})` : ''} Recorded</h3>
             </div>
-            {recordings.map((rec) => (
+
+            {/* Filters */}
+            <div className="hvc-filters" aria-label="Filter sessions">
+              <div className="hvc-filters__head">
+                <span className="hvc-filters__title">Filter results</span>
+                {listFiltersActive && (
+                  <button type="button" className="hvc-filters__clear" onClick={clearAllFilters}>
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+              <div className="hvc-filters__grid">
+                <div className="hvc-filters__group">
+                  <span className="hvc-filters__label">Session details</span>
+                  <div className="hvc-filters__row">
+                    <select
+                      className="hvc-filters__control"
+                      value={filterSessionType}
+                      onChange={e => setFilterSessionType(e.target.value)}
+                      aria-label="Session type"
+                    >
+                      <option value="">All session types</option>
+                      {SESSION_TYPES.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="hvc-filters__control"
+                      value={filterWorker}
+                      onChange={e => setFilterWorker(e.target.value)}
+                      aria-label="Social worker"
+                    >
+                      <option value="">All social workers</option>
+                      {uniqueWorkers.map(w => (
+                        <option key={w} value={w}>{w}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="hvc-filters__row hvc-filters__row--dates">
+                    <div className="hvc-filters__field">
+                      <label htmlFor="pr-date-from">From</label>
+                      <input
+                        id="pr-date-from"
+                        className="hvc-filters__control"
+                        type="date"
+                        value={filterDateFrom}
+                        onChange={e => setFilterDateFrom(e.target.value)}
+                      />
+                    </div>
+                    <div className="hvc-filters__field">
+                      <label htmlFor="pr-date-to">To</label>
+                      <input
+                        id="pr-date-to"
+                        className="hvc-filters__control"
+                        type="date"
+                        value={filterDateTo}
+                        onChange={e => setFilterDateTo(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="hvc-filters__field hvc-filters__field--full">
+                    <label htmlFor="pr-content-search">Search in session notes</label>
+                    <input
+                      id="pr-content-search"
+                      className="hvc-filters__control"
+                      type="search"
+                      placeholder="Narrative, interventions, concerns, referrals…"
+                      value={filterContentSearch}
+                      onChange={e => setFilterContentSearch(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {paginatedRecordings.length === 0 && (
+              <div className="pr-placeholder">
+                <p>No sessions match your filters.</p>
+              </div>
+            )}
+
+            {paginatedRecordings.map((rec) => (
               <div key={rec.recordingId} className="pr-card">
                 <div className="pr-card__top">
                   <div className="pr-card__date-badge">
@@ -546,6 +694,15 @@ export default function ProcessRecordings() {
                 )}
               </div>
             ))}
+
+            {/* Pagination */}
+            {filteredRecordings.length > PAGE_SIZE && (
+              <div className="supporter-pagination">
+                <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}>← Prev</button>
+                <span>Page {currentPage} of {totalPages} &nbsp;·&nbsp; {filteredRecordings.length} total</span>
+                <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}>Next →</button>
+              </div>
+            )}
           </div>
         )}
       </div>

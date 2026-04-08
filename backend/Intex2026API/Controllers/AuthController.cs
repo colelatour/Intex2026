@@ -43,9 +43,49 @@ namespace Intex2026API.Controllers
             });
         }
 
+        private static readonly HashSet<string> AllowedTlds = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".com", ".net", ".org", ".edu", ".gov", ".io", ".co", ".us", ".uk", ".ca", ".de", ".fr", ".au", ".info", ".biz", ".me"
+        };
+
+        private static readonly HashSet<string> BlockedDomains = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "example.com", "example.net", "example.org", "test.com", "tempmail.com",
+            "throwaway.email", "mailinator.com", "guerrillamail.com", "yopmail.com",
+            "sharklasers.com", "guerrillamailblock.com", "grr.la", "dispostable.com",
+            "trashmail.com", "fakeinbox.com", "tempail.com", "10minutemail.com"
+        };
+
+        private static bool IsValidEmailDomain(string email)
+        {
+            var atIndex = email.LastIndexOf('@');
+            if (atIndex < 0)
+                return false;
+
+            var domain = email[(atIndex + 1)..].ToLowerInvariant();
+
+            // Block known fake/disposable domains
+            if (BlockedDomains.Contains(domain))
+                return false;
+
+            // Must have at least one dot (e.g. gmail.com)
+            var lastDot = domain.LastIndexOf('.');
+            if (lastDot < 1)
+                return false;
+
+            // Check TLD is in the allowed list
+            var tld = domain[lastDot..];
+            return AllowedTlds.Contains(tld);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
+            if (!IsValidEmailDomain(request.Email))
+            {
+                return BadRequest(new { message = "Please use a valid email address with a recognized domain (e.g. .com, .net, .org, .edu)." });
+            }
+
             var user = new ApplicationUser
             {
                 UserName = request.Email,

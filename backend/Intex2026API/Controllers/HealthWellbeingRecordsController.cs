@@ -50,7 +50,7 @@ public class HealthWellbeingRecordsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteHealthWellbeingRecord(string id)
     {
         var record = await _context.HealthWellbeingRecords.FindAsync(id);

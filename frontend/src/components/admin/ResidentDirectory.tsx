@@ -1,5 +1,6 @@
 // src/components/admin/ResidentDirectory.tsx
 import { useEffect, useState } from 'react';
+import { getSession } from '../../lib/authApi';
 
 interface Resident {
   residentId: string | null;
@@ -156,9 +157,10 @@ interface DetailPanelProps {
   onEditStart: () => void;
   onDelete: () => void;
   onReassign: (newSafehouseId: string) => Promise<void>;
+  isAdmin: boolean;
 }
 
-function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign }: DetailPanelProps) {
+function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign, isAdmin }: DetailPanelProps) {
   const [showReassign, setShowReassign]     = useState(false);
   const [selectedSafehouse, setSelectedSafehouse] = useState('');
   const [reassigning, setReassigning]       = useState(false);
@@ -270,13 +272,15 @@ function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign }
           <button className="btn-add" onClick={(e) => { e.stopPropagation(); onEditStart(); }}>
             Edit Record
           </button>
-          <button
-            className="btn-export"
-            style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          >
-            🗑 Delete Record
-          </button>
+          {isAdmin && (
+            <button
+              className="btn-export"
+              style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            >
+              🗑 Delete Record
+            </button>
+          )}
         </div>
         <button
           className="btn-export"
@@ -493,6 +497,11 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const [residents, setResidents]   = useState<Resident[]>([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
+  const [isAdmin, setIsAdmin]       = useState(false);
+
+  useEffect(() => {
+    getSession().then(s => setIsAdmin(s.roles.includes('Admin')));
+  }, []);
   const [search, setSearch]         = useState('');
   const [expandedId, setExpandedId]     = useState<string | null>(null);
   const [editingId, setEditingId]       = useState<string | null>(null);
@@ -789,6 +798,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
                             onEditStart={() => handleEditStart(r)}
                             onDelete={() => handleDelete(r.residentId!)}
                             onReassign={(newId) => handleReassign(r.residentId!, newId)}
+                            isAdmin={isAdmin}
                           />
                         </td>
                       </tr>

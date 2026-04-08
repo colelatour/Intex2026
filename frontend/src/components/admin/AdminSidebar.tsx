@@ -1,14 +1,25 @@
 // src/components/admin/AdminSidebar.tsx
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
+import { getSession } from '../../lib/authApi';
 
-const NAV_SECTIONS = [
+interface NavItem {
+  id: string;
+  label: string;
+  icon: string;
+  adminOnly?: boolean;
+}
+
+const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Main',
     items: [
       { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'      },
       { id: 'resident-directory', label: 'Resident Directory', icon: 'users'     },
       { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
-      { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
+      { id: 'process-recordings',   label: 'Process Recordings',   icon: 'clipboard' },
+      { id: 'safehouse-management', label: 'Safehouse Management', icon: 'house'     },
+      { id: 'user-management',    label: 'User Management',    icon: 'user',  adminOnly: true },
+      { id: 'home-visits',        label: 'Visits & Conferences', icon: 'house' },
     ],
   },
 ];
@@ -86,6 +97,12 @@ interface AdminSidebarProps {
 }
 
 export default function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    getSession().then(s => setIsAdmin(s.roles.includes('Admin')));
+  }, []);
+
   return (
     <div className="sidebar">
       <div className="sidebar__brand">
@@ -95,7 +112,9 @@ export default function AdminSidebar({ activeSection, onSectionChange }: AdminSi
       {NAV_SECTIONS.map((section) => (
         <div key={section.label}>
           <div className="sidebar__section-label">{section.label}</div>
-          {section.items.map((item) => (
+          {section.items
+            .filter(item => !item.adminOnly || isAdmin)
+            .map((item) => (
             <button
               key={item.id}
               className={`sidebar__link${activeSection === item.id ? ' active' : ''}`}
