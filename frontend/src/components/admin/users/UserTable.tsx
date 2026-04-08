@@ -40,13 +40,21 @@ export default function UserTable({ onSelect, onAdd, onDeleted, currentUserEmail
   }
 
   const totalPages = data ? Math.ceil(data.total / data.pageSize) : 1;
+  const totalUsers = data?.total ?? 0;
 
   return (
-    <div className="supporter-table-wrap">
-      {/* Filters */}
-      <div className="supporter-filters">
+    <div className="users-table">
+      <div className="users-table__toolbar">
+        <div className="users-table__summary">
+          <h3>User Accounts</h3>
+          <p>View platform access, filter by role, and maintain account permissions.</p>
+        </div>
+        <button className="btn-add users-table__add" onClick={onAdd}>+ Add User</button>
+      </div>
+
+      <div className="supporter-filters users-table__filters">
         <input
-          className="supporter-search"
+          className="supporter-search users-table__search"
           placeholder="Search by email…"
           value={search}
           onChange={e => handleSearch(e.target.value)}
@@ -55,19 +63,20 @@ export default function UserTable({ onSelect, onAdd, onDeleted, currentUserEmail
           <option value="">All roles</option>
           {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
-        <button className="btn-add" onClick={onAdd}>+ Add User</button>
+        <div className="users-table__count">
+          {loading ? 'Loading users…' : `${totalUsers} total users`}
+        </div>
       </div>
 
       {error && <p className="supporter-error">{error}</p>}
 
-      {/* Table */}
-      <div className="data-table-wrapper">
-        <table className="data-table">
+      <div className="data-table-wrapper users-table__grid">
+        <table className="data-table users-table__table">
           <thead>
             <tr>
               <th>Email</th>
               <th>Role</th>
-              <th>Actions</th>
+              <th className="users-table__actions-head">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -89,25 +98,28 @@ export default function UserTable({ onSelect, onAdd, onDeleted, currentUserEmail
                     const isSelf = currentUserEmail && u.email.toLowerCase() === currentUserEmail.toLowerCase();
                     return (
                       <tr key={u.id}>
-                        <td>{u.email}</td>
-                        <td><RoleBadge role={u.role} /></td>
                         <td>
+                          <div className="users-table__email-cell">
+                            <span className="users-table__email">{u.email}</span>
+                            {isSelf && <span className="users-table__self-tag">Current account</span>}
+                          </div>
+                        </td>
+                        <td><RoleBadge role={u.role} /></td>
+                        <td className="users-table__actions-cell">
                           {isSelf ? (
-                            <span style={{ color: '#999', fontSize: '0.85rem' }}>You</span>
+                            <span className="users-table__self-note">You</span>
                           ) : (
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div className="users-table__actions">
                               <button
                                 type="button"
-                                className="btn-export"
-                                style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem' }}
+                                className="btn-export users-table__action-btn"
                                 onClick={(e) => { e.stopPropagation(); onSelect(u); }}
                               >
                                 Edit
                               </button>
                               <button
                                 type="button"
-                                className="btn-export"
-                                style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem', color: '#dc3545', borderColor: '#dc3545' }}
+                                className="btn-export users-table__action-btn users-table__action-btn--danger"
                                 onClick={(e) => { e.stopPropagation(); handleDelete(u); }}
                               >
                                 Delete
@@ -123,8 +135,7 @@ export default function UserTable({ onSelect, onAdd, onDeleted, currentUserEmail
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="supporter-pagination">
+      <div className="supporter-pagination users-table__pagination">
         <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
         <span>Page {page} of {totalPages} &nbsp;·&nbsp; {data?.total ?? 0} total</span>
         <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>

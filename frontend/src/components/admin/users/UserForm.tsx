@@ -69,8 +69,13 @@ export default function UserForm({ user, onClose, onSaved }: Props) {
   }
 
   return (
-    <form className="supporter-form" onSubmit={handleSubmit}>
+    <form className="supporter-form users-form" onSubmit={handleSubmit}>
       <h3>{isEdit ? 'Edit User' : 'Add User'}</h3>
+      <p className="users-form__subtitle">
+        {isEdit
+          ? 'Adjust the email address or role assignment for this account.'
+          : 'Create a new user and assign an initial role with a temporary password.'}
+      </p>
 
       <div className="form-row">
         <label>Email *</label>

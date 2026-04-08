@@ -22,9 +22,9 @@ export default function BottomCharts({ donationsMonthly, residentOutcomes, upcom
   const totalOutcomes = residentOutcomes.reduce((s, o) => s + o.count, 0) || 1;
 
   return (
-    <div className="bottom-grid">
+    <div className="bottom-grid dashboard-bottom-grid">
       {/* Donation Trends */}
-      <div className="admin-card">
+      <div className="admin-card dashboard-card">
         <h4>
           Donation Trends
           <span className="admin-card__link">Last {donationsMonthly.length} months</span>
@@ -54,7 +54,7 @@ export default function BottomCharts({ donationsMonthly, residentOutcomes, upcom
       </div>
 
       {/* Resident Outcomes */}
-      <div className="admin-card">
+      <div className="admin-card dashboard-card">
         <h4>
           Resident Outcomes
           <span className="admin-card__link">Status Breakdown</span>
@@ -92,7 +92,7 @@ export default function BottomCharts({ donationsMonthly, residentOutcomes, upcom
       </div>
 
       {/* Upcoming Events */}
-      <div className="admin-card">
+      <div className="admin-card dashboard-card">
         <h4>
           Upcoming Events
           <span className="admin-card__link">Next 7 days</span>

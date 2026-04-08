@@ -44,7 +44,7 @@ export default function KpiCards({ kpis, loading }: Props) {
     : [];
 
   return (
-    <div className="kpi-row">
+    <div className="kpi-row dashboard-kpi-row">
       {loading
         ? Array.from({ length: 4 }).map((_, i) => (
             <div className="kpi-card blue" key={i} style={{ opacity: 0.5 }}>

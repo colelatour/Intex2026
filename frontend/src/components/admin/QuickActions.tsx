@@ -41,7 +41,7 @@ const ACTIONS = [
 
 export default function QuickActions() {
   return (
-    <div className="admin-card">
+    <div className="admin-card dashboard-card dashboard-card--actions">
       <h4>Quick Actions</h4>
       {ACTIONS.map((a) => (
         <button className="qa-btn" key={a.label}>

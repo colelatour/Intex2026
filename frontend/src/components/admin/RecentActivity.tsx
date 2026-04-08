@@ -27,7 +27,7 @@ interface Props {
 
 export default function RecentActivity({ items, loading }: Props) {
   return (
-    <div className="admin-card">
+    <div className="admin-card dashboard-card dashboard-card--activity">
       <h4>Recent Activity</h4>
       {loading ? (
         <p style={{ color: 'var(--gray-600)', fontSize: '0.875rem' }}>Loading…</p>
