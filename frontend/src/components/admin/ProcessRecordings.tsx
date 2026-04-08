@@ -165,8 +165,8 @@ export default function ProcessRecordings() {
         setTimeout(() => setSelectedResident(prev), 0);
         return '';
       });
-    } catch {
-      setError('Failed to save recording. Please try again.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save recording. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -177,8 +177,8 @@ export default function ProcessRecordings() {
       await api('/api/ProcessRecordings/' + id, { method: 'DELETE' });
       setRecordings((prev) => prev.filter((r) => r.recordingId !== id));
       setDeleteConfirm(null);
-    } catch {
-      setError('Failed to delete recording.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete recording.');
     }
   }
 

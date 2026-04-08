@@ -1,16 +1,60 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
+function extractErrorMessage(body: string, fallback: string): string {
+  if (!body) return fallback;
+  try {
+    const json = JSON.parse(body) as {
+      message?: unknown;
+      title?: unknown;
+      detail?: unknown;
+      errors?: Record<string, unknown>;
+    };
+
+    if (typeof json.message === "string" && json.message.trim()) {
+      return json.message.trim();
+    }
+
+    const validationErrors =
+      json.errors && typeof json.errors === "object"
+        ? Object.values(json.errors)
+            .flatMap((value) => (Array.isArray(value) ? value : [value]))
+            .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        : [];
+
+    if (validationErrors.length > 0) {
+      return validationErrors.join(" ");
+    }
+
+    const parts = [json.title, json.detail].filter(
+      (value): value is string => typeof value === "string" && value.trim().length > 0,
+    );
+    if (parts.length > 0) {
+      return parts.join(" — ");
+    }
+  } catch {
+    return body || fallback;
+  }
+
+  return body || fallback;
+}
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.text();
-    let message = `${res.status} ${res.statusText}`;
-    try {
-      const json = JSON.parse(body);
-      if (json.message) message = json.message;
-    } catch {
-      if (body) message = body;
-    }
+    const message = extractErrorMessage(body, `${res.status} ${res.statusText}`);
     throw new Error(message);
+  }
+  if (res.status === 204) {
+    return undefined as T;
+  }
+  const contentLength = res.headers.get("Content-Length");
+  if (contentLength === "0") {
+    return undefined as T;
+  }
+  const contentType = res.headers.get("Content-Type") ?? "";
+  if (!contentType.toLowerCase().includes("application/json")) {
+    const body = await res.text();
+    return body as T;
   }
   return res.json() as Promise<T>;
 }
