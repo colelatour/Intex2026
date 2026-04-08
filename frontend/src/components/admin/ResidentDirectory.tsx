@@ -629,9 +629,28 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const handleReassign = async (residentId: string, newSafehouseId: string) => {
     const resident = residents.find((r) => r.residentId === residentId);
     if (!resident) return;
+    const oldSafehouseId = resident.safehouseId;
+
+    // Update the resident's safehouse
     const updated = { ...resident, safehouseId: newSafehouseId };
     await put<Resident>('/api/Residents/' + residentId, updated);
     setResidents((prev) => prev.map((r) => r.residentId === residentId ? updated : r));
+
+    // Decrement old safehouse occupancy
+    if (oldSafehouseId && oldSafehouseId !== newSafehouseId) {
+      try {
+        const oldHouse = await get<Record<string, string | null>>('/api/Safehouses/' + oldSafehouseId);
+        const oldOccupancy = Math.max(0, Number(oldHouse.currentOccupancy ?? '0') - 1);
+        await put('/api/Safehouses/' + oldSafehouseId, { ...oldHouse, currentOccupancy: String(oldOccupancy) });
+      } catch { /* non-fatal */ }
+    }
+
+    // Increment new safehouse occupancy
+    try {
+      const newHouse = await get<Record<string, string | null>>('/api/Safehouses/' + newSafehouseId);
+      const newOccupancy = Number(newHouse.currentOccupancy ?? '0') + 1;
+      await put('/api/Safehouses/' + newSafehouseId, { ...newHouse, currentOccupancy: String(newOccupancy) });
+    } catch { /* non-fatal */ }
   };
 
   const handleDelete = async (id: string) => {
