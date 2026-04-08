@@ -1,9 +1,21 @@
 /* ── Impact Dashboard ─────────────────────────────────────────────────────── */
 
 .impact-page {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  color: #2d2d2d;
-  background: #fdf8f4;
+  --impact-navy: #022846;
+  --impact-gold: #d4a018;
+  --impact-teal: #356272;
+  --impact-navy-soft: #4d6478;
+  --impact-surface: #ffffff;
+  --impact-bg: #fdf8f0;
+  --impact-border: #d9e2ea;
+  --impact-muted-bg: #eef3f7;
+  --impact-gold-soft: #f6edd1;
+  --impact-teal-soft: #e6eff2;
+  --impact-gold-dark: #b68713;
+
+  font-family: 'DM Sans', sans-serif;
+  color: var(--impact-navy);
+  background: var(--impact-bg);
   min-height: 100vh;
 }
 
@@ -15,7 +27,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #ede8e2 25%, #f5f1ec 50%, #ede8e2 75%);
+  background: linear-gradient(90deg, #e6edf3 25%, #f3f7fb 50%, #e6edf3 75%);
   background-size: 400px 100%;
   animation: shimmer 1.4s infinite linear;
   border-radius: 8px;
@@ -36,7 +48,7 @@
 .impact-error {
   text-align: center;
   padding: 60px 24px;
-  color: #8b4513;
+  color: var(--impact-gold-dark);
   font-size: 1rem;
 }
 
@@ -51,21 +63,29 @@
 .impact-section-title {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #3a2e2a;
+  color: var(--impact-navy);
   margin-bottom: 8px;
 }
 
 .impact-section-subtitle {
   font-size: 0.95rem;
-  color: #7a6e68;
+  color: var(--impact-navy-soft);
   margin-bottom: 32px;
+}
+
+.impact-section-headline {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--impact-navy);
+  margin-bottom: 8px;
+  font-style: italic;
 }
 
 /* ── Hero Banner ─────────────────────────────────────────────────────────────── */
 
 .impact-hero {
-  background: linear-gradient(135deg, #c0533a 0%, #e07b5a 50%, #d4956a 100%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--impact-navy) 0%, var(--impact-teal) 65%, #4b7b8d 100%);
+  color: var(--impact-surface);
   padding: 72px 24px;
   text-align: center;
 }
@@ -97,8 +117,8 @@
 /* ── Hero metric cards ───────────────────────────────────────────────────────── */
 
 .hero-cards {
-  background: #fff;
-  border-bottom: 1px solid #ede8e2;
+  background: var(--impact-surface);
+  border-bottom: 1px solid var(--impact-border);
 }
 
 .hero-cards__grid {
@@ -120,21 +140,21 @@
   text-align: center;
   padding: 24px 16px;
   border-radius: 12px;
-  background: #fdf8f4;
-  border: 1px solid #ede8e2;
+  background: var(--impact-bg);
+  border: 1px solid var(--impact-border);
 }
 
 .hero-card__num {
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 800;
-  color: #c0533a;
+  color: var(--impact-gold);
   line-height: 1;
   margin-bottom: 8px;
 }
 
 .hero-card__label {
   font-size: 0.875rem;
-  color: #7a6e68;
+  color: var(--impact-navy-soft);
   font-weight: 500;
   line-height: 1.4;
 }
@@ -143,7 +163,7 @@
   display: block;
   margin-top: 8px;
   font-size: 13px;
-  color: #1D9E75;
+  color: var(--impact-teal);
   text-decoration: none;
 }
 
@@ -166,10 +186,10 @@
 }
 
 .outcome-card {
-  background: #fff;
+  background: var(--impact-surface);
   border-radius: 16px;
   padding: 32px 24px;
-  border: 1px solid #ede8e2;
+  border: 1px solid var(--impact-border);
   text-align: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
@@ -182,14 +202,14 @@
 .outcome-card__num {
   font-size: 2.8rem;
   font-weight: 800;
-  color: #c0533a;
+  color: var(--impact-gold);
   line-height: 1;
   margin-bottom: 8px;
 }
 
 .outcome-card__label {
   font-size: 0.9rem;
-  color: #5a4e48;
+  color: var(--impact-navy-soft);
   line-height: 1.5;
 }
 
@@ -208,30 +228,30 @@
 }
 
 .trend-chart-card {
-  background: #fff;
+  background: var(--impact-surface);
   border-radius: 16px;
   padding: 28px 24px;
-  border: 1px solid #ede8e2;
+  border: 1px solid var(--impact-border);
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .trend-chart-card__title {
   font-size: 1rem;
   font-weight: 700;
-  color: #3a2e2a;
+  color: var(--impact-navy);
   margin-bottom: 4px;
 }
 
 .trend-chart-card__desc {
   font-size: 0.8rem;
-  color: #9a8e88;
+  color: var(--impact-navy-soft);
   margin-bottom: 20px;
 }
 
 .chart-interpretation {
   margin-top: 20px;
-  border-left: 3px solid #1D9E75;
-  background: rgba(29, 158, 117, 0.06);
+  border-left: 3px solid var(--impact-teal);
+  background: rgba(53, 98, 114, 0.1);
   padding: 14px 16px;
   border-radius: 0 6px 6px 0;
 }
@@ -240,47 +260,85 @@
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.7;
-  color: #3a2e2a;
+  color: var(--impact-navy);
 }
 
 /* ── Education journey chart ─────────────────────────────────────────────────── */
 
-.journey-callouts {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+.journey-summary {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 12px;
+  margin-bottom: 18px;
 }
 
-.journey-callout {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+@media (min-width: 760px) {
+  .journey-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.journey-callout--right {
-  text-align: right;
+.journey-summary__card {
+  background: var(--impact-surface);
+  border: 1px solid #ead8a3;
+  border-radius: 12px;
+  padding: 14px 16px;
 }
 
-.journey-callout__num {
-  font-size: 1.75rem;
+.journey-summary__card--teal {
+  background: var(--impact-teal-soft);
+  border-color: #c9dbe2;
+}
+
+.journey-summary__value {
+  font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 800;
-  color: #c0533a;
-  line-height: 1;
+  color: var(--impact-gold);
+  line-height: 1.1;
 }
 
-.journey-callout__num--teal {
-  color: #1D9E75;
+.journey-summary__card--teal .journey-summary__value {
+  color: var(--impact-gold);
 }
 
-.journey-callout__label {
-  font-size: 0.8rem;
-  color: #7a6e68;
+.journey-summary__label {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--impact-navy-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.journey-chart-shell {
+  background: linear-gradient(180deg, #fbfdff 0%, var(--impact-surface) 100%);
+  border: 1px solid var(--impact-border);
+  border-radius: 12px;
+  padding: 10px 10px 2px;
+}
+
+.journey-tooltip {
+  background: var(--impact-surface);
+  border: 1px solid var(--impact-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.journey-tooltip__title {
+  font-weight: 700;
+  color: var(--impact-navy);
+  margin-bottom: 4px;
+}
+
+.journey-tooltip__meta {
+  color: var(--impact-navy-soft);
 }
 
 .journey-footnote {
   font-size: 0.78rem;
-  color: #9a8e88;
+  color: var(--impact-navy-soft);
   margin-top: 14px;
   text-align: center;
   line-height: 1.5;
@@ -302,31 +360,31 @@
 }
 
 .care-tile {
-  background: #fff;
+  background: var(--impact-surface);
   border-radius: 14px;
   padding: 28px 20px;
   text-align: center;
-  border: 1px solid #ede8e2;
+  border: 1px solid var(--impact-border);
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .care-tile__num {
   font-size: 2.4rem;
   font-weight: 800;
-  color: #2a7a6a;
+  color: var(--impact-gold);
   line-height: 1;
   margin-bottom: 8px;
 }
 
 .care-tile__label {
   font-size: 0.875rem;
-  color: #5a4e48;
+  color: var(--impact-navy-soft);
   line-height: 1.4;
 }
 
 .care-copy {
   font-size: 0.95rem;
-  color: #5a4e48;
+  color: var(--impact-navy-soft);
   font-style: italic;
   text-align: center;
   margin-top: 8px;
@@ -335,68 +393,30 @@
 /* ── Donations section ────────────────────────────────────────────────────── */
 
 .donations-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
+  display: block;
 }
 
-@media (min-width: 900px) {
-  .donations-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.donations-chart-card,
-.donations-stats-card {
-  background: #fff;
+.donations-chart-card {
+  background: var(--impact-surface);
   border-radius: 16px;
   padding: 28px 24px;
-  border: 1px solid #ede8e2;
+  border: 1px solid var(--impact-border);
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
-.donations-chart-card__title,
-.donations-stats-card__title {
+.donations-chart-card__title {
   font-size: 1rem;
   font-weight: 700;
-  color: #3a2e2a;
+  color: var(--impact-navy);
   margin-bottom: 20px;
-}
-
-.donations-stat-row {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.donations-stat-row__num {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #c0533a;
-  line-height: 1;
-}
-
-.donations-stat-row__label {
-  font-size: 0.875rem;
-  color: #7a6e68;
-}
-
-.donations-copy {
-  font-size: 0.875rem;
-  color: #5a4e48;
-  line-height: 1.6;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #ede8e2;
 }
 
 /* ── Incident resolution ─────────────────────────────────────────────────────── */
 
 .incidents-band {
-  background: #f0f7f5;
-  border-top: 1px solid #c8e8e0;
-  border-bottom: 1px solid #c8e8e0;
+  background: #edf3f6;
+  border-top: 1px solid #c9d9e2;
+  border-bottom: 1px solid #c9d9e2;
 }
 
 .incidents-inner {
@@ -413,19 +433,19 @@
 .incidents-num {
   font-size: 4rem;
   font-weight: 800;
-  color: #2a7a6a;
+  color: var(--impact-gold);
   line-height: 1;
 }
 
 .incidents-label {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #3a2e2a;
+  color: var(--impact-navy);
 }
 
 .incidents-sub {
   font-size: 0.9rem;
-  color: #5a4e48;
+  color: var(--impact-navy-soft);
   max-width: 560px;
   line-height: 1.6;
 }
@@ -433,9 +453,9 @@
 /* ── Emotional transformation ───────────────────────────────────────────────── */
 
 .emo-section {
-  background: #fdf8f4;
+  background: var(--impact-bg);
   padding: 64px 24px;
-  border-top: 1px solid #ede8e2;
+  border-top: 1px solid var(--impact-border);
 }
 
 .emo-headline {
@@ -446,14 +466,14 @@
 .emo-pct {
   font-size: clamp(4rem, 10vw, 5.5rem);
   font-weight: 800;
-  color: #1D9E75;
+  color: var(--impact-gold);
   line-height: 1;
   margin-bottom: 16px;
 }
 
 .emo-sublabel {
   font-size: 1rem;
-  color: #5a4e48;
+  color: var(--impact-navy-soft);
   max-width: 480px;
   margin: 0 auto;
   line-height: 1.6;
@@ -478,12 +498,12 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #9a8e88;
+  color: var(--impact-navy-soft);
   margin-bottom: 16px;
 }
 
 .emo-col-header--teal {
-  color: #1D9E75;
+  color: var(--impact-teal);
 }
 
 .emo-bar-row {
@@ -496,12 +516,12 @@
 
 .emo-bar-label {
   font-size: 0.8rem;
-  color: #3a2e2a;
+  color: var(--impact-navy);
   white-space: nowrap;
 }
 
 .emo-bar-track {
-  background: #ede8e2;
+  background: #dee8ee;
   border-radius: 4px;
   height: 10px;
   overflow: hidden;
@@ -515,18 +535,13 @@
 
 .emo-bar-count {
   font-size: 0.75rem;
-  color: #9a8e88;
+  color: var(--impact-navy-soft);
   text-align: right;
-}
-
-.emo-interpretation {
-  max-width: 900px;
-  margin: 0 auto 20px;
 }
 
 .emo-footnote {
   font-size: 0.75rem;
-  color: #9a8e88;
+  color: var(--impact-navy-soft);
   text-align: center;
   line-height: 1.6;
   max-width: 600px;
@@ -536,8 +551,8 @@
 /* ── CTA banner ──────────────────────────────────────────────────────────────── */
 
 .cta-banner {
-  background: linear-gradient(135deg, #2a4a5a 0%, #3a6a7a 100%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--impact-navy) 0%, var(--impact-teal) 100%);
+  color: var(--impact-surface);
   padding: 72px 24px;
   text-align: center;
 }
@@ -565,8 +580,8 @@
 }
 
 .cta-btn-primary {
-  background: #e07b5a;
-  color: #fff;
+  background: var(--impact-gold);
+  color: var(--impact-navy);
   border: none;
   padding: 14px 32px;
   font-size: 1rem;
@@ -578,12 +593,12 @@
 }
 
 .cta-btn-primary:hover {
-  background: #c0533a;
+  background: var(--impact-gold-dark);
 }
 
 .cta-btn-outline {
   background: transparent;
-  color: #fff;
+  color: var(--impact-surface);
   border: 2px solid rgba(255,255,255,0.7);
   padding: 14px 32px;
   font-size: 1rem;
@@ -595,7 +610,7 @@
 }
 
 .cta-btn-outline:hover {
-  border-color: #fff;
+  border-color: var(--impact-surface);
 }
 
 @media (max-width: 768px) {
@@ -623,12 +638,11 @@
     font-size: 0.72rem;
   }
 
-  .journey-callouts {
-    flex-direction: column;
-    align-items: center;
+  .journey-summary__card {
+    padding: 12px 14px;
   }
 
-  .journey-callout--right {
-    text-align: center;
+  .journey-chart-shell {
+    padding: 8px 6px 2px;
   }
 }
