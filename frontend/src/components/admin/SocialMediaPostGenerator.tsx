@@ -157,7 +157,6 @@ export default function SocialMediaPostGenerator() {
             className={`smg-achievement-card${selectedAchievement === 'education' ? ' smg-achievement-card--selected' : ''}`}
             onClick={() => setSelectedAchievement('education')}
           >
-            <span className="smg-achievement-icon">🎓</span>
             <span className="smg-achievement-label">Education</span>
             <span className="smg-achievement-value">
               {achievements ? `${achievements.educationCount} residents completed programs this month` : '—'}
@@ -167,7 +166,6 @@ export default function SocialMediaPostGenerator() {
             className={`smg-achievement-card${selectedAchievement === 'health' ? ' smg-achievement-card--selected' : ''}`}
             onClick={() => setSelectedAchievement('health')}
           >
-            <span className="smg-achievement-icon">💚</span>
             <span className="smg-achievement-label">Health</span>
             <span className="smg-achievement-value">
               {achievements
@@ -179,7 +177,6 @@ export default function SocialMediaPostGenerator() {
             className={`smg-achievement-card${selectedAchievement === 'readiness' ? ' smg-achievement-card--selected' : ''}`}
             onClick={() => setSelectedAchievement('readiness')}
           >
-            <span className="smg-achievement-icon">⭐</span>
             <span className="smg-achievement-label">Readiness</span>
             <span className="smg-achievement-value">
               {achievements ? `${achievements.nearReadyCount} residents approaching reintegration readiness` : '—'}
@@ -208,7 +205,7 @@ export default function SocialMediaPostGenerator() {
             onChange={e => setGeneratedPost(e.target.value)}
           />
           {dataInsight && (
-            <p className="smg-data-insight">📊 {dataInsight}</p>
+            <p className="smg-data-insight">{dataInsight}</p>
           )}
           <div className="smg-output-actions">
             <button className="smg-btn smg-btn--primary" onClick={handleCopy}>Copy to Clipboard</button>

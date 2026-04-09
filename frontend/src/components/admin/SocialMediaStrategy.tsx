@@ -63,14 +63,14 @@ interface GeneratePostResponse {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const PLATFORM_COLORS: Record<string, string> = {
-  WhatsApp:  '#25D366',
-  Facebook:  '#1877F2',
-  Instagram: '#C13584',
-  TikTok:    '#000000',
-  YouTube:   '#FF0000',
+  WhatsApp:  '#84CFA6',
+  Facebook:  '#8EB7E8',
+  Instagram: '#D6A2C7',
+  TikTok:    '#9AA5B1',
+  YouTube:   '#E8A1A1',
 };
 
-const CHART_COLORS = ['#1a2e5a', '#c9a84c', '#2563eb', '#9333ea', '#16a34a', '#dc2626'];
+const CHART_COLORS = ['#9FB0D1', '#E3C98E', '#8EB7E8', '#C7B2E0', '#9CCFAF', '#E3A8A8'];
 
 const STORY_ARCS = [
   'Light Emerging from Darkness',
@@ -239,7 +239,6 @@ function RecommendationsTab({ onGenerateFromHighlight }: RecommendationsTabProps
             {highlights.map((h, i) => (
               <div key={i} className="sms-highlight-card">
                 <div className="sms-highlight-top">
-                  <span className="sms-highlight-icon">{h.icon}</span>
                   <span className="sms-highlight-category">{h.category}</span>
                 </div>
                 <p className="sms-highlight-text">{h.highlightText}</p>
@@ -249,7 +248,7 @@ function RecommendationsTab({ onGenerateFromHighlight }: RecommendationsTabProps
                     className="sms-btn sms-btn--sm"
                     onClick={() => onGenerateFromHighlight(h.recommendedPlatform, h.recommendedPostType, h.highlightText)}
                   >
-                    Generate Post →
+                    Generate Post
                   </button>
                 </div>
               </div>
@@ -407,7 +406,7 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
               className="sms-advanced-toggle"
               onClick={() => setShowGuidelines(v => !v)}
             >
-              🧠 ML writing guidelines active {showGuidelines ? '▴' : '▾'}
+              ML writing guidelines active {showGuidelines ? '▴' : '▾'}
             </button>
             {showGuidelines && (
               <div className="sms-guidelines-panel">
@@ -493,7 +492,6 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
                 className={`smg-achievement-card${selectedIndex === i ? ' smg-achievement-card--selected' : ''}`}
                 onClick={() => setSelectedIndex(i)}
               >
-                <span className="smg-achievement-icon">{h.icon}</span>
                 <span className="smg-achievement-label">{h.category}</span>
                 <span className="smg-achievement-value">{h.highlightText}</span>
                 <span className="sms-highlight-pct" style={{ fontSize: '0.72rem', marginTop: '0.25rem' }}>
@@ -526,7 +524,7 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
             onChange={e => setGeneratedPost(e.target.value)}
           />
           {dataInsight && (
-            <p className="smg-data-insight">📊 {dataInsight}</p>
+            <p className="smg-data-insight">{dataInsight}</p>
           )}
           <div className="smg-output-actions">
             <button className="smg-btn smg-btn--primary" onClick={handleCopy}>Copy to Clipboard</button>

@@ -1,5 +1,6 @@
 // src/components/layout/Footer.tsx
 import { Link } from 'react-router-dom';
+import footerLogo from '../../images/sheltered_light_logo_alternate.png';
 import '../../styles/Footer.css';
 
 interface FooterProps {
@@ -10,7 +11,7 @@ export default function Footer({ variant = 'default' }: FooterProps) {
   return (
     <footer className="footer">
       <div className="footer__logo">
-        Sheltered<span>Light</span>
+        <img src={footerLogo} alt="Sheltered Light" className="footer__logo-img" />
       </div>
 
       <div className="footer__copy">

@@ -16,10 +16,11 @@
   max-width: 420px;
 }
 
-.login-card h2 {
-  text-align: center;
-  color: var(--navy);
-  margin-bottom: 1.5rem;
+.login-logo {
+  display: block;
+  height: 100px;
+  width: auto;
+  margin: 0 auto 1.25rem;
 }
 
 .login-tabs {

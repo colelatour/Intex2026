@@ -13,6 +13,7 @@ import CareIntensityRow              from '../components/impact/CareIntensityRow
 import DonationsSection              from '../components/impact/DonationsSection';
 import EmotionalTransformationSection from '../components/impact/EmotionalTransformationSection';
 import CallToActionBanner            from '../components/impact/CallToActionBanner';
+import Footer                        from '../components/layout/Footer';
 
 export default function ImpactDashboard() {
   const summary    = useImpactSummary();
@@ -64,7 +65,10 @@ export default function ImpactDashboard() {
         error={emotional.error}
       />
 
-      <CallToActionBanner data={summary.data} />
+      <div className="impact-cta-footer-wrap">
+        <CallToActionBanner data={summary.data} />
+        <Footer />
+      </div>
     </main>
   );
 }
