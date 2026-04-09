@@ -1085,6 +1085,8 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pr-form-card__header {
@@ -1140,6 +1142,8 @@
 .pr-form-field input,
 .pr-form-field select,
 .pr-form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
   padding: 8px 10px;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
@@ -1558,7 +1562,7 @@
   }
 
   .pr-form-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   /* ── Slide-over: full width on mobile ── */

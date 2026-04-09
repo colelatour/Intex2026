@@ -701,7 +701,7 @@ export default function HomeVisitationConferences() {
         <div className="pr-selector__header">
           <h3>Select resident</h3>
           {selectedResident && (
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <button type="button" className="btn-add pr-add-btn" onClick={openNewVisit}>
                 + Log visit
               </button>
