@@ -4,11 +4,9 @@
     "exclude": ["/assets/*", "/api/*", "/favicon.ico", "/phl.topo.json"]
   },
   "globalHeaders": {
-    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://intex2026api-amcjb0aabhethbc4.canadacentral-01.azurewebsites.net; frame-ancestors 'none';",
+    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://intex2026api-amcjb0aabhethbc4.canadacentral-01.azurewebsites.net; frame-ancestors 'none';",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-    "Permissions-Policy": "geolocation=(), camera=(), microphone=()"
+    "Referrer-Policy": "strict-origin-when-cross-origin"
   }
 }
