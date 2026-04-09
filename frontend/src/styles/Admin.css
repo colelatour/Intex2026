@@ -301,8 +301,10 @@
 .table-toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .table-toolbar h3 {
@@ -314,6 +316,7 @@
 
 .table-right {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
 }
@@ -328,7 +331,8 @@
   padding: 7px 12px;
   font-size: 0.8rem;
   color: var(--gray-400);
-  min-width: 260px;
+  min-width: 220px;
+  flex: 1 1 220px;
 }
 
 .search-bar input {
@@ -353,6 +357,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 120px;
   font-family: 'DM Sans', sans-serif;
 }
 
@@ -1483,6 +1488,7 @@
 
   .search-bar {
     min-width: 0;
+    flex: 1 1 100%;
     width: 100%;
     order: -1; /* search bar always first */
   }

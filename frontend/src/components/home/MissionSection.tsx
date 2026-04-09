@@ -25,7 +25,6 @@ export default function MissionSection() {
               through education and skills development, to successful reintegration into
               family and community.
             </p>
-            <a className="read-more" href="#">Read our full story →</a>
           </div>
         </div>
       </div>

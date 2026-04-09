@@ -181,6 +181,11 @@ export default function HomeVisitationConferences() {
   const [planDateTo, setPlanDateTo] = useState('');
   const [planContentSearch, setPlanContentSearch] = useState('');
 
+  const [visitPage, setVisitPage] = useState(1);
+  const [visitPageSize, setVisitPageSize] = useState(10);
+  const [planPage, setPlanPage] = useState(1);
+  const [planPageSize, setPlanPageSize] = useState(10);
+
   const [showVisitForm, setShowVisitForm] = useState(false);
   const [editingVisitId, setEditingVisitId] = useState<string | null>(null);
   const [visitForm, setVisitForm] = useState(EMPTY_VISIT);
@@ -315,6 +320,20 @@ export default function HomeVisitationConferences() {
     });
   }, [plans, planStatusFilter, planContentSearch, planDateFrom, planDateTo]);
 
+  const visitTotalPages = Math.max(1, Math.ceil(filteredVisits.length / visitPageSize));
+  const safeVisitPage   = Math.min(visitPage, visitTotalPages);
+  const paginatedVisits = useMemo(
+    () => filteredVisits.slice((safeVisitPage - 1) * visitPageSize, safeVisitPage * visitPageSize),
+    [filteredVisits, safeVisitPage, visitPageSize]
+  );
+
+  const planTotalPages = Math.max(1, Math.ceil(filteredPlans.length / planPageSize));
+  const safePlanPage   = Math.min(planPage, planTotalPages);
+  const paginatedPlans = useMemo(
+    () => filteredPlans.slice((safePlanPage - 1) * planPageSize, safePlanPage * planPageSize),
+    [filteredPlans, safePlanPage, planPageSize]
+  );
+
   const planStatusFilterOptions = useMemo(() => {
     const set = new Set<string>();
     for (const s of CONFERENCE_STATUSES) set.add(s);
@@ -327,14 +346,14 @@ export default function HomeVisitationConferences() {
   }, [plans]);
 
   const { upcomingConferences, pastConferences, otherPlans } = useMemo(() => {
-    const withDate = filteredPlans.filter((p) => toIsoDateOnly(p.caseConferenceDate) !== '');
+    const withDate = paginatedPlans.filter((p) => toIsoDateOnly(p.caseConferenceDate) !== '');
     const upcoming = withDate
       .filter((p) => toIsoDateOnly(p.caseConferenceDate) >= today)
       .sort((a, b) => toIsoDateOnly(a.caseConferenceDate).localeCompare(toIsoDateOnly(b.caseConferenceDate)));
     const past = withDate
       .filter((p) => toIsoDateOnly(p.caseConferenceDate) < today)
       .sort((a, b) => toIsoDateOnly(b.caseConferenceDate).localeCompare(toIsoDateOnly(a.caseConferenceDate)));
-    const other = filteredPlans
+    const other = paginatedPlans
       .filter((p) => toIsoDateOnly(p.caseConferenceDate) === '')
       .sort((a, b) => {
         const da = a.createdAt ?? '';
@@ -365,6 +384,8 @@ export default function HomeVisitationConferences() {
     setPlanDateFrom('');
     setPlanDateTo('');
     setPlanContentSearch('');
+    setVisitPage(1);
+    setPlanPage(1);
   }
 
   const filteredResidents = searchQuery
@@ -711,6 +732,8 @@ export default function HomeVisitationConferences() {
                 setSelectedResident(r.residentId);
                 setShowVisitForm(false);
                 setShowPlanForm(false);
+                setVisitPage(1);
+                setPlanPage(1);
               }}
             >
               <span className="pr-resident-item__id">{r.residentId}</span>
@@ -1120,7 +1143,51 @@ export default function HomeVisitationConferences() {
                     No visits match the current filters. Try clearing filters or widening the date range.
                   </p>
                 ) : (
-                  filteredVisits.map((v) => renderVisitCard(v))
+                  <>
+                    {paginatedVisits.map((v) => renderVisitCard(v))}
+                    <div className="table-footer" style={{ marginTop: '0.75rem' }}>
+                      <span>
+                        Showing {filteredVisits.length === 0 ? 0 : (safeVisitPage - 1) * visitPageSize + 1}–{Math.min(safeVisitPage * visitPageSize, filteredVisits.length)} of {filteredVisits.length}
+                      </span>
+                      <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                        <select
+                          className="filter-btn"
+                          value={visitPageSize}
+                          onChange={(e) => { setVisitPageSize(Number(e.target.value)); setVisitPage(1); }}
+                          style={{ fontFamily: 'DM Sans, sans-serif' }}
+                        >
+                          <option value={10}>10 / page</option>
+                          <option value={20}>20 / page</option>
+                          <option value={30}>30 / page</option>
+                        </select>
+                        <button
+                          className="filter-btn"
+                          onClick={() => setVisitPage(p => Math.max(1, p - 1))}
+                          disabled={safeVisitPage === 1}
+                          style={{ padding: '3px 10px' }}
+                        >‹</button>
+                        {Array.from({ length: visitTotalPages }, (_, i) => i + 1).map((p) => (
+                          <button
+                            key={p}
+                            className="filter-btn"
+                            onClick={() => setVisitPage(p)}
+                            style={{
+                              padding: '3px 10px',
+                              background: p === safeVisitPage ? 'var(--navy)' : 'white',
+                              color: p === safeVisitPage ? 'white' : 'var(--gray-600)',
+                              borderColor: p === safeVisitPage ? 'var(--navy)' : undefined,
+                            }}
+                          >{p}</button>
+                        ))}
+                        <button
+                          className="filter-btn"
+                          onClick={() => setVisitPage(p => Math.min(visitTotalPages, p + 1))}
+                          disabled={safeVisitPage === visitTotalPages}
+                          style={{ padding: '3px 10px' }}
+                        >›</button>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -1171,6 +1238,51 @@ export default function HomeVisitationConferences() {
                         <div className="hvc-subhead">Other intervention plans (no conference date)</div>
                         {otherPlans.map((p) => renderPlanCard(p, 'other'))}
                       </>
+                    )}
+
+                    {filteredPlans.length > 0 && (
+                      <div className="table-footer" style={{ marginTop: '0.75rem' }}>
+                        <span>
+                          Showing {filteredPlans.length === 0 ? 0 : (safePlanPage - 1) * planPageSize + 1}–{Math.min(safePlanPage * planPageSize, filteredPlans.length)} of {filteredPlans.length}
+                        </span>
+                        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                          <select
+                            className="filter-btn"
+                            value={planPageSize}
+                            onChange={(e) => { setPlanPageSize(Number(e.target.value)); setPlanPage(1); }}
+                            style={{ fontFamily: 'DM Sans, sans-serif' }}
+                          >
+                            <option value={10}>10 / page</option>
+                            <option value={20}>20 / page</option>
+                            <option value={30}>30 / page</option>
+                          </select>
+                          <button
+                            className="filter-btn"
+                            onClick={() => setPlanPage(p => Math.max(1, p - 1))}
+                            disabled={safePlanPage === 1}
+                            style={{ padding: '3px 10px' }}
+                          >‹</button>
+                          {Array.from({ length: planTotalPages }, (_, i) => i + 1).map((p) => (
+                            <button
+                              key={p}
+                              className="filter-btn"
+                              onClick={() => setPlanPage(p)}
+                              style={{
+                                padding: '3px 10px',
+                                background: p === safePlanPage ? 'var(--navy)' : 'white',
+                                color: p === safePlanPage ? 'white' : 'var(--gray-600)',
+                                borderColor: p === safePlanPage ? 'var(--navy)' : undefined,
+                              }}
+                            >{p}</button>
+                          ))}
+                          <button
+                            className="filter-btn"
+                            onClick={() => setPlanPage(p => Math.min(planTotalPages, p + 1))}
+                            disabled={safePlanPage === planTotalPages}
+                            style={{ padding: '3px 10px' }}
+                          >›</button>
+                        </div>
+                      </div>
                     )}
                   </>
                 )}

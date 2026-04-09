@@ -68,7 +68,7 @@ export default function ProcessRecordings() {
   const [filterSessionType, setFilterSessionType] = useState('');
   const [filterContentSearch, setFilterContentSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 5;
+  const [pageSize, setPageSize] = useState(10);
 
   // Load residents for the selector
   useEffect(() => {
@@ -216,10 +216,10 @@ export default function ProcessRecordings() {
     return true;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredRecordings.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredRecordings.length / pageSize));
   const paginatedRecordings = filteredRecordings.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
   );
 
   // Reset page when filters change
@@ -677,11 +677,48 @@ export default function ProcessRecordings() {
             ))}
 
             {/* Pagination */}
-            {filteredRecordings.length > PAGE_SIZE && (
-              <div className="supporter-pagination">
-                <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}>← Prev</button>
-                <span>Page {currentPage} of {totalPages} &nbsp;·&nbsp; {filteredRecordings.length} total</span>
-                <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}>Next →</button>
+            {filteredRecordings.length > pageSize && (
+              <div className="table-footer">
+                <span>
+                  Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredRecordings.length)} of {filteredRecordings.length}
+                </span>
+                <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                  <select
+                    className="filter-btn"
+                    value={pageSize}
+                    onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                    style={{ fontFamily: 'DM Sans, sans-serif' }}
+                  >
+                    <option value={10}>10 / page</option>
+                    <option value={20}>20 / page</option>
+                    <option value={30}>30 / page</option>
+                  </select>
+                  <button
+                    className="filter-btn"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                    style={{ padding: '3px 10px' }}
+                  >‹</button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={p}
+                      className="filter-btn"
+                      onClick={() => setCurrentPage(p)}
+                      style={{
+                        padding: '3px 10px',
+                        background: p === currentPage ? 'var(--navy)' : 'white',
+                        color: p === currentPage ? 'white' : 'var(--gray-600)',
+                        borderColor: p === currentPage ? 'var(--navy)' : undefined,
+                      }}
+                    >{p}</button>
+                  ))}
+                  <button
+                    className="filter-btn"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    style={{ padding: '3px 10px' }}
+                  >›</button>
+                </div>
               </div>
             )}
           </div>

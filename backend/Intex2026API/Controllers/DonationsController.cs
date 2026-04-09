@@ -55,6 +55,7 @@ public class DonationsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<ActionResult<Donation>> PostDonation(Donation donation)
     {
         _context.Donations.Add(donation);
@@ -178,6 +179,7 @@ public class DonationsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> PutDonation(string id, Donation donation)
     {
         if (id != donation.DonationId) return BadRequest();
