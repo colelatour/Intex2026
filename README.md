@@ -63,7 +63,7 @@ az webapp config appsettings set \
 
 ### ML Pipelines (Python)
 
-Create `pipelines/.env` (gitignored):
+Create `ml-pipelines/.env` (gitignored):
 
 ```
 AZURE_SQL_SERVER=your-server.database.windows.net,1433
@@ -95,7 +95,7 @@ dotnet run        # https://localhost:5001
 ### ML Pipelines
 
 ```bash
-cd pipelines
+cd ml-pipelines
 pip install -r api/requirements.txt
 uvicorn api.main:app --reload   # http://localhost:8000
 ```
@@ -107,7 +107,7 @@ uvicorn api.main:app --reload   # http://localhost:8000
 ```
 ├── frontend/          React + Vite app
 ├── backend/           ASP.NET Core API
-├── pipelines/         Python ML pipelines + FastAPI inference server
+├── ml-pipelines/      Python ML pipelines + FastAPI inference server
 │   ├── jobs/          Nightly inference scripts (churn, readiness, social)
 │   ├── api/           FastAPI wrapper for manual re-runs
 │   └── test_connection.py  DB connectivity + view creation utility
@@ -118,7 +118,7 @@ uvicorn api.main:app --reload   # http://localhost:8000
 
 ## ML Pipelines
 
-Three nightly jobs run on Render (see `pipelines/render.yaml`):
+Three nightly jobs run on Render (see `ml-pipelines/render.yaml`):
 
 | Job | Schedule | Output table |
 |---|---|---|
@@ -126,4 +126,4 @@ Three nightly jobs run on Render (see `pipelines/render.yaml`):
 | Reintegration readiness | 2:10 AM UTC | `resident_readiness_scores` |
 | Social media analysis | 2:20 AM UTC | `social_media_recommendations` |
 
-The `social_media_highlights` SQL view (created via `pipelines/test_connection.py`) aggregates live program data for the Social Media Strategy page.
+The `social_media_highlights` SQL view (created via `ml-pipelines/test_connection.py`) aggregates live program data for the Social Media Strategy page.

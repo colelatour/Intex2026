@@ -1,6 +1,6 @@
 # ML Inference Jobs
 
-Three Python scripts that run nightly inference against the Azure SQL database and write scored results back to output tables. Each script reads credentials from a shared `.env` file located at `pipelines/.env` (one level above this directory).
+Three Python scripts that run nightly inference against the Azure SQL database and write scored results back to output tables. Each script reads credentials from a shared `.env` file located at `ml-pipelines/.env` (one level above this directory).
 
 ---
 
@@ -35,7 +35,7 @@ Unlike the other two pipelines, this script does not score individual records. I
 
 ## Environment Setup
 
-Create `pipelines/.env` with:
+Create `ml-pipelines/.env` with:
 
 ```
 AZURE_SQL_SERVER=your-server.database.windows.net
@@ -53,9 +53,9 @@ Required Python packages: `pandas`, `numpy`, `scikit-learn`, `xgboost`, `statsmo
 From anywhere (scripts use absolute paths internally):
 
 ```bash
-python /path/to/pipelines/jobs/run_churn_inference.py
-python /path/to/pipelines/jobs/run_readiness_inference.py
-python /path/to/pipelines/jobs/run_social_inference.py
+python /path/to/ml-pipelines/jobs/run_churn_inference.py
+python /path/to/ml-pipelines/jobs/run_readiness_inference.py
+python /path/to/ml-pipelines/jobs/run_social_inference.py
 ```
 
 Or from the `jobs/` directory:
@@ -80,13 +80,13 @@ Add these entries (adjust the Python path to match your virtualenv):
 
 ```cron
 # Donor churn inference — nightly 2:00 AM
-0 2 * * * /usr/bin/python3 /path/to/pipelines/jobs/run_churn_inference.py >> /var/log/churn_inference.log 2>&1
+0 2 * * * /usr/bin/python3 /path/to/ml-pipelines/jobs/run_churn_inference.py >> /var/log/churn_inference.log 2>&1
 
 # Resident readiness inference — nightly 2:10 AM
-10 2 * * * /usr/bin/python3 /path/to/pipelines/jobs/run_readiness_inference.py >> /var/log/readiness_inference.log 2>&1
+10 2 * * * /usr/bin/python3 /path/to/ml-pipelines/jobs/run_readiness_inference.py >> /var/log/readiness_inference.log 2>&1
 
 # Social media recommendations — nightly 2:20 AM
-20 2 * * * /usr/bin/python3 /path/to/pipelines/jobs/run_social_inference.py >> /var/log/social_inference.log 2>&1
+20 2 * * * /usr/bin/python3 /path/to/ml-pipelines/jobs/run_social_inference.py >> /var/log/social_inference.log 2>&1
 ```
 
 To find your Python path: `which python3`  

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import urllib
 
-# Load .env from the pipelines directory (works regardless of cwd)
+# Load .env from the ml-pipelines directory (works regardless of cwd)
 load_dotenv(dotenv_path=Path(__file__).parent / '.env')
 
 # Read credentials from environment variables

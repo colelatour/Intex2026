@@ -6,7 +6,7 @@ Reads churn_scores.csv produced by donor-churn-classifier.ipynb and
 inserts the results into donor_churn_scores in Azure SQL.
 
 Run from any directory — the script locates the repo root .env automatically:
-    python pipelines/donor_churn_pipeline/upload_churn_scores.py
+    python ml-pipelines/donor_churn_pipeline/upload_churn_scores.py
 
 Requirements:
     pip install pyodbc python-dotenv pandas
