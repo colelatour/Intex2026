@@ -1,0 +1,248 @@
+IS414 SECURITY REQUIREMENTS — VIDEO GRADING GUIDE
+===================================================
+Use this file to navigate your code during the grading video.
+Each section tells you exactly what to open and what to say.
+
+====================================================================
+1. HTTPS / TLS
+====================================================================
+SHOW: backend/Intex2026API/Program.cs — line 199
+  → app.UseHttpsRedirection();
+SHOW: Browser address bar on deployed site — https:// with lock icon
+SAY:  "HTTPS is enforced via UseHttpsRedirection. Azure App Service
+       provides a managed TLS certificate automatically."
+
+====================================================================
+2. HTTP → HTTPS REDIRECT + HSTS
+====================================================================
+SHOW: backend/Intex2026API/Program.cs — lines 194-198
+  → if (!app.Environment.IsDevelopment()) { app.UseHsts(); }
+  → app.UseHttpsRedirection();
+SAY:  "HSTS is enabled for production only so Swagger still works in
+       dev. UseHttpsRedirection forces all HTTP traffic to HTTPS."
+
+====================================================================
+3. ASP.NET IDENTITY AUTHENTICATION
+====================================================================
+SHOW: backend/Intex2026API/Intex2026API.csproj — line 13
+  → Microsoft.AspNetCore.Identity.EntityFrameworkCore
+SHOW: backend/Intex2026API/Controllers/ApplicationUser.cs — line 5
+  → public class ApplicationUser : IdentityUser
+SHOW: backend/Intex2026API/Data/AuthIdentityDbContext.cs — line 7
+  → public class AuthIdentityDbContext : IdentityDbContext<ApplicationUser>
+SHOW: backend/Intex2026API/Program.cs — line 124
+  → builder.Services.AddIdentity<ApplicationUser, IdentityRole>(...)
+SHOW: backend/Intex2026API/Controllers/AuthController.cs — lines 22-44
+  → Login endpoint using SignInManager
+SHOW: backend/Intex2026API/Controllers/AuthController.cs — lines 81-116
+  → Register endpoint creating user + assigning Donor role
+SAY:  "We use ASP.NET Identity with a custom AuthController for
+       login, register, logout, and session check endpoints."
+
+====================================================================
+4. PASSWORD POLICY (STRICTLY GRADED)
+====================================================================
+SHOW: backend/Intex2026API/Program.cs — lines 127-132
+  → RequiredLength = 14
+  → RequireDigit = false
+  → RequireNonAlphanumeric = false
+  → RequireLowercase = false
+  → RequireUppercase = false
+  → RequiredUniqueChars = 1
+SAY:  "14-character minimum with no complexity requirements, exactly
+       as specified. RequiredUniqueChars is 1."
+
+====================================================================
+5. COOKIE HARDENING
+====================================================================
+SHOW: backend/Intex2026API/Program.cs — lines 148-153
+  → HttpOnly = true
+  → SameSite = SameSiteMode.Lax
+  → SecurePolicy = CookieSecurePolicy.Always
+SHOW: frontend/src/lib/api.ts — line 64
+  → credentials: "include"
+SAY:  "Auth cookie is HttpOnly, Secure, SameSite=Lax. All frontend
+       fetch calls include credentials via the shared api() helper."
+
+====================================================================
+6. MIDDLEWARE ORDER
+====================================================================
+SHOW: backend/Intex2026API/Program.cs — lines 217-220
+  → app.UseCors("frontend");
+  → app.UseAuthentication();
+  → app.UseAuthorization();
+SAY:  "CORS runs first, then Authentication, then Authorization —
+       correct middleware order."
+
+====================================================================
+7. ENDPOINTS REQUIRE AUTH
+====================================================================
+SHOW: backend/Intex2026API/Controllers/AuthController.cs — line 13
+  → [AllowAnonymous] on AuthController (login/register/me are public)
+SHOW: backend/Intex2026API/Controllers/SafehousesController.cs — line 11
+  → [Authorize(Roles = "Admin,Worker")] at class level
+SHOW: backend/Intex2026API/Controllers/DonationsController.cs — lines 58-59
+  → [Authorize(Roles = "Admin,Worker")] on PostDonation
+SHOW: backend/Intex2026API/Controllers/DonationsController.cs — lines 181-182
+  → [Authorize(Roles = "Admin,Worker")] on PutDonation
+SHOW: backend/Intex2026API/Controllers/AdminUsersController.cs — line 11
+  → [Authorize(Roles = "Admin")] — admin-only user management
+SAY:  "All CUD operations require authentication. Auth endpoints are
+       public. Read-only public data like impact stats is AllowAnonymous."
+
+====================================================================
+8. RBAC — ROLES & POLICIES
+====================================================================
+SHOW: backend/Intex2026API/Data/AuthRoles.cs
+  → Admin, Worker, Donor constants
+SHOW: backend/Intex2026API/Data/AuthPolicies.cs
+  → AdminOnly, AdminWorker, DonorAccess constants
+SHOW: backend/Intex2026API/Program.cs — lines 137-145
+  → AddAuthorization with three named policies
+SHOW: frontend/src/components/ProtectedRoute.tsx — lines 11-41
+  → requiredRoles prop, role check, redirect to /login
+SHOW: frontend/src/App.tsx — lines 46-49
+  → Admin routes guarded with requiredRoles={['Admin', 'Worker']}
+SHOW: frontend/src/App.tsx — lines 58-65
+  → User management nested guard: requiredRoles={['Admin']}
+SAY:  "Roles and policies are defined as constants. Backend enforces
+       via [Authorize]. Frontend uses ProtectedRoute for route guards."
+
+====================================================================
+9. DONOR ROLE ACCESS
+====================================================================
+SHOW: backend/Intex2026API/Data/AuthPolicies.cs — line 8
+  → DonorAccess policy
+SHOW: backend/Intex2026API/Program.cs — lines 143-144
+  → DonorAccess requires Donor or Admin role
+SHOW: backend/Intex2026API/Controllers/AuthController.cs — line 103
+  → await userManager.AddToRoleAsync(user, "Donor");
+SHOW: backend/Intex2026API/Controllers/DonationAllocationsController.cs — line 11
+  → [Authorize(Roles = "Admin,Worker,Donor")]
+SHOW: frontend/src/App.tsx — line 42
+  → /account guarded with ProtectedRoute requiredRoles
+SAY:  "New registrations get the Donor role. Donor-accessible endpoints
+       include Donor in the role list. Account page is route-guarded."
+
+====================================================================
+10. CONFIRMATION BEFORE DELETE
+====================================================================
+SHOW: frontend/src/lib/api.ts — lines 96-99
+  → del() function with window.confirm() before every DELETE call
+DEMO: Click a delete button in the admin panel — show the confirm dialog
+SAY:  "Every delete in the app goes through the shared del() helper
+       which requires user confirmation before the API call fires."
+
+====================================================================
+11. CREDENTIALS SECURITY
+====================================================================
+SHOW: .gitignore — lines 4-6
+  → .env, .env.*, appsettings.Development.json excluded
+SHOW: backend/Intex2026API/Intex2026API.csproj — line 7
+  → <UserSecretsId>bd41c9ca-...
+SHOW: backend/Intex2026API/appsettings.json — lines 14-20
+  → Empty connection strings and API keys (placeholders only)
+SHOW: backend/Intex2026API/Program.cs — lines 51-55
+  → .env file loaded via DotNetEnv
+SHOW: backend/Intex2026API/Program.cs — lines 169-171
+  → Admin credentials read from config, fallback is dev-only
+SAY:  "No real secrets in committed files. Connection strings come from
+       .env or user-secrets. appsettings.json has only empty placeholders."
+
+====================================================================
+12. GDPR PRIVACY POLICY
+====================================================================
+SHOW: frontend/src/App.tsx — line 39
+  → <Route path="/privacy" element={<PrivacyPolicy />} />
+SHOW: frontend/src/pages/PrivacyPolicy.tsx — scroll through sections
+SHOW: frontend/src/components/layout/Footer.tsx — line 23
+  → <Link to="/privacy">Privacy Policy</Link>
+DEMO: Click "Privacy Policy" in the footer, show the page loads
+SAY:  "Full 12-section GDPR-compliant privacy policy accessible from
+       every page via the footer link."
+
+====================================================================
+13. GDPR COOKIE CONSENT
+====================================================================
+SHOW: frontend/src/components/CookieConsent.tsx — full file
+  → localStorage persistence (line 14), Accept/Reject/Manage buttons
+SHOW: frontend/src/App.tsx — line 103
+  → <CookieConsent /> rendered site-wide
+SHOW: frontend/src/components/layout/Footer.tsx — lines 24-28
+  → "Cookie Settings" button dispatches event to reopen banner
+DEMO: Clear localStorage → refresh → banner appears
+      Accept → refresh → banner stays hidden
+      Click "Cookie Settings" in footer → banner reopens
+SAY:  "Cookie consent persists in localStorage, appears site-wide,
+       and can be reopened from the footer at any time."
+
+====================================================================
+14. CONTENT SECURITY POLICY & SECURITY HEADERS
+====================================================================
+SHOW: backend/Intex2026API/Program.cs — lines 202-216
+  → CSP header with default-src, script-src, style-src, etc.
+  → X-Content-Type-Options: nosniff
+  → X-Frame-Options: DENY
+  → Referrer-Policy: strict-origin-when-cross-origin
+SHOW: frontend/public/staticwebapp.config.json — lines 6-11
+  → Same headers configured for Azure Static Web Apps
+DEMO: Open DevTools → Network tab → click a request → show Response
+      Headers with CSP, X-Frame-Options, etc.
+SAY:  "CSP restricts scripts to self-only, blocks framing. Additional
+       headers prevent MIME sniffing and clickjacking. Both backend
+       and frontend serve these headers."
+
+====================================================================
+15. SEEDER / DEFAULT ADMIN USER
+====================================================================
+SHOW: backend/Intex2026API/Program.cs — lines 157-185
+  → Scoped service block creating roles and admin user
+  → roleManager.RoleExistsAsync check before creating
+  → userManager.FindByEmailAsync check before creating admin
+  → Credentials from Configuration with dev fallback
+  → try-catch wrapping the entire block
+SAY:  "Seeder runs on startup in a scoped block. It checks existence
+       before creating roles or the admin user to prevent crashes on
+       restart. Credentials come from config."
+
+====================================================================
+16. EF MIGRATIONS FOR IDENTITY DB
+====================================================================
+SHOW: backend/Intex2026API/Migrations/Identity/ folder
+  → InitialIdentity migration files
+SHOW: Open the migration .cs file — note AuthIdentityDbContext reference
+SAY:  "EF migration was generated with --context AuthIdentityDbContext.
+       The migration files are in Migrations/Identity."
+
+====================================================================
+17. BONUS SECURITY FEATURES
+====================================================================
+
+A) GOOGLE OAUTH
+SHOW: backend/Intex2026API/Intex2026API.csproj — line 12
+  → Microsoft.AspNetCore.Authentication.Google
+SHOW: backend/Intex2026API/Program.cs — lines 88-98
+  → AddGoogle() with ClientId/Secret from config
+SHOW: backend/Intex2026API/Controllers/AuthController.cs — lines 195-224
+  → external-login endpoint
+SHOW: backend/Intex2026API/Controllers/AuthController.cs — lines 226-290
+  → external-callback endpoint
+DEMO: Show the Google login button on the login page
+SAY:  "Google OAuth is fully implemented with external-login and
+       external-callback endpoints."
+
+B) REAL DBMS (SQL Server)
+SHOW: backend/Intex2026API/Program.cs — lines 113, 119
+  → options.UseSqlServer(...) for both contexts
+SAY:  "Both databases use SQL Server, not SQLite, in production."
+
+C) HSTS (already covered in section 2)
+
+D) DATA SANITIZATION
+SHOW: backend/Intex2026API/Controllers/AuthController.cs — lines 46-79
+  → Email domain validation with TLD whitelist + blocked domains
+SHOW: backend/Intex2026API/Controllers/TipsController.cs — lines 27-41
+  → Input validation for Name, Email, Region
+SAY:  "Input validation is applied at the controller level — email
+       domains are checked against allow/block lists, and form inputs
+       are validated before processing."
