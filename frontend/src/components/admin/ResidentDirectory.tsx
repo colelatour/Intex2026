@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { getSession } from '../../lib/authApi';
 import { get, post, put, api } from '../../lib/api';
+import PaginationControls from './PaginationControls';
 
 interface Resident {
   residentId: string | null;
@@ -935,54 +936,14 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
               })}
             </tbody>
           </table>
-          <div className="table-footer">
-            <span>
-              Showing {displayed.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–{Math.min(safePage * pageSize, displayed.length)} of {displayed.length} residents
-            </span>
-            <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-              <select
-                className="filter-btn"
-                value={pageSize}
-                onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-                style={{ fontFamily: 'DM Sans, sans-serif' }}
-              >
-                <option value={10}>10 / page</option>
-                <option value={20}>20 / page</option>
-                <option value={30}>30 / page</option>
-              </select>
-              <button
-                className="filter-btn"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={safePage === 1}
-                style={{ padding: '3px 10px' }}
-              >
-                ‹
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  className="filter-btn"
-                  onClick={() => setCurrentPage(p)}
-                  style={{
-                    padding: '3px 10px',
-                    background: p === safePage ? 'var(--navy)' : 'white',
-                    color: p === safePage ? 'white' : 'var(--gray-600)',
-                    borderColor: p === safePage ? 'var(--navy)' : undefined,
-                  }}
-                >
-                  {p}
-                </button>
-              ))}
-              <button
-                className="filter-btn"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={safePage === totalPages}
-                style={{ padding: '3px 10px' }}
-              >
-                ›
-              </button>
-            </div>
-          </div>
+          <PaginationControls
+            currentPage={safePage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
+            label={`Showing ${displayed.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, displayed.length)} of ${displayed.length} residents`}
+          />
         </div>
       )}
     </div>
