@@ -31,6 +31,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     items: [
       { id: 'safehouse-management', label: 'Safehouse Management', icon: 'home'  },
       { id: 'donors',               label: 'Donor Dashboard',      icon: 'heart' },
+      { id: 'donations',            label: 'Donation Management',  icon: 'dollar' },
     ],
   },
   {

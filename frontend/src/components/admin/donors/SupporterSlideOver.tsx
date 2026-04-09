@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSupporterDetail } from '../../../hooks/useSupporters';
+import { post } from '../../../lib/api';
 import SupporterForm from './SupporterForm';
 
 interface Props {
@@ -10,13 +11,72 @@ interface Props {
 
 export default function SupporterSlideOver({ supporterId, onClose, onSaved }: Props) {
   const [editing, setEditing] = useState(false);
-  const { data, loading, error } = useSupporterDetail(supporterId);
+  const [showAddDonationForm, setShowAddDonationForm] = useState(false);
+  const { data, loading, error, refetch } = useSupporterDetail(supporterId);
+  const [donationForm, setDonationForm] = useState({
+    amount: '',
+    donationDate: new Date().toISOString().slice(0, 10),
+    isRecurring: false,
+    notes: ''
+  });
+  const [donationSaving, setDonationSaving] = useState(false);
+  const [donationError, setDonationError] = useState<string | null>(null);
+  const donationFormRef = useRef<HTMLDivElement>(null);
 
   const open = !!supporterId;
 
   function handleSaved() {
     setEditing(false);
+    setShowAddDonationForm(false);
     onSaved();
+  }
+
+  useEffect(() => {
+    if (!showAddDonationForm || !donationFormRef.current) return;
+    requestAnimationFrame(() => {
+      const scroller = donationFormRef.current?.closest('.slide-over') as HTMLElement | null;
+      if (!scroller) return;
+      scroller.scrollTo({
+        top: scroller.scrollHeight,
+        behavior: 'smooth'
+      });
+    });
+  }, [showAddDonationForm]);
+
+  async function handleAddDonation(e: React.FormEvent) {
+    e.preventDefault();
+    if (!supporterId || !data) return;
+
+    const amount = Number(donationForm.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setDonationError('Enter a valid donation amount greater than zero.');
+      return;
+    }
+
+    setDonationSaving(true);
+    setDonationError(null);
+    try {
+      await post(`/api/supporters/${supporterId}/donations`, {
+        amount,
+        currencyCode: 'PHP',
+        donationDate: donationForm.donationDate,
+        isRecurring: donationForm.isRecurring,
+        donationType: 'Monetary',
+        notes: donationForm.notes || undefined
+      });
+      setDonationForm({
+        amount: '',
+        donationDate: new Date().toISOString().slice(0, 10),
+        isRecurring: false,
+        notes: ''
+      });
+      setShowAddDonationForm(false);
+      refetch();
+    } catch (err) {
+      setDonationError(err instanceof Error ? err.message : 'Failed to add donation.');
+    } finally {
+      setDonationSaving(false);
+    }
   }
 
   return (
@@ -94,9 +154,80 @@ export default function SupporterSlideOver({ supporterId, onClose, onSaved }: Pr
                   }
                 </div>
 
-                <button className="btn-add" style={{ marginTop: '1rem' }} onClick={() => setEditing(true)}>
-                  Edit Supporter
-                </button>
+                <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                  <button className="btn-add" onClick={() => setEditing(true)}>
+                    Edit Supporter
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-export"
+                    onClick={() => {
+                      setShowAddDonationForm((v) => !v);
+                      setDonationError(null);
+                    }}
+                  >
+                    {showAddDonationForm ? 'Cancel Donation' : 'Add Donation'}
+                  </button>
+                </div>
+
+                <div
+                  ref={donationFormRef}
+                  className={`donation-form-reveal${showAddDonationForm ? ' donation-form-reveal--open' : ''}`}
+                  aria-hidden={!showAddDonationForm}
+                >
+                  <div className="slide-over__section donation-form-section">
+                    <h3>Add Donation</h3>
+                    <form className="donation-quick-form" onSubmit={handleAddDonation}>
+                      <div className="form-row form-row--2col">
+                        <div>
+                          <label>Amount (PHP)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={donationForm.amount}
+                            onChange={(e) => setDonationForm((prev) => ({ ...prev, amount: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <label>Date</label>
+                          <input
+                            type="date"
+                            value={donationForm.donationDate}
+                            onChange={(e) => setDonationForm((prev) => ({ ...prev, donationDate: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="form-row">
+                        <label className="donation-toggle">
+                          <input
+                            type="checkbox"
+                            checked={donationForm.isRecurring}
+                            onChange={(e) => setDonationForm((prev) => ({ ...prev, isRecurring: e.target.checked }))}
+                          />
+                          <span className="donation-toggle__track" aria-hidden="true">
+                            <span className="donation-toggle__thumb" />
+                          </span>
+                          <span className="donation-toggle__label">Recurring donation</span>
+                        </label>
+                      </div>
+                      <div className="form-row">
+                        <label>Notes</label>
+                        <input
+                          value={donationForm.notes}
+                          onChange={(e) => setDonationForm((prev) => ({ ...prev, notes: e.target.value }))}
+                          placeholder="Optional notes"
+                        />
+                      </div>
+                      {donationError && <p className="field-error" style={{ marginBottom: '0.5rem' }}>{donationError}</p>}
+                      <div className="form-actions" style={{ marginTop: '0.5rem' }}>
+                        <button type="submit" className="btn-add" disabled={donationSaving}>
+                          {donationSaving ? 'Adding…' : 'Add Donation'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
               </div>
             )}
 

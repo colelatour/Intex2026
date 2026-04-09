@@ -86,6 +86,26 @@ public class DonationsController : ControllerBase
     [Authorize(Roles = "Admin,Worker")]
     public async Task<ActionResult<Donation>> PostDonation(Donation donation)
     {
+        if (string.IsNullOrWhiteSpace(donation.SupporterId))
+            return BadRequest("SupporterId is required.");
+
+        var supporterExists = await _context.Supporters
+            .AnyAsync(s => s.SupporterId == donation.SupporterId);
+        if (!supporterExists)
+            return BadRequest("SupporterId does not exist.");
+
+        if (!donation.Amount.HasValue || donation.Amount.Value <= 0)
+            return BadRequest("Amount must be greater than zero.");
+
+        if (string.IsNullOrWhiteSpace(donation.DonationId))
+            donation.DonationId = await GetNextNumericIdAsync(_context.Donations.Select(d => d.DonationId));
+
+        donation.DonationType ??= "Monetary";
+        donation.CurrencyCode = string.IsNullOrWhiteSpace(donation.CurrencyCode) ? "PHP" : donation.CurrencyCode.Trim().ToUpperInvariant();
+        donation.DonationDate ??= DateOnly.FromDateTime(DateTime.UtcNow);
+        donation.IsRecurring = donation.IsRecurring?.ToLower() is "true" or "1" or "yes" ? "True" : "False";
+        donation.EstimatedValue ??= donation.Amount;
+
         _context.Donations.Add(donation);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetDonation), new { id = donation.DonationId }, donation);
