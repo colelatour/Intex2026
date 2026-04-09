@@ -388,7 +388,7 @@ export default function SafehouseManagement() {
               Add New Safehouse
             </h4>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="safehouse-form-grid">
               {/* Read-only auto-incremented ID */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -467,7 +467,7 @@ export default function SafehouseManagement() {
               Edit Safehouse — {editingSafehouse.name ?? editingSafehouse.safehouseId}
             </h4>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="safehouse-form-grid">
               {EDITABLE_FIELDS.map((f) => (
                 <div key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
