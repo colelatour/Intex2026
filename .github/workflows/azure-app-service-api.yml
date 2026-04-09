@@ -1,0 +1,72 @@
+# Deploy Intex2026 API to Azure App Service (fresh dotnet publish every run).
+#
+# This workflow uses a publish profile secret → SCM deploy → requires SCM BASIC AUTH to be ON
+# unless you switch to OpenID Connect (see Microsoft: "Deploy to App Service using GitHub Actions").
+# If deploy fails with 401 / "basic authentication is disabled":
+#   Portal → App Service → Settings → Configuration → General settings
+#   → SCM Basic Auth Publishing Credentials → On → Save
+# (FTP Basic Auth is separate; enable only if you use FTP.)
+#
+# One-time setup:
+# 1. Azure Portal → your App Service → Get publish profile (Download profile).
+# 2. GitHub repo → Settings → Secrets and variables → Actions → New repository secret:
+#    Name:  AZURE_API_PUBLISH_PROFILE
+#    Value: entire contents of the downloaded .PublishSettings file (XML).
+# 3. AZURE_WEBAPP_NAME must match Azure Portal → App Service → Overview → Name (the resource name),
+#    NOT the random part of the *.azurewebsites.net URL. In the publish profile XML it is the part
+#    after $ in userName (e.g. userName="$Intex2026API" → app name Intex2026API).
+# 4. Deploying to a deployment slot? Download the publish profile FROM that slot and set slot-name below.
+#
+# Local deploy without enabling basic auth: backend/Intex2026API/deploy-to-azure.sh (uses az login + az webapp deploy).
+#
+# Run: pushes to main that touch the API, or Actions → "Deploy API to Azure App Service" → Run workflow.
+
+name: Deploy API to Azure App Service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/Intex2026API/**"
+      - ".github/workflows/azure-app-service-api.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: azure-api-deploy
+  cancel-in-progress: true
+
+env:
+  # Portal "Name" field (matches $<this> in publish profile userName). Change if yours differs.
+  AZURE_WEBAPP_NAME: Intex2026API
+  DOTNET_VERSION: "10.0.x"
+  PROJECT_PATH: backend/Intex2026API/Intex2026API.csproj
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore and publish
+        run: |
+          dotnet restore "${{ env.PROJECT_PATH }}"
+          dotnet publish "${{ env.PROJECT_PATH }}" \
+            -c Release \
+            -o "${{ github.workspace }}/publish-out" \
+            --verbosity minimal
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_API_PUBLISH_PROFILE }}
+          package: ${{ github.workspace }}/publish-out

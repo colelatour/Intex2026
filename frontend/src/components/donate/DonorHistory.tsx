@@ -6,16 +6,26 @@ import { getMyDonations, type MyDonationsResponse } from '../../lib/donationsApi
 export default function DonorHistory({ refreshKey }: { refreshKey?: number }) {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [data, setData] = useState<MyDonationsResponse | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoadError(null);
     getSession().then((session) => {
       setLoggedIn(session.isAuthenticated);
-      if (session.isAuthenticated) {
-        getMyDonations()
-          .then(setData)
-          .catch(() => setData({ firstName: '', lastName: '', donations: [] }));
+      if (!session.isAuthenticated) {
+        setData(null);
+        return;
       }
-    }).catch(() => setLoggedIn(false));
+      getMyDonations()
+        .then(setData)
+        .catch((err) => {
+          setData({ firstName: '', lastName: '', donations: [] });
+          setLoadError(err instanceof Error ? err.message : 'Could not load donation history.');
+        });
+    }).catch(() => {
+      setLoggedIn(false);
+      setData(null);
+    });
   }, [refreshKey]);
 
   return (
@@ -30,11 +40,21 @@ export default function DonorHistory({ refreshKey }: { refreshKey?: number }) {
         <p className="donate-history-empty">Log in to view your donor history</p>
       )}
 
-      {loggedIn === true && data && data.donations.length === 0 && (
+      {loggedIn === true && data === null && !loadError && (
+        <p className="donate-history-empty">Loading your history…</p>
+      )}
+
+      {loadError && (
+        <p className="donate-history-empty" role="alert">
+          {loadError}
+        </p>
+      )}
+
+      {loggedIn === true && data && !loadError && data.donations.length === 0 && (
         <p className="donate-history-empty">No donations recorded, make your first donation today!</p>
       )}
 
-      {loggedIn === true && data && data.donations.length > 0 && (
+      {loggedIn === true && data && !loadError && data.donations.length > 0 && (
         <>
           <ul className="donate-history-list">
             {data.donations.map((d) => (
