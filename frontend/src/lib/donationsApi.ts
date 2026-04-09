@@ -34,6 +34,23 @@ export function recordDonation(payload: RecordDonationRequest): Promise<RecordDo
   return post<RecordDonationResponse>("/api/donations/record", payload);
 }
 
+export interface MyDonationItem {
+  donationId: string;
+  amount: number;
+  currencyCode: string;
+  donationDate: string;
+}
+
+export interface MyDonationsResponse {
+  firstName: string;
+  lastName: string;
+  donations: MyDonationItem[];
+}
+
+export function getMyDonations(): Promise<MyDonationsResponse> {
+  return get<MyDonationsResponse>("/api/donations/my");
+}
+
 export interface DonationReportQuery {
   startDate: string;
   endDate: string;

@@ -3,6 +3,7 @@ using Intex2026API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text;
 
 namespace Intex2026API.Controllers;
@@ -39,6 +40,33 @@ public class DonationsController : ControllerBase
         string CurrencyCode,
         DateOnly DonationDate
     );
+
+    public record MyDonationItem(string DonationId, decimal Amount, string CurrencyCode, DateOnly DonationDate);
+    public record MyDonationsResponse(string FirstName, string LastName, IEnumerable<MyDonationItem> Donations);
+
+    [HttpGet("my")]
+    [Authorize]
+    public async Task<ActionResult<MyDonationsResponse>> GetMyDonations()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+        if (string.IsNullOrWhiteSpace(email))
+            return Unauthorized();
+
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var supporter = await _context.Supporters
+            .FirstOrDefaultAsync(s => s.Email != null && s.Email.ToLower() == normalizedEmail);
+
+        if (supporter == null)
+            return Ok(new MyDonationsResponse("", "", Enumerable.Empty<MyDonationItem>()));
+
+        var donations = await _context.Donations
+            .Where(d => d.SupporterId == supporter.SupporterId && d.Amount != null && d.DonationDate != null)
+            .OrderByDescending(d => d.DonationDate)
+            .Select(d => new MyDonationItem(d.DonationId!, d.Amount!.Value, d.CurrencyCode ?? "USD", d.DonationDate!.Value))
+            .ToListAsync();
+
+        return Ok(new MyDonationsResponse(supporter.FirstName ?? "", supporter.LastName ?? "", donations));
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Donation>>> GetDonations()
