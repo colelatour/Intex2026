@@ -55,6 +55,7 @@ export interface SupporterDetail {
 
 export interface SupporterParams {
   page: number;
+  pageSize: number;
   search: string;
   supporterType: string;
   status: string;
@@ -70,6 +71,7 @@ export function useSupporters(params: SupporterParams) {
     setLoading(true);
     const q = new URLSearchParams();
     q.set('page', String(params.page));
+    q.set('pageSize', String(params.pageSize));
     if (params.search)       q.set('search',        params.search);
     if (params.supporterType) q.set('supporterType', params.supporterType);
     if (params.status)       q.set('status',        params.status);
@@ -78,7 +80,7 @@ export function useSupporters(params: SupporterParams) {
     get<SupporterListResponse>(`/api/supporters?${q}`)
       .then(d => { setData(d); setLoading(false); setError(null); })
       .catch((err: Error) => { setError(err.message); setLoading(false); });
-  }, [params.page, params.search, params.supporterType, params.status, params.region]);
+  }, [params.page, params.pageSize, params.search, params.supporterType, params.status, params.region]);
 
   useEffect(() => { fetch_(); }, [fetch_]);
 
