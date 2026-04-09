@@ -12,15 +12,30 @@ interface NavItem {
 
 const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
-    label: 'Main',
+    label: 'Overview',
     items: [
-      { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'      },
+      { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
+    ],
+  },
+  {
+    label: 'Residents',
+    items: [
       { id: 'resident-directory', label: 'Resident Directory', icon: 'users'     },
-      { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
       { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
+      { id: 'home-visits',        label: 'Visits & Conferences', icon: 'house'   },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
       { id: 'safehouse-management', label: 'Safehouse Management', icon: 'home' },
-      { id: 'user-management',      label: 'User Management',      icon: 'user', adminOnly: true },
-      { id: 'home-visits',          label: 'Visits & Conferences', icon: 'house'     },
+      { id: 'donors',               label: 'Donor Dashboard',      icon: 'heart' },
+    ],
+  },
+  {
+    label: 'Administration',
+    items: [
+      { id: 'user-management', label: 'User Management', icon: 'user', adminOnly: true },
     ],
   },
 ];
