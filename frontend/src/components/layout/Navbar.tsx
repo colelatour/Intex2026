@@ -11,7 +11,7 @@ export default function Navbar() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLLIElement>(null);
 
   useEffect(() => {
     getSession()
