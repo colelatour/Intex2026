@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { get } from '../../../lib/api';
-import OutreachModal from './OutreachModal';
 
 interface ChurnScoreDto {
   supporterId: string;
@@ -16,7 +15,6 @@ export default function AtRiskTable() {
   const [scores,   setScores]   = useState<ChurnScoreDto[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState<string | null>(null);
-  const [outreach, setOutreach] = useState<ChurnScoreDto | null>(null);
   const [contacted, setContacted] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -27,6 +25,19 @@ export default function AtRiskTable() {
 
   function markContacted(id: string) {
     setContacted(prev => new Set([...prev, id]));
+  }
+
+  function buildMailtoHref(score: ChurnScoreDto) {
+    const displayName = score.displayName ?? score.supporterId;
+    const subject = `Checking in from Sheltered Light`;
+    const body =
+      `Hi ${displayName},\n\n` +
+      `Thank you for your support of Sheltered Light. Your generosity helps provide safe shelter, education, and care for girls in need.\n\n` +
+      `We wanted to check in and share updates on the impact of your support. If you're open to it, we'd love to reconnect and hear from you.\n\n` +
+      `With gratitude,\n` +
+      `The Sheltered Light Team`;
+
+    return `mailto:${encodeURIComponent(score.email ?? '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
   if (loading) return <p style={{ padding: '2rem' }}>Loading at-risk donors…</p>;
@@ -44,7 +55,7 @@ export default function AtRiskTable() {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Risk</th>
-                  <th>Probability</th>
+                  <th>Churn Likelihood</th>
                   <th>Scored At</th>
                   <th>Actions</th>
                 </tr>
@@ -61,7 +72,11 @@ export default function AtRiskTable() {
                       <div className="at-risk-actions">
                         <button
                           className="btn-export"
-                          onClick={() => setOutreach(s)}
+                          onClick={() => {
+                            if (!s.email) return;
+                            window.location.href = buildMailtoHref(s);
+                          }}
+                          disabled={!s.email}
                         >
                           Draft outreach
                         </button>
@@ -85,13 +100,6 @@ export default function AtRiskTable() {
           </div>
         )
       }
-
-      {outreach && (
-        <OutreachModal
-          displayName={outreach.displayName ?? outreach.supporterId}
-          onClose={() => setOutreach(null)}
-        />
-      )}
     </div>
   );
 }
