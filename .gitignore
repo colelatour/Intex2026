@@ -10,6 +10,9 @@ DataFiles/
 *.key
 secrets.json
 
+# ASP.NET local secrets (never commit — use dotnet user-secrets instead)
+appsettings.Development.json
+
 # OS
 .DS_Store
 Thumbs.db

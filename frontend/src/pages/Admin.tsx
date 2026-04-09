@@ -1,6 +1,11 @@
 // src/pages/Admin.tsx
 import { useState, type Dispatch, type SetStateAction } from 'react';
-import { Navigate, Outlet, useLocation, useOutletContext } from 'react-router-dom';
+import {
+  Navigate,
+  Outlet,
+  useLocation,
+  useOutletContext,
+} from 'react-router-dom';
 
 import '../styles/Admin.css';
 
@@ -16,6 +21,10 @@ import SafehouseManagement from '../components/admin/SafehouseManagement';
 import UserManagement from '../components/admin/UserManagement';
 import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
 import Referrals from '../components/admin/Referrals';
+import SocialMediaStrategy from '../components/admin/SocialMediaStrategy';
+import DonationReportsPage from './admin/reports/DonationReportsPage';
+import ResidentOutcomesPage from './admin/reports/ResidentOutcomesPage';
+import SafehousePerformancePage from './admin/reports/SafehousePerformancePage';
 import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
 export const SECTION_TITLES: Record<string, string> = {
@@ -27,6 +36,10 @@ export const SECTION_TITLES: Record<string, string> = {
   'user-management': 'User Management',
   'home-visits': 'Home Visitation & Case Conferences',
   referrals: 'Referrals',
+  'social-strategy': 'Social Media Strategy',
+  'reports/donations': 'Donation Reports',
+  'reports/resident-outcomes': 'Resident Outcomes',
+  'reports/safehouse-performance': 'Safehouse Performance',
 };
 
 export type DashboardOutletState = ReturnType<typeof useAdminDashboard>;
@@ -44,19 +57,24 @@ export function AdminDashboard() {
   return (
     <div className="dashboard-shell">
       {dashError && (
-        <p style={{ padding: '1rem', color: 'var(--red)' }}>Error: {dashError}</p>
+        <p style={{ padding: '1rem', color: 'var(--red)' }}>
+          Error: {dashError}
+        </p>
       )}
       <div className="dashboard-hero">
         <div className="dashboard-hero__content">
           <span className="dashboard-hero__eyebrow">Operations Overview</span>
-          <h2>Daily admin snapshot</h2>
+          <h2>Daily Snapshot</h2>
           <p>
-            Monitor residents, conferences, donations, and operational activity from a single fuller dashboard view.
+            Monitor residents, conferences, donations, and operational activity
+            from a single fuller dashboard view.
           </p>
         </div>
         <div className="dashboard-hero__meta">
           <span className="dashboard-hero__meta-label">Status</span>
-          <strong>{dashLoading ? 'Refreshing data…' : 'Live operational view'}</strong>
+          <strong>
+            {dashLoading ? 'Refreshing data…' : 'Live operational view'}
+          </strong>
         </div>
       </div>
 
@@ -70,7 +88,10 @@ export function AdminDashboard() {
         </div>
         <div className="admin-mid-right">
           <div className="dashboard-panel">
-            <RecentActivity items={dash?.activity ?? []} loading={dashLoading} />
+            <RecentActivity
+              items={dash?.activity ?? []}
+              loading={dashLoading}
+            />
           </div>
         </div>
       </div>
@@ -89,7 +110,9 @@ export function AdminDashboard() {
 
 export function AdminResidentDirectory() {
   const { showCreate, setShowCreate } = useOutletContext<AdminOutletContext>();
-  return <ResidentDirectory showCreate={showCreate} setShowCreate={setShowCreate} />;
+  return (
+    <ResidentDirectory showCreate={showCreate} setShowCreate={setShowCreate} />
+  );
 }
 
 export function AdminDonors() {
@@ -116,6 +139,22 @@ export function AdminReferrals() {
   return <Referrals />;
 }
 
+export function AdminSocialStrategy() {
+  return <SocialMediaStrategy />;
+}
+
+export function AdminDonationReports() {
+  return <DonationReportsPage />;
+}
+
+export function AdminResidentOutcomes() {
+  return <ResidentOutcomesPage />;
+}
+
+export function AdminSafehousePerformance() {
+  return <SafehousePerformancePage />;
+}
+
 export function AdminCatchAll() {
   return <Navigate to="/admin/dashboard" replace />;
 }
@@ -125,8 +164,13 @@ export default function AdminLayout() {
   const [showCreate, setShowCreate] = useState(false);
   const dashboard = useAdminDashboard();
 
-  const segment = location.pathname.replace(/^\/admin\/?/, '').split('/')[0] || 'dashboard';
-  const title = SECTION_TITLES[segment] ?? SECTION_TITLES.dashboard;
+  const rawSegment =
+    location.pathname.replace(/^\/admin\/?/, '') || 'dashboard';
+  const segment = rawSegment.split('/')[0];
+  const title =
+    SECTION_TITLES[rawSegment] ??
+    SECTION_TITLES[segment] ??
+    SECTION_TITLES.dashboard;
 
   const outletContext: AdminOutletContext = {
     showCreate,
@@ -158,7 +202,11 @@ export default function AdminLayout() {
               </button>
             )}
             {segment === 'resident-directory' && (
-              <button type="button" className="btn-add" onClick={() => setShowCreate(true)}>
+              <button
+                type="button"
+                className="btn-add"
+                onClick={() => setShowCreate(true)}
+              >
                 + New Resident
               </button>
             )}

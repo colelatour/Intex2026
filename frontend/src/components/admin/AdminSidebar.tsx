@@ -1,6 +1,6 @@
 // src/components/admin/AdminSidebar.tsx
 import { type ReactNode, useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { getSession } from '../../lib/authApi';
 
 interface NavItem {
@@ -37,6 +37,12 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: 'Administration',
     items: [
       { id: 'user-management', label: 'User Management', icon: 'user', adminOnly: true },
+    ],
+  },
+  {
+    label: 'Insights',
+    items: [
+      { id: 'social-strategy', label: 'Social Media Strategy', icon: 'megaphone' },
     ],
   },
 ];
@@ -106,6 +112,12 @@ const ICONS: Record<string, ReactNode> = {
       <polyline points="9 22 9 12 15 12 15 22"/>
     </svg>
   ),
+  megaphone: (
+    <svg className="sidebar__icon" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+      <path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V7L6 11H4a1 1 0 0 0-1 1z"/>
+      <path d="M18.07 4.93a10 10 0 0 1 0 14.14M15.54 7.46a6 6 0 0 1 0 9.08"/>
+    </svg>
+  ),
   referral: (
     <svg className="sidebar__icon" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
       <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
@@ -115,10 +127,20 @@ const ICONS: Record<string, ReactNode> = {
   ),
 };
 
+const REPORT_LINKS = [
+  { to: '/admin/reports/donations', label: 'Donations' },
+  { to: '/admin/reports/resident-outcomes', label: 'Resident Outcomes' },
+  { to: '/admin/reports/safehouse-performance', label: 'Safehouse Performance' },
+];
+
 export default function AdminSidebar() {
+  const location = useLocation();
   const [isAdmin, setIsAdmin]       = useState(false);
   const [collapsed, setCollapsed]   = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [reportsOpen, setReportsOpen] = useState(
+    location.pathname.startsWith('/admin/reports')
+  );
 
   useEffect(() => {
     getSession().then(s => setIsAdmin(s.roles.includes('Admin')));
@@ -144,6 +166,40 @@ export default function AdminSidebar() {
             {!collapsed && item.label}
           </NavLink>
         ))}
+
+      {section.label === 'Administration' && isAdmin && !collapsed && (
+        <>
+          <button
+            type="button"
+            className="sidebar__link"
+            onClick={() => setReportsOpen(!reportsOpen)}
+          >
+            {ICONS.chart}
+            Reports &amp; Analytics
+            <svg
+              className="sidebar__icon"
+              style={{ marginLeft: 'auto', width: 14, height: 14, transition: 'transform 0.2s', transform: reportsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {reportsOpen && (
+            <div style={{ paddingLeft: '0.75rem' }}>
+              {REPORT_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
+                  onClick={handleNavClick}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   ));
 
@@ -163,6 +219,40 @@ export default function AdminSidebar() {
             {item.label}
           </NavLink>
         ))}
+
+      {section.label === 'Administration' && isAdmin && (
+        <>
+          <button
+            type="button"
+            className="sidebar__link"
+            onClick={() => setReportsOpen(!reportsOpen)}
+          >
+            {ICONS.chart}
+            Reports &amp; Analytics
+            <svg
+              className="sidebar__icon"
+              style={{ marginLeft: 'auto', width: 14, height: 14, transition: 'transform 0.2s', transform: reportsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {reportsOpen && (
+            <div style={{ paddingLeft: '0.75rem' }}>
+              {REPORT_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
+                  onClick={handleNavClick}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   ));
 

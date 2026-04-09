@@ -48,6 +48,9 @@ public partial class LighthouseContext : DbContext
 
     public virtual DbSet<Supporter> Supporters { get; set; }
 
+    public virtual DbSet<SocialMediaRecommendation> SocialMediaRecommendations { get; set; }
+    public virtual DbSet<ResidentReadinessScore> ResidentReadinessScores { get; set; }
+    public virtual DbSet<SocialMediaHighlight> SocialMediaHighlights { get; set; }
     public virtual DbSet<Tip> Tips { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -472,6 +475,41 @@ public partial class LighthouseContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.SupporterId).HasColumnName("supporter_id");
             entity.Property(e => e.SupporterType).HasColumnName("supporter_type");
+        });
+
+        modelBuilder.Entity<SocialMediaRecommendation>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToTable("social_media_recommendations");
+            entity.Property(e => e.Feature).HasColumnName("feature");
+            entity.Property(e => e.Coefficient).HasColumnName("coefficient");
+            entity.Property(e => e.PValue).HasColumnName("p_value");
+            entity.Property(e => e.Significant).HasColumnName("significant");
+            entity.Property(e => e.ModelType).HasColumnName("model_type");
+            entity.Property(e => e.ScoredAt).HasColumnName("scored_at").HasColumnType("datetime2");
+        });
+
+        modelBuilder.Entity<ResidentReadinessScore>(entity =>
+        {
+            entity.HasKey(e => e.ResidentId);
+            entity.ToTable("resident_readiness_scores");
+            entity.Property(e => e.ResidentId).HasColumnName("resident_id");
+            entity.Property(e => e.ReadinessProbability).HasColumnName("readiness_probability");
+            entity.Property(e => e.ReadinessLabel).HasColumnName("readiness_label");
+            entity.Property(e => e.ScoredAt).HasColumnName("scored_at").HasColumnType("datetime2");
+        });
+
+        modelBuilder.Entity<SocialMediaHighlight>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("social_media_highlights");
+            entity.Property(e => e.Category).HasColumnName("category");
+            entity.Property(e => e.Icon).HasColumnName("icon");
+            entity.Property(e => e.HighlightText).HasColumnName("highlight_text");
+            entity.Property(e => e.MetricValue).HasColumnName("metric_value");
+            entity.Property(e => e.RecommendedPlatform).HasColumnName("recommended_platform");
+            entity.Property(e => e.RecommendedPostType).HasColumnName("recommended_post_type");
+            entity.Property(e => e.PctAboveAverage).HasColumnName("pct_above_average");
         });
 
         OnModelCreatingPartial(modelBuilder);

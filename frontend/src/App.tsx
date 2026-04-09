@@ -15,6 +15,10 @@ import AdminLayout, {
   AdminUserManagement,
   AdminHomeVisits,
   AdminReferrals,
+  AdminSocialStrategy,
+  AdminDonationReports,
+  AdminResidentOutcomes,
+  AdminSafehousePerformance,
   AdminCatchAll,
 } from './pages/Admin';
 import Login from './pages/Login';
@@ -51,9 +55,41 @@ export default function App() {
           <Route path="donors" element={<AdminDonors />} />
           <Route path="process-recordings" element={<AdminProcessRecordings />} />
           <Route path="safehouse-management" element={<AdminSafehouseManagement />} />
-          <Route path="user-management" element={<AdminUserManagement />} />
+          <Route
+            path="user-management"
+            element={
+              <ProtectedRoute requiredRoles={['Admin']}>
+                <AdminUserManagement />
+              </ProtectedRoute>
+            }
+          />
           <Route path="home-visits" element={<AdminHomeVisits />} />
           <Route path="referrals" element={<AdminReferrals />} />
+          <Route path="social-strategy" element={<AdminSocialStrategy />} />
+          <Route
+            path="reports/donations"
+            element={
+              <ProtectedRoute requiredRoles={['Admin']}>
+                <AdminDonationReports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="reports/resident-outcomes"
+            element={
+              <ProtectedRoute requiredRoles={['Admin']}>
+                <AdminResidentOutcomes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="reports/safehouse-performance"
+            element={
+              <ProtectedRoute requiredRoles={['Admin']}>
+                <AdminSafehousePerformance />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<AdminCatchAll />} />
         </Route>
       </Routes>
