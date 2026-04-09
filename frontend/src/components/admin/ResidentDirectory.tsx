@@ -185,7 +185,10 @@ function DetailPanel({ resident, safehouses, residents, onEditStart, onDelete, o
       <div className="row g-3">
         {SECTIONS.map((section) => {
           if (section.type === 'tags') {
-            const active = section.fields.filter((f) => hasValue(resident[f.key] as string | null));
+            const active = section.fields.filter((f) => {
+              const v = resident[f.key] as string | null;
+              return hasValue(v) && v.toLowerCase() === 'true';
+            });
             if (active.length === 0) return null;
             return (
               <div className="col-12" key={section.title}>

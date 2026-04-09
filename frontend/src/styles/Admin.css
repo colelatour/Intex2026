@@ -112,10 +112,15 @@
   display: none;
 }
 
-/* Hide mobile drawer on desktop */
+/* Hide mobile drawer and overlay on desktop */
 .sidebar__nav {
   display: none;
 }
+
+.sidebar__overlay {
+  display: none;
+}
+
 
 /* Hide desktop button on mobile */
 @media (max-width: 768px) {
