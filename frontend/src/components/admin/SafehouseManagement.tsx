@@ -1,6 +1,6 @@
 // src/components/admin/SafehouseManagement.tsx
 import { useEffect, useState } from 'react';
-import { get, put, del } from '../../lib/api';
+import { get, post, put, del } from '../../lib/api';
 
 interface Safehouse {
   safehouseId: string | null;
@@ -51,7 +51,6 @@ const EDITABLE_FIELDS: { label: string; key: keyof Safehouse; type?: string; opt
   { label: 'Status',            key: 'status', options: ['Active', 'Inactive', 'Closed'] },
   { label: 'Capacity (Girls)',  key: 'capacityGirls', type: 'number' },
   { label: 'Capacity (Staff)',  key: 'capacityStaff', type: 'number' },
-  { label: 'Current Occupancy', key: 'currentOccupancy', type: 'number' },
   { label: 'Notes',             key: 'notes' },
 ];
 
@@ -71,15 +70,29 @@ export default function SafehouseManagement() {
   const [editForm, setEditForm]             = useState<Partial<Safehouse>>({});
   const [saving, setSaving]                 = useState(false);
   const [saveError, setSaveError]           = useState<string | null>(null);
+  const [showAddForm, setShowAddForm]       = useState(false);
+  const [addForm, setAddForm]               = useState<Partial<Safehouse>>({});
+  const [addError, setAddError]             = useState<string | null>(null);
+  const [adding, setAdding]                 = useState(false);
 
   useEffect(() => {
-    get<Safehouse[]>('/api/Safehouses')
-      .then((data) => {
-        setSafehouses(data);
+    Promise.all([
+      get<Safehouse[]>('/api/Safehouses'),
+      get<{ safehouseId: string | null }[]>('/api/Residents'),
+    ])
+      .then(([houses, residents]) => {
+        const counts: Record<string, number> = {};
+        for (const r of residents) {
+          if (r.safehouseId) counts[r.safehouseId] = (counts[r.safehouseId] ?? 0) + 1;
+        }
+        setSafehouses(houses.map((h) => ({
+          ...h,
+          currentOccupancy: String(counts[h.safehouseId ?? ''] ?? 0),
+        })));
         setLoading(false);
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : 'Failed to fetch safehouses');
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
         setLoading(false);
       });
   }, []);
@@ -117,6 +130,53 @@ export default function SafehouseManagement() {
       setSaveError(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setSaving(false);
+    }
+  }
+
+  function nextSafehouseCode(): string {
+    const codes = safehouses.map((s) => s.safehouseCode ?? '').filter(Boolean);
+    if (codes.length === 0) return 'SH001';
+    let bestPrefix = '';
+    let bestNum = 0;
+    let bestPad = 1;
+    for (const code of codes) {
+      const match = code.match(/^(.*?)(\d+)$/);
+      if (match) {
+        const n = Number(match[2]);
+        if (n > bestNum) {
+          bestNum = n;
+          bestPrefix = match[1];
+          bestPad = match[2].length;
+        }
+      }
+    }
+    const next = bestNum + 1;
+    return bestPrefix + String(next).padStart(bestPad, '0');
+  }
+
+  function handleAddOpen() {
+    const maxId = safehouses.reduce((max, s) => {
+      const n = Number(s.safehouseId ?? '');
+      return !isNaN(n) && n > max ? n : max;
+    }, 0);
+    setAddForm({ safehouseId: String(maxId + 1), safehouseCode: nextSafehouseCode(), currentOccupancy: '0' });
+    setAddError(null);
+    setShowAddForm(true);
+  }
+
+  async function handleAddSave() {
+    if (!addForm.safehouseId) return;
+    setAdding(true);
+    setAddError(null);
+    try {
+      const created = await post<Safehouse>('/api/Safehouses', addForm);
+      setSafehouses((prev) => [...prev, created]);
+      setShowAddForm(false);
+      setAddForm({});
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to create safehouse');
+    } finally {
+      setAdding(false);
     }
   }
 
@@ -164,6 +224,7 @@ export default function SafehouseManagement() {
       <div className="table-toolbar">
         <h3>Safehouse Management</h3>
         <div className="table-right">
+          <button className="btn-add" onClick={handleAddOpen}>+ Add Safehouse</button>
           <div className="search-bar">
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -302,6 +363,85 @@ export default function SafehouseManagement() {
 
           <div className="table-footer">
             <span>Showing {filtered.length} of {safehouses.length} safehouses</span>
+          </div>
+        </div>
+      )}
+
+      {/* Add Modal */}
+      {showAddForm && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+            zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+          onClick={() => setShowAddForm(false)}
+        >
+          <div
+            style={{
+              background: '#fff', borderRadius: '12px', padding: '2rem',
+              width: '100%', maxWidth: '560px', maxHeight: '90vh',
+              overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h4 style={{ marginBottom: '1.25rem', color: 'var(--navy)', fontFamily: 'DM Serif Display, serif' }}>
+              Add New Safehouse
+            </h4>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              {/* Read-only auto-incremented ID */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Safehouse ID (auto)
+                </label>
+                <input
+                  type="text"
+                  value={addForm.safehouseId ?? ''}
+                  readOnly
+                  style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--gray-200)', fontSize: '0.85rem', fontFamily: 'DM Sans, sans-serif', background: 'var(--gray-50)', color: 'var(--gray-400)' }}
+                />
+              </div>
+
+              {EDITABLE_FIELDS.map((f) => {
+                const isAutoCode = f.key === 'safehouseCode';
+                return (
+                  <div key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {f.label}{isAutoCode ? ' (auto)' : ''}
+                    </label>
+                    {f.options ? (
+                      <select
+                        value={(addForm[f.key] as string) ?? ''}
+                        onChange={(e) => setAddForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                        style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--gray-200)', fontSize: '0.85rem', fontFamily: 'DM Sans, sans-serif' }}
+                      >
+                        <option value="">— Select —</option>
+                        {f.options.map((o) => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    ) : (
+                      <input
+                        type={f.type ?? 'text'}
+                        value={(addForm[f.key] as string) ?? ''}
+                        readOnly={isAutoCode}
+                        onChange={(e) => !isAutoCode && setAddForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                        style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--gray-200)', fontSize: '0.85rem', fontFamily: 'DM Sans, sans-serif', ...(isAutoCode ? { background: 'var(--gray-50)', color: 'var(--gray-400)' } : {}) }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {addError && (
+              <p style={{ color: 'var(--red)', fontSize: '0.82rem', marginTop: '0.75rem' }}>{addError}</p>
+            )}
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+              <button className="btn-export" onClick={() => setShowAddForm(false)}>Cancel</button>
+              <button className="btn-add" onClick={handleAddSave} disabled={adding}>
+                {adding ? 'Creating…' : 'Create Safehouse'}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,94 +1,219 @@
 // src/pages/Admin.tsx
-import { useState } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
+import {
+  Navigate,
+  Outlet,
+  useLocation,
+  useOutletContext,
+} from 'react-router-dom';
+
 import '../styles/Admin.css';
 
-import AdminSidebar               from '../components/admin/AdminSidebar';
-import KpiCards                   from '../components/admin/KpiCards';
-import CaseloadTable              from '../components/admin/CaseloadTable';
-import RecentActivity             from '../components/admin/RecentActivity';
-import QuickActions               from '../components/admin/QuickActions';
-import BottomCharts               from '../components/admin/BottomCharts';
-import ResidentDirectory          from '../components/admin/ResidentDirectory';
-import DonorDashboard             from '../components/admin/DonorDashboard';
-import ProcessRecordings          from '../components/admin/ProcessRecordings';
-import SafehouseManagement        from '../components/admin/SafehouseManagement';
-import UserManagement             from '../components/admin/UserManagement';
-import HomeVisitationConferences  from '../components/admin/HomeVisitationConferences';
-import SocialMediaStrategy        from '../components/admin/SocialMediaStrategy';
+import AdminSidebar from '../components/admin/AdminSidebar';
+import KpiCards from '../components/admin/KpiCards';
+import CaseloadTable from '../components/admin/CaseloadTable';
+import RecentActivity from '../components/admin/RecentActivity';
+import BottomCharts from '../components/admin/BottomCharts';
+import ResidentDirectory from '../components/admin/ResidentDirectory';
+import DonorDashboard from '../components/admin/DonorDashboard';
+import ProcessRecordings from '../components/admin/ProcessRecordings';
+import SafehouseManagement from '../components/admin/SafehouseManagement';
+import UserManagement from '../components/admin/UserManagement';
+import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
+import Referrals from '../components/admin/Referrals';
+import SocialMediaStrategy from '../components/admin/SocialMediaStrategy';
+import DonationReportsPage from './admin/reports/DonationReportsPage';
+import ResidentOutcomesPage from './admin/reports/ResidentOutcomesPage';
+import SafehousePerformancePage from './admin/reports/SafehousePerformancePage';
 import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
-const SECTION_TITLES: Record<string, string> = {
-  'dashboard':            'Admin Dashboard',
-  'resident-directory':   'Resident Directory',
-  'donors':               'Donor Dashboard',
-  'process-recordings':   'Process Recordings',
+export const SECTION_TITLES: Record<string, string> = {
+  dashboard: 'Admin Dashboard',
+  'resident-directory': 'Resident Directory',
+  donors: 'Donor Dashboard',
+  'process-recordings': 'Process Recordings',
   'safehouse-management': 'Safehouse Management',
-  'user-management':      'User Management',
-  'home-visits':          'Home Visitation & Case Conferences',
-  'social-strategy':      'Social Media Strategy',
+  'user-management': 'User Management',
+  'home-visits': 'Home Visitation & Case Conferences',
+  referrals: 'Referrals',
+  'social-strategy': 'Social Media Strategy',
+  'reports/donations': 'Donation Reports',
+  'reports/resident-outcomes': 'Resident Outcomes',
+  'reports/safehouse-performance': 'Safehouse Performance',
 };
 
-export default function Admin() {
-  const [activeSection, setActiveSection] = useState('dashboard');
-  const [showCreate, setShowCreate]       = useState(false);
-  const { data: dash, loading: dashLoading, error: dashError, refresh } = useAdminDashboard();
+export type DashboardOutletState = ReturnType<typeof useAdminDashboard>;
+
+export type AdminOutletContext = {
+  showCreate: boolean;
+  setShowCreate: Dispatch<SetStateAction<boolean>>;
+  dashboard: DashboardOutletState;
+};
+
+export function AdminDashboard() {
+  const { dashboard } = useOutletContext<AdminOutletContext>();
+  const { data: dash, loading: dashLoading, error: dashError } = dashboard;
+
+  return (
+    <div className="dashboard-shell">
+      {dashError && (
+        <p style={{ padding: '1rem', color: 'var(--red)' }}>
+          Error: {dashError}
+        </p>
+      )}
+      <div className="dashboard-hero">
+        <div className="dashboard-hero__content">
+          <span className="dashboard-hero__eyebrow">Operations Overview</span>
+          <h2>Daily Snapshot</h2>
+          <p>
+            Monitor residents, conferences, donations, and operational activity
+            from a single fuller dashboard view.
+          </p>
+        </div>
+        <div className="dashboard-hero__meta">
+          <span className="dashboard-hero__meta-label">Status</span>
+          <strong>
+            {dashLoading ? 'Refreshing data…' : 'Live operational view'}
+          </strong>
+        </div>
+      </div>
+
+      <div className="dashboard-section dashboard-section--kpis">
+        <KpiCards kpis={dash?.kpis ?? null} loading={dashLoading} />
+      </div>
+
+      <div className="admin-mid-row dashboard-section">
+        <div className="dashboard-panel dashboard-panel--table">
+          <CaseloadTable rows={dash?.caseload ?? []} loading={dashLoading} />
+        </div>
+        <div className="admin-mid-right">
+          <div className="dashboard-panel">
+            <RecentActivity
+              items={dash?.activity ?? []}
+              loading={dashLoading}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-section">
+        <BottomCharts
+          donationsMonthly={dash?.donationsMonthly ?? []}
+          residentOutcomes={dash?.residentOutcomes ?? []}
+          upcomingEvents={dash?.upcomingEvents ?? []}
+          loading={dashLoading}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function AdminResidentDirectory() {
+  const { showCreate, setShowCreate } = useOutletContext<AdminOutletContext>();
+  return (
+    <ResidentDirectory showCreate={showCreate} setShowCreate={setShowCreate} />
+  );
+}
+
+export function AdminDonors() {
+  return <DonorDashboard />;
+}
+
+export function AdminProcessRecordings() {
+  return <ProcessRecordings />;
+}
+
+export function AdminSafehouseManagement() {
+  return <SafehouseManagement />;
+}
+
+export function AdminUserManagement() {
+  return <UserManagement />;
+}
+
+export function AdminHomeVisits() {
+  return <HomeVisitationConferences />;
+}
+
+export function AdminReferrals() {
+  return <Referrals />;
+}
+
+export function AdminSocialStrategy() {
+  return <SocialMediaStrategy />;
+}
+
+export function AdminDonationReports() {
+  return <DonationReportsPage />;
+}
+
+export function AdminResidentOutcomes() {
+  return <ResidentOutcomesPage />;
+}
+
+export function AdminSafehousePerformance() {
+  return <SafehousePerformancePage />;
+}
+
+export function AdminCatchAll() {
+  return <Navigate to="/admin/dashboard" replace />;
+}
+
+export default function AdminLayout() {
+  const location = useLocation();
+  const [showCreate, setShowCreate] = useState(false);
+  const dashboard = useAdminDashboard();
+
+  const rawSegment =
+    location.pathname.replace(/^\/admin\/?/, '') || 'dashboard';
+  const segment = rawSegment.split('/')[0];
+  const title =
+    SECTION_TITLES[rawSegment] ??
+    SECTION_TITLES[segment] ??
+    SECTION_TITLES.dashboard;
+
+  const outletContext: AdminOutletContext = {
+    showCreate,
+    setShowCreate,
+    dashboard,
+  };
 
   return (
     <div className="admin-layout">
-      <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      <AdminSidebar />
 
       <div className="admin-main">
-        {/* Top bar */}
         <div className="admin-topbar">
           <div>
             <div className="breadcrumb">
-              Admin Panel · <span>{SECTION_TITLES[activeSection]}</span>
+              Admin Panel · <span>{title}</span>
             </div>
-            <h1>{SECTION_TITLES[activeSection]}</h1>
+            <h1>{title}</h1>
           </div>
           <div className="admin-actions">
-            {activeSection === 'dashboard' && (
-              <button className="filter-btn" onClick={refresh} disabled={dashLoading}>
-                {dashLoading ? 'Refreshing…' : '↻ Refresh'}
+            {segment === 'dashboard' && (
+              <button
+                type="button"
+                className="filter-btn"
+                onClick={dashboard.refresh}
+                disabled={dashboard.loading}
+              >
+                {dashboard.loading ? 'Refreshing…' : '↻ Refresh'}
               </button>
             )}
-            {activeSection === 'resident-directory' && (
-              <button className="btn-add" onClick={() => setShowCreate(true)}>+ New Resident</button>
+            {segment === 'resident-directory' && (
+              <button
+                type="button"
+                className="btn-add"
+                onClick={() => setShowCreate(true)}
+              >
+                + New Resident
+              </button>
             )}
           </div>
         </div>
 
-        {/* Content */}
-        {activeSection === 'dashboard' && (
-          <>
-            {dashError && (
-              <p style={{ padding: '1rem', color: 'var(--red)' }}>Error: {dashError}</p>
-            )}
-            <KpiCards kpis={dash?.kpis ?? null} loading={dashLoading} />
-            <div className="admin-mid-row">
-              <CaseloadTable rows={dash?.caseload ?? []} loading={dashLoading} />
-              <div className="admin-mid-right">
-                <RecentActivity items={dash?.activity ?? []} loading={dashLoading} />
-                <QuickActions />
-              </div>
-            </div>
-            <BottomCharts
-              donationsMonthly={dash?.donationsMonthly ?? []}
-              residentOutcomes={dash?.residentOutcomes ?? []}
-              upcomingEvents={dash?.upcomingEvents ?? []}
-              loading={dashLoading}
-            />
-          </>
-        )}
-        {activeSection === 'resident-directory' && (
-          <ResidentDirectory showCreate={showCreate} setShowCreate={setShowCreate} />
-        )}
-        {activeSection === 'donors' && <DonorDashboard />}
-        {activeSection === 'process-recordings' && <ProcessRecordings />}
-        {activeSection === 'safehouse-management' && <SafehouseManagement />}
-        {activeSection === 'user-management' && <UserManagement />}
-        {activeSection === 'home-visits' && <HomeVisitationConferences />}
-        {activeSection === 'social-strategy' && <SocialMediaStrategy />}
+        <Outlet context={outletContext} />
       </div>
     </div>
   );

@@ -51,6 +51,7 @@ public partial class LighthouseContext : DbContext
     public virtual DbSet<SocialMediaRecommendation> SocialMediaRecommendations { get; set; }
     public virtual DbSet<ResidentReadinessScore> ResidentReadinessScores { get; set; }
     public virtual DbSet<SocialMediaHighlight> SocialMediaHighlights { get; set; }
+    public virtual DbSet<Tip> Tips { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -438,6 +439,19 @@ public partial class LighthouseContext : DbContext
             entity.Property(e => e.SubscriberCountAtPost).HasColumnName("subscriber_count_at_post");
             entity.Property(e => e.VideoViews).HasColumnName("video_views");
             entity.Property(e => e.WatchTimeSeconds).HasColumnName("watch_time_seconds");
+        });
+
+        modelBuilder.Entity<Tip>(entity =>
+        {
+            entity.HasKey(e => e.TipId);
+            entity.ToTable("tips");
+
+            entity.Property(e => e.TipId).HasColumnName("tip_id").ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.Region).HasColumnName("region");
+            entity.Property(e => e.SubmittedAt).HasColumnName("submitted_at");
+            entity.Property(e => e.Contacted).HasColumnName("contacted");
         });
 
         modelBuilder.Entity<Supporter>(entity =>

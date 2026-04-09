@@ -14,6 +14,26 @@
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
 }
 
+/* Desktop: full-height link column so items stay vertically centered in the bar */
+@media (min-width: 961px) {
+  .navbar {
+    align-items: stretch;
+  }
+
+  .navbar__logo {
+    align-self: center;
+  }
+
+  .navbar__hamburger {
+    align-self: center;
+  }
+
+  .navbar__links {
+    align-self: stretch;
+    min-height: 56px;
+  }
+}
+
 .navbar__logo {
   font-family: 'DM Sans', sans-serif;
   font-weight: 600;
@@ -52,10 +72,18 @@
 }
 
 .navbar__links {
+  margin: 0;
+  padding: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   list-style: none;
+}
+
+/* Center link / profile content within each row item (avoids top-heavy inline text in stretched rows) */
+.navbar__links > li {
+  display: flex;
+  align-items: center;
 }
 
 .navbar__links a {
@@ -318,6 +346,8 @@
   }
 
   .navbar__profile-wrapper {
+    flex-direction: column;
+    align-items: stretch;
     padding: 8px 0 0;
     border-bottom: none !important;
   }
