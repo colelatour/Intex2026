@@ -112,6 +112,11 @@
   display: none;
 }
 
+/* Hide mobile drawer on desktop */
+.sidebar__nav {
+  display: none;
+}
+
 /* Hide desktop button on mobile */
 @media (max-width: 768px) {
   .sidebar__collapse-btn--desktop {
