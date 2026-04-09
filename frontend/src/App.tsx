@@ -14,6 +14,7 @@ import AdminLayout, {
   AdminSafehouseManagement,
   AdminUserManagement,
   AdminHomeVisits,
+  AdminReferrals,
   AdminCatchAll,
 } from './pages/Admin';
 import Login from './pages/Login';
@@ -21,6 +22,7 @@ import ImpactDashboard from './pages/ImpactDashboard';
 import RegionsPage from './pages/RegionsPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Account from './pages/Account';
+import SubmitTip from './pages/SubmitTip';
 
 export default function App() {
   return (
@@ -34,6 +36,7 @@ export default function App() {
         <Route path="/regions" element={<RegionsPage />} />
         <Route path="/account" element={<Account />} />
         <Route path="/donate" element={<Donate />} />
+        <Route path="/submit-tip" element={<SubmitTip />} />
         <Route
           path="/admin"
           element={
@@ -50,6 +53,7 @@ export default function App() {
           <Route path="safehouse-management" element={<AdminSafehouseManagement />} />
           <Route path="user-management" element={<AdminUserManagement />} />
           <Route path="home-visits" element={<AdminHomeVisits />} />
+          <Route path="referrals" element={<AdminReferrals />} />
           <Route path="*" element={<AdminCatchAll />} />
         </Route>
       </Routes>

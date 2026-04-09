@@ -33,6 +33,9 @@ export default function HeroSection() {
             <button className="btn-outline-navy">
               Learn Our Mission
             </button>
+            <button className="btn-outline-navy" onClick={() => navigate('/submit-tip')}>
+              Submit a Tip
+            </button>
           </div>
         </div>
 

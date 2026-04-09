@@ -4,6 +4,7 @@ export interface DashboardKpis {
   donationsLastMonth: number;
   upcomingConferences: number;
   atRiskResidents: number;
+  totalReferrals: number;
 }
 
 export interface CaseloadRow {

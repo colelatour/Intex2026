@@ -21,6 +21,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { id: 'safehouse-management', label: 'Safehouse Management', icon: 'home' },
       { id: 'user-management',      label: 'User Management',      icon: 'user', adminOnly: true },
       { id: 'home-visits',          label: 'Visits & Conferences', icon: 'house'     },
+      { id: 'referrals',             label: 'Referrals',            icon: 'clipboard' },
     ],
   },
 ];

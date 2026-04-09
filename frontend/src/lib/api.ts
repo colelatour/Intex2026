@@ -85,6 +85,13 @@ export function put<T>(path: string, body?: unknown): Promise<T> {
   });
 }
 
+export function patch<T>(path: string, body?: unknown): Promise<T> {
+  return api<T>(path, {
+    method: "PATCH",
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
 export function del<T>(path: string): Promise<T> {
   if (!window.confirm("Are you sure you want to delete this record? This action cannot be undone.")) {
     return Promise.reject(new Error("Delete cancelled by user"));

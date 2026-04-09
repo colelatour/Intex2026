@@ -15,6 +15,7 @@ import ProcessRecordings from '../components/admin/ProcessRecordings';
 import SafehouseManagement from '../components/admin/SafehouseManagement';
 import UserManagement from '../components/admin/UserManagement';
 import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
+import Referrals from '../components/admin/Referrals';
 import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
 export const SECTION_TITLES: Record<string, string> = {
@@ -25,6 +26,7 @@ export const SECTION_TITLES: Record<string, string> = {
   'safehouse-management': 'Safehouse Management',
   'user-management': 'User Management',
   'home-visits': 'Home Visitation & Case Conferences',
+  referrals: 'Referrals',
 };
 
 export type DashboardOutletState = ReturnType<typeof useAdminDashboard>;
@@ -108,6 +110,10 @@ export function AdminUserManagement() {
 
 export function AdminHomeVisits() {
   return <HomeVisitationConferences />;
+}
+
+export function AdminReferrals() {
+  return <Referrals />;
 }
 
 export function AdminCatchAll() {
