@@ -134,10 +134,20 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<AuthIdentityDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AuthPolicies.AdminOnly, policy =>
+        policy.RequireRole(AuthRoles.Admin));
+    options.AddPolicy(AuthPolicies.AdminWorker, policy =>
+        policy.RequireRole(AuthRoles.Admin, AuthRoles.Worker));
+    options.AddPolicy(AuthPolicies.DonorAccess, policy =>
+        policy.RequireRole(AuthRoles.Donor, AuthRoles.Admin));
+});
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.Name = "SafeHavenAuth";
     options.Events.OnRedirectToLogin = context =>
@@ -191,6 +201,11 @@ if (app.Environment.IsDevelopment())
 }
 
 
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
 
 // CSP Header
@@ -206,6 +221,9 @@ app.Use(async (context, next) =>
         "connect-src 'self'; " +
         "frame-ancestors 'none';"
     );
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     await next();
 });
 

@@ -38,7 +38,7 @@ export default function App() {
         <Route path="/impact" element={<ImpactDashboard />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/regions" element={<RegionsPage />} />
-        <Route path="/account" element={<Account />} />
+        <Route path="/account" element={<ProtectedRoute requiredRoles={['Donor', 'Admin', 'Worker']}><Account /></ProtectedRoute>} />
         <Route path="/donate" element={<Donate />} />
         <Route path="/submit-tip" element={<SubmitTip />} />
         <Route
