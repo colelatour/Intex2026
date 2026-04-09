@@ -12,7 +12,7 @@ const AMOUNTS = [
 ];
 const REGIONS = ['Luzon', 'Visayas', 'Mindanao'] as const;
 
-export default function DonationForm() {
+export default function DonationForm({ onDonationSuccess }: { onDonationSuccess?: () => void }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [selectedAmt, setSelectedAmt] = useState<number>(50);
@@ -92,6 +92,7 @@ export default function DonationForm() {
       });
 
       setSubmitSuccess(`Donation recorded successfully. Reference: ${result.donationId}`);
+      onDonationSuccess?.();
       setCustomAmt('');
       setSelectedAmt(50);
       setGiftType('one-time');

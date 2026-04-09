@@ -1,5 +1,5 @@
 // src/pages/Donate.tsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../styles/Donate.css';
 
@@ -9,6 +9,7 @@ import Footer from '../components/layout/Footer';
 
 export default function Donate() {
   const location = useLocation();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -27,8 +28,8 @@ export default function Donate() {
 
       <section className="donate-body donate-lean-body">
         <div className="donate-lean-grid">
-          <DonationForm />
-          <DonationInfo />
+          <DonationForm onDonationSuccess={() => setRefreshKey((k) => k + 1)} />
+          <DonationInfo refreshKey={refreshKey} />
         </div>
       </section>
 
