@@ -357,7 +357,6 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  min-width: 120px;
   font-family: 'DM Sans', sans-serif;
 }
 
@@ -707,7 +706,8 @@
   font-size: 0.8rem;
   color: var(--gray-600);
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
 .next-link {
@@ -989,7 +989,9 @@
 
 .pr-search {
   margin-bottom: 0.75rem;
-  min-width: 0;
+  width: 100%;
+  max-width: 280px;
+  flex: none;
 }
 
 .pr-resident-list {
@@ -1642,24 +1644,12 @@
 .supporter-pagination {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-top: 1rem;
-  font-size: 0.875rem;
-  color: #555;
-}
-
-.supporter-pagination button {
-  padding: 0.3rem 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.supporter-pagination button:disabled {
-  opacity: 0.4;
-  cursor: default;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  width: fit-content;
 }
 
 .supporter-error { color: #A32D2D; padding: 0.5rem 0; font-size: 0.875rem; }

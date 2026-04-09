@@ -678,7 +678,7 @@ export default function ProcessRecordings() {
 
             {/* Pagination */}
             {filteredRecordings.length > pageSize && (
-              <div className="table-footer">
+              <div className="supporter-pagination">
                 <span>
                   Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredRecordings.length)} of {filteredRecordings.length}
                 </span>
