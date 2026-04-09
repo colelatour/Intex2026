@@ -1,7 +1,7 @@
 // src/components/home/HeroSection.tsx
 import { useNavigate } from 'react-router-dom';
 import groupPhoto from '../../images/group_photo.png';
-import imageLogo from '../../images/sheltered_light_image_logo.png';
+import imageLogo from '../../images/sheltered_light_image_title_logo.png';
 
 export default function HeroSection() {
   const navigate = useNavigate();
