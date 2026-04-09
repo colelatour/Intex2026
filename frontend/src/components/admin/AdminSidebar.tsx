@@ -12,16 +12,31 @@ interface NavItem {
 
 const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
-    label: 'Main',
+    label: 'Overview',
     items: [
-      { id: 'dashboard',          label: 'Dashboard',          icon: 'grid'      },
-      { id: 'resident-directory', label: 'Resident Directory', icon: 'users'     },
-      { id: 'donors',             label: 'Donor Dashboard',    icon: 'heart'     },
-      { id: 'process-recordings', label: 'Process Recordings', icon: 'clipboard' },
-      { id: 'safehouse-management', label: 'Safehouse Management', icon: 'home' },
-      { id: 'user-management',      label: 'User Management',      icon: 'user', adminOnly: true },
-      { id: 'home-visits',          label: 'Visits & Conferences', icon: 'house'     },
-      { id: 'referrals',             label: 'Referrals',            icon: 'clipboard' },
+      { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
+    ],
+  },
+  {
+    label: 'Residents',
+    items: [
+      { id: 'resident-directory', label: 'Resident Directory',  icon: 'users'     },
+      { id: 'process-recordings', label: 'Process Recordings',  icon: 'clipboard' },
+      { id: 'home-visits',        label: 'Visits & Conferences', icon: 'house'    },
+      { id: 'referrals',          label: 'Referrals',           icon: 'referral'  },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { id: 'safehouse-management', label: 'Safehouse Management', icon: 'home'  },
+      { id: 'donors',               label: 'Donor Dashboard',      icon: 'heart' },
+    ],
+  },
+  {
+    label: 'Administration',
+    items: [
+      { id: 'user-management', label: 'User Management', icon: 'user', adminOnly: true },
     ],
   },
 ];
@@ -89,6 +104,13 @@ const ICONS: Record<string, ReactNode> = {
     <svg className="sidebar__icon" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  ),
+  referral: (
+    <svg className="sidebar__icon" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+      <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+      <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+      <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
     </svg>
   ),
 };
