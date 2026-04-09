@@ -177,7 +177,8 @@
 /* ─── Main Content ──────────────────────── */
 .admin-main {
   flex: 1;
-  overflow: auto;
+  min-width: 0;
+  overflow: visible;
   padding: 1.75rem 2rem;
 }
 
@@ -1929,7 +1930,7 @@
 .sms-root {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* Let content define height so the page uses a single document scrollbar */
 }
 
 .sms-tabs {
@@ -1967,8 +1968,6 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  overflow-y: auto;
-  flex: 1;
 }
 
 .sms-section {
