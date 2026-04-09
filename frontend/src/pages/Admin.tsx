@@ -14,6 +14,7 @@ import ProcessRecordings          from '../components/admin/ProcessRecordings';
 import SafehouseManagement        from '../components/admin/SafehouseManagement';
 import UserManagement             from '../components/admin/UserManagement';
 import HomeVisitationConferences  from '../components/admin/HomeVisitationConferences';
+import SocialMediaStrategy        from '../components/admin/SocialMediaStrategy';
 import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
 const SECTION_TITLES: Record<string, string> = {
@@ -24,6 +25,7 @@ const SECTION_TITLES: Record<string, string> = {
   'safehouse-management': 'Safehouse Management',
   'user-management':      'User Management',
   'home-visits':          'Home Visitation & Case Conferences',
+  'social-strategy':      'Social Media Strategy',
 };
 
 export default function Admin() {
@@ -86,6 +88,7 @@ export default function Admin() {
         {activeSection === 'safehouse-management' && <SafehouseManagement />}
         {activeSection === 'user-management' && <UserManagement />}
         {activeSection === 'home-visits' && <HomeVisitationConferences />}
+        {activeSection === 'social-strategy' && <SocialMediaStrategy />}
       </div>
     </div>
   );
