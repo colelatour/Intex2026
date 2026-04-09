@@ -65,7 +65,14 @@ export default function App() {
           />
           <Route path="home-visits" element={<AdminHomeVisits />} />
           <Route path="referrals" element={<AdminReferrals />} />
-          <Route path="social-strategy" element={<AdminSocialStrategy />} />
+          <Route
+            path="social-strategy"
+            element={
+              <ProtectedRoute requiredRoles={['Admin']}>
+                <AdminSocialStrategy />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="reports/donations"
             element={
