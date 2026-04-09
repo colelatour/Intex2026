@@ -11,7 +11,8 @@ public record DashboardKpis(
     decimal DonationsThisMonth,
     decimal DonationsLastMonth,
     int UpcomingConferences,
-    int AtRiskResidents);
+    int AtRiskResidents,
+    int TotalReferrals);
 
 public record CaseloadRow(
     string ResidentId,
@@ -100,8 +101,13 @@ public class AdminDashboardController : ControllerBase
         var atRisk = residents.Count(r =>
             r.DateClosed == null && IsAtRisk(r));
 
+        // ── KPI: Total Referrals (tips) ────────────────────────
+        int totalReferrals;
+        try { totalReferrals = await _ctx.Tips.AsNoTracking().CountAsync(); }
+        catch { totalReferrals = 0; }
+
         var kpis = new DashboardKpis(activeResidents, donationsThisMonth, donationsLastMonth,
-                                     upcomingConferences, atRisk);
+                                     upcomingConferences, atRisk, totalReferrals);
 
         // ── Caseload ────────────────────────────────────────────
         var caseload = residents

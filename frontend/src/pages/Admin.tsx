@@ -8,7 +8,6 @@ import AdminSidebar from '../components/admin/AdminSidebar';
 import KpiCards from '../components/admin/KpiCards';
 import CaseloadTable from '../components/admin/CaseloadTable';
 import RecentActivity from '../components/admin/RecentActivity';
-import QuickActions from '../components/admin/QuickActions';
 import BottomCharts from '../components/admin/BottomCharts';
 import ResidentDirectory from '../components/admin/ResidentDirectory';
 import DonorDashboard from '../components/admin/DonorDashboard';
@@ -16,6 +15,7 @@ import ProcessRecordings from '../components/admin/ProcessRecordings';
 import SafehouseManagement from '../components/admin/SafehouseManagement';
 import UserManagement from '../components/admin/UserManagement';
 import HomeVisitationConferences from '../components/admin/HomeVisitationConferences';
+import Referrals from '../components/admin/Referrals';
 import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
 export const SECTION_TITLES: Record<string, string> = {
@@ -26,6 +26,7 @@ export const SECTION_TITLES: Record<string, string> = {
   'safehouse-management': 'Safehouse Management',
   'user-management': 'User Management',
   'home-visits': 'Home Visitation & Case Conferences',
+  referrals: 'Referrals',
 };
 
 export type DashboardOutletState = ReturnType<typeof useAdminDashboard>;
@@ -41,25 +42,48 @@ export function AdminDashboard() {
   const { data: dash, loading: dashLoading, error: dashError } = dashboard;
 
   return (
-    <>
+    <div className="dashboard-shell">
       {dashError && (
         <p style={{ padding: '1rem', color: 'var(--red)' }}>Error: {dashError}</p>
       )}
-      <KpiCards kpis={dash?.kpis ?? null} loading={dashLoading} />
-      <div className="admin-mid-row">
-        <CaseloadTable rows={dash?.caseload ?? []} loading={dashLoading} />
-        <div className="admin-mid-right">
-          <RecentActivity items={dash?.activity ?? []} loading={dashLoading} />
-          <QuickActions />
+      <div className="dashboard-hero">
+        <div className="dashboard-hero__content">
+          <span className="dashboard-hero__eyebrow">Operations Overview</span>
+          <h2>Daily admin snapshot</h2>
+          <p>
+            Monitor residents, conferences, donations, and operational activity from a single fuller dashboard view.
+          </p>
+        </div>
+        <div className="dashboard-hero__meta">
+          <span className="dashboard-hero__meta-label">Status</span>
+          <strong>{dashLoading ? 'Refreshing data…' : 'Live operational view'}</strong>
         </div>
       </div>
-      <BottomCharts
-        donationsMonthly={dash?.donationsMonthly ?? []}
-        residentOutcomes={dash?.residentOutcomes ?? []}
-        upcomingEvents={dash?.upcomingEvents ?? []}
-        loading={dashLoading}
-      />
-    </>
+
+      <div className="dashboard-section dashboard-section--kpis">
+        <KpiCards kpis={dash?.kpis ?? null} loading={dashLoading} />
+      </div>
+
+      <div className="admin-mid-row dashboard-section">
+        <div className="dashboard-panel dashboard-panel--table">
+          <CaseloadTable rows={dash?.caseload ?? []} loading={dashLoading} />
+        </div>
+        <div className="admin-mid-right">
+          <div className="dashboard-panel">
+            <RecentActivity items={dash?.activity ?? []} loading={dashLoading} />
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-section">
+        <BottomCharts
+          donationsMonthly={dash?.donationsMonthly ?? []}
+          residentOutcomes={dash?.residentOutcomes ?? []}
+          upcomingEvents={dash?.upcomingEvents ?? []}
+          loading={dashLoading}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -86,6 +110,10 @@ export function AdminUserManagement() {
 
 export function AdminHomeVisits() {
   return <HomeVisitationConferences />;
+}
+
+export function AdminReferrals() {
+  return <Referrals />;
 }
 
 export function AdminCatchAll() {

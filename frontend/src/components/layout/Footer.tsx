@@ -27,7 +27,6 @@ export default function Footer({ variant = 'default' }: FooterProps) {
         >
           Cookie Settings
         </button>
-<Link to="/login">Admin Login</Link>
       </div>
     </footer>
   );
