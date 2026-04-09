@@ -91,6 +91,7 @@ export default function ResidentOutcomesPage() {
   const [outcomes, setOutcomes] = useState<ResidentOutcomeBar[]>([]);
   const [exitPathways, setExitPathways] = useState<ResidentExitPathway[]>([]);
   const [filters, setFilters] = useState<ResidentFilterOptions | null>(null);
+  const [filtersReady, setFiltersReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,11 +105,19 @@ export default function ResidentOutcomesPage() {
         if (data.latestAdmissionDate) {
           setEndDate(data.latestAdmissionDate);
         }
+        setFiltersReady(true);
       })
-      .catch(() => setFilters(null));
+      .catch(() => {
+        setFilters(null);
+        setFiltersReady(true);
+      });
   }, []);
 
   useEffect(() => {
+    if (!filtersReady) {
+      return;
+    }
+
     const query: ResidentReportQuery = {
       startDate,
       endDate,
@@ -118,6 +127,7 @@ export default function ResidentOutcomesPage() {
       granularity,
     };
 
+    let cancelled = false;
     setLoading(true);
     setError(null);
 
@@ -130,6 +140,9 @@ export default function ResidentOutcomesPage() {
       getResidentReportExitPathways(query),
     ])
       .then(([summaryData, trendData, statusData, lengthData, outcomeData, exitData]) => {
+        if (cancelled) {
+          return;
+        }
         setSummary(summaryData);
         setTrends(trendData);
         setStatusBreakdown(statusData);
@@ -138,10 +151,21 @@ export default function ResidentOutcomesPage() {
         setExitPathways(exitData);
       })
       .catch((err: unknown) => {
+        if (cancelled) {
+          return;
+        }
         setError(err instanceof Error ? err.message : 'Failed to load resident outcomes.');
       })
-      .finally(() => setLoading(false));
-  }, [caseCategory, endDate, granularity, safehouseId, startDate, status]);
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [caseCategory, endDate, filtersReady, granularity, safehouseId, startDate, status]);
 
   const hasData = (summary?.totalResidentsInRange ?? 0) > 0;
 
