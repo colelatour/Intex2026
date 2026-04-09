@@ -37,12 +37,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: 'Administration',
     items: [
       { id: 'user-management', label: 'User Management', icon: 'user', adminOnly: true },
-    ],
-  },
-  {
-    label: 'Insights',
-    items: [
-      { id: 'social-strategy', label: 'Social Media Strategy', icon: 'megaphone' },
+      { id: 'social-strategy', label: 'Social Media Strategy', icon: 'megaphone', adminOnly: true },
     ],
   },
 ];
@@ -149,12 +144,18 @@ export default function AdminSidebar() {
   // Close drawer on route change on mobile
   const handleNavClick = () => setMobileOpen(false);
 
-  const desktopNav = NAV_SECTIONS.map((section) => (
+const desktopNav = NAV_SECTIONS.map((section) => {
+    const visibleItems = section.items.filter(item => !item.adminOnly || isAdmin);
+    const showReportsSection = section.label === 'Administration' && isAdmin;
+
+    if (visibleItems.length === 0 && !showReportsSection) {
+      return null;
+    }
+
+    return (
     <div key={section.label}>
       {!collapsed && <div className="sidebar__section-label">{section.label}</div>}
-      {section.items
-        .filter(item => !item.adminOnly || isAdmin)
-        .map((item) => (
+      {visibleItems.map((item) => (
           <NavLink
             key={item.id}
             to={`/admin/${item.id}`}
@@ -201,14 +202,20 @@ export default function AdminSidebar() {
         </>
       )}
     </div>
-  ));
+  )});
 
-  const mobileNav = NAV_SECTIONS.map((section) => (
+  const mobileNav = NAV_SECTIONS.map((section) => {
+    const visibleItems = section.items.filter(item => !item.adminOnly || isAdmin);
+    const showReportsSection = section.label === 'Administration' && isAdmin;
+
+    if (visibleItems.length === 0 && !showReportsSection) {
+      return null;
+    }
+
+    return (
     <div key={section.label}>
       <div className="sidebar__section-label">{section.label}</div>
-      {section.items
-        .filter(item => !item.adminOnly || isAdmin)
-        .map((item) => (
+      {visibleItems.map((item) => (
           <NavLink
             key={item.id}
             to={`/admin/${item.id}`}
@@ -254,7 +261,7 @@ export default function AdminSidebar() {
         </>
       )}
     </div>
-  ));
+  )});
 
   return (
     <>
