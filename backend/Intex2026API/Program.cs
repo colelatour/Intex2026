@@ -215,7 +215,7 @@ app.Use(async (context, next) =>
         "Content-Security-Policy",
         "default-src 'self'; " +
         "script-src 'self'; " +
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+        "style-src 'self' https://fonts.googleapis.com; " +
         "img-src 'self' data: https:; " +
         "font-src 'self' https://fonts.gstatic.com; " +
         "connect-src 'self'; " +
@@ -224,6 +224,8 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
     context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    context.Response.Headers.Append("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
     await next();
 });
 
