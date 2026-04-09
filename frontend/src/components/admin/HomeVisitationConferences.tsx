@@ -1145,7 +1145,7 @@ export default function HomeVisitationConferences() {
                 ) : (
                   <>
                     {paginatedVisits.map((v) => renderVisitCard(v))}
-                    <div className="table-footer" style={{ marginTop: '0.75rem' }}>
+                    <div className="supporter-pagination">
                       <span>
                         Showing {filteredVisits.length === 0 ? 0 : (safeVisitPage - 1) * visitPageSize + 1}–{Math.min(safeVisitPage * visitPageSize, filteredVisits.length)} of {filteredVisits.length}
                       </span>
@@ -1241,7 +1241,7 @@ export default function HomeVisitationConferences() {
                     )}
 
                     {filteredPlans.length > 0 && (
-                      <div className="table-footer" style={{ marginTop: '0.75rem' }}>
+                      <div className="supporter-pagination">
                         <span>
                           Showing {filteredPlans.length === 0 ? 0 : (safePlanPage - 1) * planPageSize + 1}–{Math.min(safePlanPage * planPageSize, filteredPlans.length)} of {filteredPlans.length}
                         </span>

@@ -112,7 +112,7 @@ export default function SupporterTable({ onSelect, onAdd }: Props) {
       </div>
 
       {/* Pagination */}
-      <div className="table-footer">
+      <div className="supporter-pagination">
         <span>Page {page} of {totalPages} &nbsp;·&nbsp; {data?.total ?? 0} total</span>
         <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
           <select
