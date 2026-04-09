@@ -691,6 +691,10 @@
 .badge-risk     { background: #fce8e8; color: #8b1a1a; }
 .badge-re       { background: #dce8f5; color: #1b2d4f; }
 .badge-transfer { background: #e8e4f5; color: #3d2a7f; }
+.badge-readiness-near { background: #e1f5ee; color: #085041; }
+.badge-readiness-progressing { background: #dce8f5; color: #1b2d4f; }
+.badge-readiness-early { background: #fce8e8; color: #8b1a1a; }
+.badge-readiness-none { background: #f0f0f0; color: #888; }
 
 .view-link {
   color: var(--gold);

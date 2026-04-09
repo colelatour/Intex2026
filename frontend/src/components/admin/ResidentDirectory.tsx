@@ -53,6 +53,9 @@ interface Resident {
   dateClosed: string | null;
   createdAt: string | null;
   notesRestricted: string | null;
+  readinessLabel: string | null;
+  readinessProbability: number | null;
+  readinessScoredAt: string | null;
 }
 
 const STATUS_CLASS: Record<string, string> = {
@@ -61,6 +64,12 @@ const STATUS_CLASS: Record<string, string> = {
   Transferred:  'badge-transfer',
   'At Risk':    'badge-risk',
   Monitoring:   'badge-mon',
+};
+
+const READINESS_CLASS: Record<string, string> = {
+  'Near Ready': 'badge-readiness-near',
+  Progressing: 'badge-readiness-progressing',
+  'Early Stage': 'badge-readiness-early',
 };
 
 function hasValue(v: string | null): v is string {
@@ -223,6 +232,37 @@ function DetailPanel({ resident, safehouses, residents, onEditStart, onDelete, o
             </div>
           );
         })}
+        <div className="col-12 col-lg-6">
+          <div className="detail-section__title">Reintegration Readiness</div>
+          <table className="table table-sm table-bordered table-striped mb-0" style={{ fontSize: '0.875rem' }}>
+            <tbody>
+              <tr>
+                <td style={{ width: '45%', fontWeight: 600, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>
+                  Readiness Label
+                </td>
+                <td style={{ color: 'var(--gray-800)' }}>
+                  <ReadinessBadge label={resident.readinessLabel} />
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: '45%', fontWeight: 600, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>
+                  Readiness Probability
+                </td>
+                <td style={{ color: 'var(--gray-800)' }}>
+                  {resident.readinessProbability == null ? '—' : `${(resident.readinessProbability * 100).toFixed(1)}%`}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: '45%', fontWeight: 600, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>
+                  Last Scored
+                </td>
+                <td style={{ color: 'var(--gray-800)' }}>
+                  {resident.readinessScoredAt ? new Date(resident.readinessScoredAt).toLocaleString() : '—'}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Reassign safehouse inline form */}
@@ -502,6 +542,12 @@ function EditPanel({ draft, onChange, onSave, onCancel, saving }: EditPanelProps
   );
 }
 
+function ReadinessBadge({ label }: { label: string | null }) {
+  if (!label) return <span className="badge badge-readiness-none">—</span>;
+  const cls = READINESS_CLASS[label] ?? 'badge-readiness-progressing';
+  return <span className={`badge ${cls}`}>{label}</span>;
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 interface ResidentDirectoryProps {
   showCreate: boolean;
@@ -773,6 +819,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
                 <th>Resident ID</th>
                 <th>Case Control No.</th>
                 <th>Case Status</th>
+                <th>Readiness</th>
                 <th></th>
               </tr>
             </thead>
@@ -794,13 +841,14 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
                           {r.caseStatus ?? '—'}
                         </span>
                       </td>
+                      <td><ReadinessBadge label={r.readinessLabel} /></td>
                       <td style={{ textAlign: 'right', color: 'var(--gray-600)', fontSize: '0.825rem' }}>
                         {isEditing ? '✏️ editing' : isExpanded ? '▲ collapse' : '▼ expand'}
                       </td>
                     </tr>
                     {isExpanded && !isEditing && (
                       <tr key={`${r.residentId}-detail`}>
-                        <td colSpan={4} style={{ padding: 0 }}>
+                        <td colSpan={5} style={{ padding: 0 }}>
                           <DetailPanel
                             resident={r}
                             safehouses={safehouses}
@@ -815,7 +863,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
                     )}
                     {isEditing && editDraft && (
                       <tr key={`${r.residentId}-edit`}>
-                        <td colSpan={4} style={{ padding: 0 }}>
+                        <td colSpan={5} style={{ padding: 0 }}>
                           <EditPanel
                             draft={editDraft}
                             onChange={handleEditChange}

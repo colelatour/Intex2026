@@ -3,6 +3,7 @@ using Intex2026API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Intex2026API.Controllers;
 
@@ -11,6 +12,20 @@ namespace Intex2026API.Controllers;
 [Authorize(Roles = "Admin,Worker")]
 public class ResidentsController : ControllerBase
 {
+    private sealed class ReadinessSnapshot
+    {
+        public string? ReadinessLabel { get; set; }
+        public double? ReadinessProbability { get; set; }
+        public DateTime? ReadinessScoredAt { get; set; }
+    }
+
+    public class ResidentDirectoryDto : Resident
+    {
+        public string? ReadinessLabel { get; set; }
+        public double? ReadinessProbability { get; set; }
+        public DateTime? ReadinessScoredAt { get; set; }
+    }
+
     private readonly LighthouseContext _context;
 
     public ResidentsController(LighthouseContext context)
@@ -19,9 +34,118 @@ public class ResidentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Resident>>> GetResidents()
+    public async Task<ActionResult<IEnumerable<ResidentDirectoryDto>>> GetResidents()
     {
-        return await _context.Residents.ToListAsync();
+        var residents = await _context.Residents
+            .AsNoTracking()
+            .ToListAsync();
+
+        var latestReadinessByResident = new Dictionary<string, ReadinessSnapshot>(StringComparer.Ordinal);
+        var conn = _context.Database.GetDbConnection();
+        var wasClosed = conn.State != ConnectionState.Open;
+        if (wasClosed) await conn.OpenAsync();
+        try
+        {
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+WITH latest AS (
+    SELECT
+        CAST(resident_id AS NVARCHAR(64)) AS resident_id,
+        CAST(readiness_probability AS FLOAT) AS readiness_probability,
+        CAST(readiness_label AS NVARCHAR(64)) AS readiness_label,
+        scored_at,
+        ROW_NUMBER() OVER (
+            PARTITION BY resident_id
+            ORDER BY
+                scored_at DESC,
+                readiness_probability DESC,
+                readiness_label ASC
+        ) AS rn
+    FROM resident_readiness_scores
+)
+SELECT resident_id, readiness_probability, readiness_label, scored_at
+FROM latest
+WHERE rn = 1;";
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var residentId = reader["resident_id"] as string;
+                if (string.IsNullOrWhiteSpace(residentId)) continue;
+                latestReadinessByResident[residentId] = new ReadinessSnapshot
+                {
+                    ReadinessProbability = reader["readiness_probability"] is DBNull ? null : Convert.ToDouble(reader["readiness_probability"]),
+                    ReadinessLabel = reader["readiness_label"] is DBNull ? null : Convert.ToString(reader["readiness_label"]),
+                    ReadinessScoredAt = reader["scored_at"] is DBNull ? null : Convert.ToDateTime(reader["scored_at"])
+                };
+            }
+        }
+        finally
+        {
+            if (wasClosed) await conn.CloseAsync();
+        }
+
+        var result = residents.Select(r =>
+        {
+            latestReadinessByResident.TryGetValue(r.ResidentId ?? string.Empty, out var readiness);
+            return new ResidentDirectoryDto
+            {
+                ResidentId = r.ResidentId,
+                CaseControlNo = r.CaseControlNo,
+                InternalCode = r.InternalCode,
+                SafehouseId = r.SafehouseId,
+                CaseStatus = r.CaseStatus,
+                Sex = r.Sex,
+                DateOfBirth = r.DateOfBirth,
+                BirthStatus = r.BirthStatus,
+                PlaceOfBirth = r.PlaceOfBirth,
+                Religion = r.Religion,
+                CaseCategory = r.CaseCategory,
+                SubCatOrphaned = r.SubCatOrphaned,
+                SubCatTrafficked = r.SubCatTrafficked,
+                SubCatChildLabor = r.SubCatChildLabor,
+                SubCatPhysicalAbuse = r.SubCatPhysicalAbuse,
+                SubCatSexualAbuse = r.SubCatSexualAbuse,
+                SubCatOsaec = r.SubCatOsaec,
+                SubCatCicl = r.SubCatCicl,
+                SubCatAtRisk = r.SubCatAtRisk,
+                SubCatStreetChild = r.SubCatStreetChild,
+                SubCatChildWithHiv = r.SubCatChildWithHiv,
+                IsPwd = r.IsPwd,
+                PwdType = r.PwdType,
+                HasSpecialNeeds = r.HasSpecialNeeds,
+                SpecialNeedsDiagnosis = r.SpecialNeedsDiagnosis,
+                FamilyIs4ps = r.FamilyIs4ps,
+                FamilySoloParent = r.FamilySoloParent,
+                FamilyIndigenous = r.FamilyIndigenous,
+                FamilyParentPwd = r.FamilyParentPwd,
+                FamilyInformalSettler = r.FamilyInformalSettler,
+                DateOfAdmission = r.DateOfAdmission,
+                AgeUponAdmission = r.AgeUponAdmission,
+                PresentAge = r.PresentAge,
+                LengthOfStay = r.LengthOfStay,
+                ReferralSource = r.ReferralSource,
+                ReferringAgencyPerson = r.ReferringAgencyPerson,
+                DateColbRegistered = r.DateColbRegistered,
+                DateColbObtained = r.DateColbObtained,
+                AssignedSocialWorker = r.AssignedSocialWorker,
+                InitialCaseAssessment = r.InitialCaseAssessment,
+                DateCaseStudyPrepared = r.DateCaseStudyPrepared,
+                ReintegrationType = r.ReintegrationType,
+                ReintegrationStatus = r.ReintegrationStatus,
+                InitialRiskLevel = r.InitialRiskLevel,
+                CurrentRiskLevel = r.CurrentRiskLevel,
+                DateEnrolled = r.DateEnrolled,
+                DateClosed = r.DateClosed,
+                CreatedAt = r.CreatedAt,
+                NotesRestricted = r.NotesRestricted,
+                ReadinessLabel = readiness?.ReadinessLabel,
+                ReadinessProbability = readiness?.ReadinessProbability,
+                ReadinessScoredAt = readiness?.ReadinessScoredAt
+            };
+        }).ToList();
+
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
