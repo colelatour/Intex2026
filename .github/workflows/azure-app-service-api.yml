@@ -12,7 +12,10 @@
 # 2. GitHub repo → Settings → Secrets and variables → Actions → New repository secret:
 #    Name:  AZURE_API_PUBLISH_PROFILE
 #    Value: entire contents of the downloaded .PublishSettings file (XML).
-# 3. If your app name differs from the hostname prefix, change AZURE_WEBAPP_NAME below.
+# 3. AZURE_WEBAPP_NAME must match Azure Portal → App Service → Overview → Name (the resource name),
+#    NOT the random part of the *.azurewebsites.net URL. In the publish profile XML it is the part
+#    after $ in userName (e.g. userName="$Intex2026API" → app name Intex2026API).
+# 4. Deploying to a deployment slot? Download the publish profile FROM that slot and set slot-name below.
 #
 # Local deploy without enabling basic auth: backend/Intex2026API/deploy-to-azure.sh (uses az login + az webapp deploy).
 #
@@ -36,7 +39,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AZURE_WEBAPP_NAME: intex2026api-amcjb0aabhethbc4
+  # Portal "Name" field (matches $<this> in publish profile userName). Change if yours differs.
+  AZURE_WEBAPP_NAME: Intex2026API
   DOTNET_VERSION: "10.0.x"
   PROJECT_PATH: backend/Intex2026API/Intex2026API.csproj
 

@@ -10,12 +10,12 @@
 #   ./deploy-to-azure.sh
 #
 # Optional:
-#   export AZURE_WEBAPP_NAME="intex2026api-amcjb0aabhethbc4"   # default matches repo config
+#   export AZURE_WEBAPP_NAME="Intex2026API"   # Azure Portal App Service *Name* (not URL hostname prefix)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_NAME="${AZURE_WEBAPP_NAME:-intex2026api-amcjb0aabhethbc4}"
+APP_NAME="${AZURE_WEBAPP_NAME:-Intex2026API}"
 RG="${AZURE_RESOURCE_GROUP:-}"
 
 if [[ -z "$RG" ]]; then
