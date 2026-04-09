@@ -74,7 +74,7 @@ public class DonationsController : ControllerBase
         return await _context.Donations.ToListAsync();
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:regex(^\\d+$)}")]
     public async Task<ActionResult<Donation>> GetDonation(string id)
     {
         var donation = await _context.Donations.FindAsync(id);
@@ -206,7 +206,7 @@ public class DonationsController : ControllerBase
         ));
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:regex(^\\d+$)}")]
     [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> PutDonation(string id, Donation donation)
     {
@@ -216,7 +216,7 @@ public class DonationsController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:regex(^\\d+$)}")]
     [Authorize(Roles = "Admin,Worker")]
     public async Task<IActionResult> DeleteDonation(string id)
     {
