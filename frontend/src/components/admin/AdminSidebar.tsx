@@ -1,6 +1,6 @@
 // src/components/admin/AdminSidebar.tsx
 import { type ReactNode, useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { getSession } from '../../lib/authApi';
 
 interface NavItem {
@@ -115,8 +115,18 @@ const ICONS: Record<string, ReactNode> = {
   ),
 };
 
+const REPORT_LINKS = [
+  { to: '/admin/reports/donations', label: 'Donations' },
+  { to: '/admin/reports/resident-outcomes', label: 'Resident Outcomes' },
+  { to: '/admin/reports/safehouse-performance', label: 'Safehouse Performance' },
+];
+
 export default function AdminSidebar() {
+  const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [reportsOpen, setReportsOpen] = useState(
+    location.pathname.startsWith('/admin/reports')
+  );
 
   useEffect(() => {
     getSession().then(s => setIsAdmin(s.roles.includes('Admin')));
@@ -128,12 +138,18 @@ export default function AdminSidebar() {
         Sheltered Light <span>Admin Portal</span>
       </div>
 
-      {NAV_SECTIONS.map((section) => (
+      {NAV_SECTIONS.map((section) => {
+        const visibleItems = section.items.filter(item => !item.adminOnly || isAdmin);
+        const showReportsSection = section.label === 'Administration' && isAdmin;
+
+        if (visibleItems.length === 0 && !showReportsSection) {
+          return null;
+        }
+
+        return (
         <div key={section.label}>
           <div className="sidebar__section-label">{section.label}</div>
-          {section.items
-            .filter(item => !item.adminOnly || isAdmin)
-            .map((item) => (
+          {visibleItems.map((item) => (
             <NavLink
               key={item.id}
               to={`/admin/${item.id}`}
@@ -143,8 +159,41 @@ export default function AdminSidebar() {
               {item.label}
             </NavLink>
           ))}
+
+          {section.label === 'Administration' && isAdmin && (
+            <>
+              <button
+                type="button"
+                className="sidebar__link"
+                onClick={() => setReportsOpen(!reportsOpen)}
+              >
+                {ICONS.chart}
+                Reports &amp; Analytics
+                <svg
+                  className="sidebar__icon"
+                  style={{ marginLeft: 'auto', width: 14, height: 14, transition: 'transform 0.2s', transform: reportsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              {reportsOpen && (
+                <div style={{ paddingLeft: '0.75rem' }}>
+                  {REPORT_LINKS.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
+                    >
+                      {link.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
-      ))}
+      )})}
     </div>
   );
 }
