@@ -16,12 +16,13 @@ export default function Donate() {
 
   return (
     <>
-      <section className="donate-hero donate-lean-hero">
-        <div className="donate-hero__eyebrow">Make a Difference Today</div>
-        <h1>Support One Girl at a Time</h1>
-        <p>
-          A simplified donation experience focused on clarity and trust.
-        </p>
+      <section className="donate-hero">
+        <div className="donate-hero__inner">
+          <h1 className="donate-hero__title">Support One Girl at a Time</h1>
+          <p className="donate-hero__subtitle">
+            Your gift helps provide safety, healing, and education for girls across the Philippines.
+          </p>
+        </div>
       </section>
 
       <section className="donate-body donate-lean-body">

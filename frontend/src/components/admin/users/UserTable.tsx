@@ -62,65 +62,67 @@ export default function UserTable({ onSelect, onAdd, onDeleted, currentUserEmail
 
       {/* Table */}
       <div className="data-table-wrapper">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading
-              ? Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i} className="skeleton-row">
-                    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
-                  </tr>
-                ))
-              : data?.items.length === 0
-                ? (
-                  <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
-                      No users found.
-                    </td>
-                  </tr>
-                )
-                : data?.items.map(u => {
-                    const isSelf = currentUserEmail && u.email.toLowerCase() === currentUserEmail.toLowerCase();
-                    return (
-                      <tr key={u.id}>
-                        <td>{u.email}</td>
-                        <td><RoleBadge role={u.role} /></td>
-                        <td>
-                          {isSelf ? (
-                            <span style={{ color: '#999', fontSize: '0.85rem' }}>You</span>
-                          ) : (
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <button
-                                type="button"
-                                className="btn-export"
-                                style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem' }}
-                                onClick={(e) => { e.stopPropagation(); onSelect(u); }}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-export"
-                                style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem', color: '#dc3545', borderColor: '#dc3545' }}
-                                onClick={(e) => { e.stopPropagation(); handleDelete(u); }}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })
-            }
-          </tbody>
-        </table>
+        <div className="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading
+                ? Array.from({ length: 8 }).map((_, i) => (
+                    <tr key={i} className="skeleton-row">
+                      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                    </tr>
+                  ))
+                : data?.items.length === 0
+                  ? (
+                    <tr>
+                      <td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
+                        No users found.
+                      </td>
+                    </tr>
+                  )
+                  : data?.items.map(u => {
+                      const isSelf = currentUserEmail && u.email.toLowerCase() === currentUserEmail.toLowerCase();
+                      return (
+                        <tr key={u.id}>
+                          <td>{u.email}</td>
+                          <td><RoleBadge role={u.role} /></td>
+                          <td>
+                            {isSelf ? (
+                              <span style={{ color: '#999', fontSize: '0.85rem' }}>You</span>
+                            ) : (
+                              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button
+                                  type="button"
+                                  className="btn-export"
+                                  style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem' }}
+                                  onClick={(e) => { e.stopPropagation(); onSelect(u); }}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn-export"
+                                  style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem', color: '#dc3545', borderColor: '#dc3545' }}
+                                  onClick={(e) => { e.stopPropagation(); handleDelete(u); }}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Pagination */}
