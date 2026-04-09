@@ -123,7 +123,9 @@ const REPORT_LINKS = [
 
 export default function AdminSidebar() {
   const location = useLocation();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin]       = useState(false);
+  const [collapsed, setCollapsed]   = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(
     location.pathname.startsWith('/admin/reports')
   );
@@ -132,68 +134,164 @@ export default function AdminSidebar() {
     getSession().then(s => setIsAdmin(s.roles.includes('Admin')));
   }, []);
 
+  // Close drawer on route change on mobile
+  const handleNavClick = () => setMobileOpen(false);
+
+  const desktopNav = NAV_SECTIONS.map((section) => (
+    <div key={section.label}>
+      {!collapsed && <div className="sidebar__section-label">{section.label}</div>}
+      {section.items
+        .filter(item => !item.adminOnly || isAdmin)
+        .map((item) => (
+          <NavLink
+            key={item.id}
+            to={`/admin/${item.id}`}
+            className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
+            title={collapsed ? item.label : undefined}
+            onClick={handleNavClick}
+          >
+            {ICONS[item.icon]}
+            {!collapsed && item.label}
+          </NavLink>
+        ))}
+
+      {section.label === 'Administration' && isAdmin && !collapsed && (
+        <>
+          <button
+            type="button"
+            className="sidebar__link"
+            onClick={() => setReportsOpen(!reportsOpen)}
+          >
+            {ICONS.chart}
+            Reports &amp; Analytics
+            <svg
+              className="sidebar__icon"
+              style={{ marginLeft: 'auto', width: 14, height: 14, transition: 'transform 0.2s', transform: reportsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {reportsOpen && (
+            <div style={{ paddingLeft: '0.75rem' }}>
+              {REPORT_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
+                  onClick={handleNavClick}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  ));
+
+  const mobileNav = NAV_SECTIONS.map((section) => (
+    <div key={section.label}>
+      <div className="sidebar__section-label">{section.label}</div>
+      {section.items
+        .filter(item => !item.adminOnly || isAdmin)
+        .map((item) => (
+          <NavLink
+            key={item.id}
+            to={`/admin/${item.id}`}
+            className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
+            onClick={handleNavClick}
+          >
+            {ICONS[item.icon]}
+            {item.label}
+          </NavLink>
+        ))}
+
+      {section.label === 'Administration' && isAdmin && (
+        <>
+          <button
+            type="button"
+            className="sidebar__link"
+            onClick={() => setReportsOpen(!reportsOpen)}
+          >
+            {ICONS.chart}
+            Reports &amp; Analytics
+            <svg
+              className="sidebar__icon"
+              style={{ marginLeft: 'auto', width: 14, height: 14, transition: 'transform 0.2s', transform: reportsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {reportsOpen && (
+            <div style={{ paddingLeft: '0.75rem' }}>
+              {REPORT_LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
+                  onClick={handleNavClick}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  ));
+
   return (
-    <div className="sidebar">
-      <div className="sidebar__brand">
-        Sheltered Light <span>Admin Portal</span>
+    <>
+      <div className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}>
+        <div className="sidebar__brand">
+          {!collapsed && <span>Sheltered Light Admin Portal</span>}
+          {/* Desktop collapse toggle */}
+          <button
+            className="sidebar__collapse-btn sidebar__collapse-btn--desktop"
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="16" height="16">
+              {collapsed
+                ? <path d="M9 18l6-6-6-6"/>
+                : <path d="M15 18l-6-6 6-6"/>}
+            </svg>
+          </button>
+          {/* Mobile hamburger toggle */}
+          <button
+            className="sidebar__collapse-btn sidebar__collapse-btn--mobile"
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+          >
+            <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="20" height="20">
+              {mobileOpen
+                ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
+                : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>}
+            </svg>
+          </button>
+        </div>
+
+        {/* Desktop nav — always visible in sidebar */}
+        <div className="sidebar__nav--desktop">
+          {desktopNav}
+        </div>
       </div>
 
-      {NAV_SECTIONS.map((section) => {
-        const visibleItems = section.items.filter(item => !item.adminOnly || isAdmin);
-        const showReportsSection = section.label === 'Administration' && isAdmin;
+      {/* Mobile drawer — outside sidebar so fixed positioning works correctly */}
+      <div className={`sidebar__nav${mobileOpen ? ' sidebar__nav--open' : ''}`}>
+        {mobileNav}
+      </div>
 
-        if (visibleItems.length === 0 && !showReportsSection) {
-          return null;
-        }
-
-        return (
-        <div key={section.label}>
-          <div className="sidebar__section-label">{section.label}</div>
-          {visibleItems.map((item) => (
-            <NavLink
-              key={item.id}
-              to={`/admin/${item.id}`}
-              className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
-            >
-              {ICONS[item.icon]}
-              {item.label}
-            </NavLink>
-          ))}
-
-          {section.label === 'Administration' && isAdmin && (
-            <>
-              <button
-                type="button"
-                className="sidebar__link"
-                onClick={() => setReportsOpen(!reportsOpen)}
-              >
-                {ICONS.chart}
-                Reports &amp; Analytics
-                <svg
-                  className="sidebar__icon"
-                  style={{ marginLeft: 'auto', width: 14, height: 14, transition: 'transform 0.2s', transform: reportsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-              {reportsOpen && (
-                <div style={{ paddingLeft: '0.75rem' }}>
-                  {REPORT_LINKS.map((link) => (
-                    <NavLink
-                      key={link.to}
-                      to={link.to}
-                      className={({ isActive }) => `sidebar__link${isActive ? ' active' : ''}`}
-                    >
-                      {link.label}
-                    </NavLink>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )})}
-    </div>
+      {/* Mobile backdrop */}
+      <div
+        className={`sidebar__overlay${mobileOpen ? ' sidebar__overlay--visible' : ''}`}
+        onClick={() => setMobileOpen(false)}
+      />
+    </>
   );
 }
