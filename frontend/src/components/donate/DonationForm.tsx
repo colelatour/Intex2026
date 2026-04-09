@@ -47,6 +47,20 @@ export default function DonationForm({ onDonationSuccess }: { onDonationSuccess?
     setRegion(initialRegion);
   }, [initialRegion]);
 
+  // Tie donation records to the signed-in account email (matches /api/donations/my lookup).
+  useEffect(() => {
+    let cancelled = false;
+    getSession()
+      .then((session) => {
+        if (cancelled || !session.isAuthenticated || !session.email?.trim()) return;
+        setEmail((prev) => (prev.trim() === '' ? session.email!.trim() : prev));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitError('');

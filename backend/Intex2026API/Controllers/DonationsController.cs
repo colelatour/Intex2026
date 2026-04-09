@@ -1,6 +1,7 @@
 using Intex2026API.Data;
 using Intex2026API.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -13,10 +14,12 @@ namespace Intex2026API.Controllers;
 public class DonationsController : ControllerBase
 {
     private readonly LighthouseContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public DonationsController(LighthouseContext context)
+    public DonationsController(LighthouseContext context, UserManager<ApplicationUser> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
 
     public record RecordDonationRequest(
@@ -48,7 +51,7 @@ public class DonationsController : ControllerBase
     [Authorize]
     public async Task<ActionResult<MyDonationsResponse>> GetMyDonations()
     {
-        var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+        var email = await ResolveAccountEmailAsync();
         if (string.IsNullOrWhiteSpace(email))
             return Unauthorized();
 
@@ -92,6 +95,7 @@ public class DonationsController : ControllerBase
     }
 
     [HttpPost("record")]
+    [Authorize]
     public async Task<ActionResult<RecordDonationResponse>> RecordDonation([FromBody] RecordDonationRequest request)
     {
         if (request.Amount <= 0)
@@ -99,12 +103,19 @@ public class DonationsController : ControllerBase
             return BadRequest("Donation amount must be greater than zero.");
         }
 
+        var accountEmail = await ResolveAccountEmailAsync();
+        if (string.IsNullOrWhiteSpace(accountEmail))
+            return Unauthorized();
+
+        // Always tie the supporter record to the signed-in account email so history matches login,
+        // even if the form email field differs (typos, paste, etc.).
+        var normalizedEmail = accountEmail.Trim().ToLowerInvariant();
+
         if (string.IsNullOrWhiteSpace(request.Email))
         {
             return BadRequest("Email is required.");
         }
 
-        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
         var supporter = await _context.Supporters
             .FirstOrDefaultAsync(s => s.Email != null && s.Email.ToLower() == normalizedEmail);
 
@@ -279,4 +290,20 @@ public class DonationsController : ControllerBase
 
     private static int ParseNumericIdOrMax(string? id) =>
         int.TryParse(id, out var parsed) ? parsed : int.MaxValue;
+
+    /// <summary>
+    /// Prefer Identity store email (same source as /api/auth/me); fall back to claims for edge cases.
+    /// </summary>
+    private async Task<string?> ResolveAccountEmailAsync()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (!string.IsNullOrWhiteSpace(user?.Email))
+            return user!.Email;
+
+        var fromClaims = User.FindFirstValue(ClaimTypes.Email);
+        if (!string.IsNullOrWhiteSpace(fromClaims))
+            return fromClaims;
+
+        return User.Identity?.Name;
+    }
 }
