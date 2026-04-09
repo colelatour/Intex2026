@@ -15,7 +15,6 @@ export default function CtaBanner() {
         <button className="btn-white" onClick={() => navigate('/donate')}>
           Donate Today
         </button>
-        <button className="btn-outline-white2">Get Involved</button>
       </div>
     </div>
   );
