@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { get, post, put, api } from '../../lib/api';
 import '../../styles/HomeVisitationConferences.css';
+import PaginationControls from './PaginationControls';
 
 interface HomeVisitation {
   visitationId: string | null;
@@ -1145,48 +1146,14 @@ export default function HomeVisitationConferences() {
                 ) : (
                   <>
                     {paginatedVisits.map((v) => renderVisitCard(v))}
-                    <div className="supporter-pagination">
-                      <span>
-                        Showing {filteredVisits.length === 0 ? 0 : (safeVisitPage - 1) * visitPageSize + 1}–{Math.min(safeVisitPage * visitPageSize, filteredVisits.length)} of {filteredVisits.length}
-                      </span>
-                      <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                        <select
-                          className="filter-btn"
-                          value={visitPageSize}
-                          onChange={(e) => { setVisitPageSize(Number(e.target.value)); setVisitPage(1); }}
-                          style={{ fontFamily: 'DM Sans, sans-serif' }}
-                        >
-                          <option value={10}>10 / page</option>
-                          <option value={20}>20 / page</option>
-                          <option value={30}>30 / page</option>
-                        </select>
-                        <button
-                          className="filter-btn"
-                          onClick={() => setVisitPage(p => Math.max(1, p - 1))}
-                          disabled={safeVisitPage === 1}
-                          style={{ padding: '3px 10px' }}
-                        >‹</button>
-                        {Array.from({ length: visitTotalPages }, (_, i) => i + 1).map((p) => (
-                          <button
-                            key={p}
-                            className="filter-btn"
-                            onClick={() => setVisitPage(p)}
-                            style={{
-                              padding: '3px 10px',
-                              background: p === safeVisitPage ? 'var(--navy)' : 'white',
-                              color: p === safeVisitPage ? 'white' : 'var(--gray-600)',
-                              borderColor: p === safeVisitPage ? 'var(--navy)' : undefined,
-                            }}
-                          >{p}</button>
-                        ))}
-                        <button
-                          className="filter-btn"
-                          onClick={() => setVisitPage(p => Math.min(visitTotalPages, p + 1))}
-                          disabled={safeVisitPage === visitTotalPages}
-                          style={{ padding: '3px 10px' }}
-                        >›</button>
-                      </div>
-                    </div>
+                    <PaginationControls
+                      currentPage={safeVisitPage}
+                      totalPages={visitTotalPages}
+                      pageSize={visitPageSize}
+                      onPageChange={setVisitPage}
+                      onPageSizeChange={(s) => { setVisitPageSize(s); setVisitPage(1); }}
+                      label={`Showing ${filteredVisits.length === 0 ? 0 : (safeVisitPage - 1) * visitPageSize + 1}–${Math.min(safeVisitPage * visitPageSize, filteredVisits.length)} of ${filteredVisits.length}`}
+                    />
                   </>
                 )}
               </div>
@@ -1241,48 +1208,14 @@ export default function HomeVisitationConferences() {
                     )}
 
                     {filteredPlans.length > 0 && (
-                      <div className="supporter-pagination">
-                        <span>
-                          Showing {filteredPlans.length === 0 ? 0 : (safePlanPage - 1) * planPageSize + 1}–{Math.min(safePlanPage * planPageSize, filteredPlans.length)} of {filteredPlans.length}
-                        </span>
-                        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                          <select
-                            className="filter-btn"
-                            value={planPageSize}
-                            onChange={(e) => { setPlanPageSize(Number(e.target.value)); setPlanPage(1); }}
-                            style={{ fontFamily: 'DM Sans, sans-serif' }}
-                          >
-                            <option value={10}>10 / page</option>
-                            <option value={20}>20 / page</option>
-                            <option value={30}>30 / page</option>
-                          </select>
-                          <button
-                            className="filter-btn"
-                            onClick={() => setPlanPage(p => Math.max(1, p - 1))}
-                            disabled={safePlanPage === 1}
-                            style={{ padding: '3px 10px' }}
-                          >‹</button>
-                          {Array.from({ length: planTotalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                              key={p}
-                              className="filter-btn"
-                              onClick={() => setPlanPage(p)}
-                              style={{
-                                padding: '3px 10px',
-                                background: p === safePlanPage ? 'var(--navy)' : 'white',
-                                color: p === safePlanPage ? 'white' : 'var(--gray-600)',
-                                borderColor: p === safePlanPage ? 'var(--navy)' : undefined,
-                              }}
-                            >{p}</button>
-                          ))}
-                          <button
-                            className="filter-btn"
-                            onClick={() => setPlanPage(p => Math.min(planTotalPages, p + 1))}
-                            disabled={safePlanPage === planTotalPages}
-                            style={{ padding: '3px 10px' }}
-                          >›</button>
-                        </div>
-                      </div>
+                      <PaginationControls
+                        currentPage={safePlanPage}
+                        totalPages={planTotalPages}
+                        pageSize={planPageSize}
+                        onPageChange={setPlanPage}
+                        onPageSizeChange={(s) => { setPlanPageSize(s); setPlanPage(1); }}
+                        label={`Showing ${filteredPlans.length === 0 ? 0 : (safePlanPage - 1) * planPageSize + 1}–${Math.min(safePlanPage * planPageSize, filteredPlans.length)} of ${filteredPlans.length}`}
+                      />
                     )}
                   </>
                 )}
