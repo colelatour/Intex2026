@@ -234,5 +234,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Production has no page at "/"; browsers and health checks often hit the site root and would see 404 otherwise.
+app.MapGet("/", () => Results.Json(new
+{
+    service = "Intex2026 API",
+    status = "ok",
+    hint = "API routes are under /api/... (e.g. GET /api/impact/summary, GET /api/auth/me). OpenAPI/Swagger UI is Development-only."
+}));
 
 app.Run();
