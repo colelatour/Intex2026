@@ -154,14 +154,15 @@ const SECTIONS: SectionDef[] = [
 // ── Read-only detail panel ───────────────────────────────────────────────────
 interface DetailPanelProps {
   resident: Resident;
-  safehouses: { id: string; name: string }[];
+  safehouses: { id: string; name: string; capacityGirls: string | null }[];
+  residents: Resident[];
   onEditStart: () => void;
   onDelete: () => void;
   onReassign: (newSafehouseId: string) => Promise<void>;
   isAdmin: boolean;
 }
 
-function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign, isAdmin }: DetailPanelProps) {
+function DetailPanel({ resident, safehouses, residents, onEditStart, onDelete, onReassign, isAdmin }: DetailPanelProps) {
   const [showReassign, setShowReassign]     = useState(false);
   const [selectedSafehouse, setSelectedSafehouse] = useState('');
   const [reassigning, setReassigning]       = useState(false);
@@ -246,9 +247,19 @@ function DetailPanel({ resident, safehouses, onEditStart, onDelete, onReassign, 
             style={{ ...inputStyle, width: 'auto', flex: 1, minWidth: '180px' }}
           >
             <option value="">— select safehouse —</option>
-            {safehouses.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
+            {safehouses
+              .filter((s) => {
+                if (s.id === resident.safehouseId) return false; // exclude current
+                const occupancy = residents.filter((r) => r.safehouseId === s.id).length;
+                const capacity = Number(s.capacityGirls ?? '');
+                return isNaN(capacity) || capacity === 0 || occupancy < capacity;
+              })
+              .map((s) => {
+                const occupancy = residents.filter((r) => r.safehouseId === s.id).length;
+                const capacity = s.capacityGirls ? Number(s.capacityGirls) : null;
+                const label = capacity ? `${s.name} (${occupancy}/${capacity})` : s.name;
+                return <option key={s.id} value={s.id}>{label}</option>;
+              })}
           </select>
           <button
             className="btn-add"
@@ -517,12 +528,12 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
   const [safehouseFilter, setSafehouseFilter] = useState('');
   const [riskFilter, setRiskFilter]           = useState('');
   const [referralFilter, setReferralFilter]   = useState('');
-  const [safehouses, setSafehouses]           = useState<{ id: string; name: string }[]>([]);
+  const [safehouses, setSafehouses]           = useState<{ id: string; name: string; capacityGirls: string | null }[]>([]);
 
   useEffect(() => {
-    get<{ safehouseId: string; name: string }[]>('/api/Safehouses')
+    get<{ safehouseId: string; name: string | null; capacityGirls: string | null }[]>('/api/Safehouses')
       .then((data) => {
-        setSafehouses(data.map((s) => ({ id: s.safehouseId, name: s.name ?? s.safehouseId })));
+        setSafehouses(data.map((s) => ({ id: s.safehouseId, name: s.name ?? s.safehouseId, capacityGirls: s.capacityGirls })));
       })
       .catch(() => {});
   }, []);
@@ -790,6 +801,7 @@ export default function ResidentDirectory({ showCreate, setShowCreate }: Residen
                           <DetailPanel
                             resident={r}
                             safehouses={safehouses}
+                            residents={residents}
                             onEditStart={() => handleEditStart(r)}
                             onDelete={() => handleDelete(r.residentId!)}
                             onReassign={(newId) => handleReassign(r.residentId!, newId)}
