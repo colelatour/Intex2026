@@ -13,16 +13,17 @@ interface Props {
 
 export default function UserTable({ onSelect, onAdd, onDeleted, currentUserEmail }: Props) {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [role, setRole] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data, loading, error } = useAdminUsers({
-    page, search: debouncedSearch, role,
+    page, pageSize, search: debouncedSearch, role,
   });
 
-  useEffect(() => { setPage(1); }, [debouncedSearch, role]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, role, pageSize]);
 
   function handleSearch(val: string) {
     setSearch(val);
@@ -124,10 +125,45 @@ export default function UserTable({ onSelect, onAdd, onDeleted, currentUserEmail
       </div>
 
       {/* Pagination */}
-      <div className="supporter-pagination">
-        <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+      <div className="table-footer">
         <span>Page {page} of {totalPages} &nbsp;·&nbsp; {data?.total ?? 0} total</span>
-        <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
+        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+          <select
+            className="filter-btn"
+            value={pageSize}
+            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
+          >
+            <option value={10}>10 / page</option>
+            <option value={20}>20 / page</option>
+            <option value={30}>30 / page</option>
+          </select>
+          <button
+            className="filter-btn"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            style={{ padding: '3px 10px' }}
+          >‹</button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              className="filter-btn"
+              onClick={() => setPage(p)}
+              style={{
+                padding: '3px 10px',
+                background: p === page ? 'var(--navy)' : 'white',
+                color: p === page ? 'white' : 'var(--gray-600)',
+                borderColor: p === page ? 'var(--navy)' : undefined,
+              }}
+            >{p}</button>
+          ))}
+          <button
+            className="filter-btn"
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            style={{ padding: '3px 10px' }}
+          >›</button>
+        </div>
       </div>
     </div>
   );
