@@ -28,13 +28,6 @@ export default function CallToActionBanner({ data }: Props) {
         >
           Donate Now
         </button>
-        <button
-          className="cta-btn-outline"
-          onClick={() => navigate('/about')}
-          aria-label="Learn more about Sheltered Light"
-        >
-          Learn More
-        </button>
       </div>
     </div>
   );

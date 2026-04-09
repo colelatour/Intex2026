@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRegionData, RegionKey } from '../hooks/useRegionData';
 import PhilippinesMap   from '../components/regions/PhilippinesMap';
 import RegionDetailPanel from '../components/regions/RegionDetailPanel';
+import Footer from '../components/layout/Footer';
 
 export default function RegionsPage() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function RegionsPage() {
       {/* ── Part 1: Page header ─────────────────────────────────────────────── */}
       <div className="regions-header">
         <div className="regions-header__inner">
-          <h1 className="regions-header__title">Where we work</h1>
+          <h1 className="regions-header__title">Where We Work</h1>
           <p className="regions-header__subtitle">
             Sheltered Light operates {allSafehouses.length} safehouses across three regions of the Philippines.
             Click a region to learn more and support the girls there.
@@ -79,6 +80,7 @@ export default function RegionsPage() {
             Donate to any region
           </button>
         </div>
+        <Footer />
       </div>
 
     </main>

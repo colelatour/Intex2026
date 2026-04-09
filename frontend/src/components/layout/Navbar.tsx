@@ -42,6 +42,11 @@ export default function Navbar() {
     navigate("/");
   }
 
+  function handleNavLinkClick() {
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }
+
   const isAuthenticated = session?.isAuthenticated ?? false;
   const roles = session?.roles ?? [];
   const isAdmin = roles.includes("Admin");
@@ -68,12 +73,12 @@ export default function Navbar() {
 
       <ul className={`navbar__links${mobileMenuOpen ? " navbar__links--open" : ""}`}>
         <li>
-          <Link to="/" className={pathname === "/" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
+          <Link to="/" className={pathname === "/" ? "active" : ""} onClick={handleNavLinkClick}>
             Home
           </Link>
         </li>
         <li>
-          <Link to="/impact" className={pathname === "/impact" ? "active" : ""} onClick={() => setMobileMenuOpen(false)}>
+          <Link to="/impact" className={pathname === "/impact" ? "active" : ""} onClick={handleNavLinkClick}>
             Impact
           </Link>
         </li>
@@ -81,7 +86,7 @@ export default function Navbar() {
           <Link
             to="/regions"
             className={pathname === "/regions" ? "active" : ""}
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={handleNavLinkClick}
           >
             Our Regions
           </Link>
@@ -90,7 +95,7 @@ export default function Navbar() {
           <Link
             to="/donate"
             className={pathname === "/donate" ? "active" : ""}
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={handleNavLinkClick}
           >
             Donate
           </Link>
@@ -100,7 +105,7 @@ export default function Navbar() {
             <Link
               to="/admin"
               className={pathname.startsWith("/admin") ? "active" : ""}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={handleNavLinkClick}
             >
               Admin
             </Link>
@@ -128,7 +133,10 @@ export default function Navbar() {
                 <Link
                   to="/account"
                   className="navbar__profile-item"
-                  onClick={() => setProfileOpen(false)}
+                  onClick={() => {
+                    setProfileOpen(false);
+                    handleNavLinkClick();
+                  }}
                 >
                   Account Details
                 </Link>
@@ -146,7 +154,7 @@ export default function Navbar() {
             <Link
               to="/login"
               className={pathname === "/login" ? "active" : ""}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={handleNavLinkClick}
             >
               Login
             </Link>

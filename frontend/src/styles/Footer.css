@@ -11,13 +11,14 @@
 }
 
 .footer__logo {
-  color: white;
-  font-weight: 600;
-  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
 }
 
-.footer__logo span {
-  color: #f0c060;
+.footer__logo-img {
+  height: 44px;
+  width: auto;
+  display: block;
 }
 
 .footer__copy {
