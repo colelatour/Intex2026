@@ -23,10 +23,10 @@
 }
 
 .hero__image-logo {
-  height: 100%;
-  width: auto;
-  max-width: 320px;
-  object-fit: cover;
+  height: auto;
+  width: 100%;
+  max-width: 420px;
+  object-fit: contain;
   display: block;
   mix-blend-mode: darken;
 }

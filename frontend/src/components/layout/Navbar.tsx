@@ -21,7 +21,10 @@ export default function Navbar() {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target as Node)
+      ) {
         setProfileOpen(false);
       }
     }
@@ -32,7 +35,9 @@ export default function Navbar() {
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileMenuOpen]);
 
   async function handleLogout() {
@@ -57,7 +62,11 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar__logo">
-        <img src={navbarLogo} alt="Sheltered Light" className="navbar__logo-img" />
+        <img
+          src={navbarLogo}
+          alt="Sheltered Light"
+          className="navbar__logo-img"
+        />
       </Link>
 
       <button
@@ -66,12 +75,20 @@ export default function Navbar() {
         aria-label="Toggle menu"
         aria-expanded={mobileMenuOpen}
       >
-        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
-        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
-        <span className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`} />
+        <span
+          className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`}
+        />
+        <span
+          className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`}
+        />
+        <span
+          className={`navbar__hamburger-line${mobileMenuOpen ? " open" : ""}`}
+        />
       </button>
 
-      <ul className={`navbar__links${mobileMenuOpen ? " navbar__links--open" : ""}`}>
+      <ul
+        className={`navbar__links${mobileMenuOpen ? " navbar__links--open" : ""}`}
+      >
         <li>
           <Link to="/" className={pathname === "/" ? "active" : ""} onClick={handleNavLinkClick}>
             Home
@@ -107,7 +124,7 @@ export default function Navbar() {
               className={pathname.startsWith("/admin") ? "active" : ""}
               onClick={handleNavLinkClick}
             >
-              Admin
+              Dashboard
             </Link>
           </li>
         )}
@@ -126,8 +143,12 @@ export default function Navbar() {
             {profileOpen && (
               <div className="navbar__profile-dropdown">
                 <div className="navbar__profile-header">
-                  <span className="navbar__profile-email">{session!.email}</span>
-                  <span className="navbar__profile-role">{roles.join(", ")}</span>
+                  <span className="navbar__profile-email">
+                    {session!.email}
+                  </span>
+                  <span className="navbar__profile-role">
+                    {roles.join(", ")}
+                  </span>
                 </div>
                 <hr className="navbar__profile-divider" />
                 <Link
