@@ -1124,7 +1124,7 @@
 
 .pr-form-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -1565,10 +1565,6 @@
     min-height: 80px;
   }
 
-  .pr-form-grid {
-    grid-template-columns: 1fr;
-  }
-
   /* ── Pagination ─────────────────────────── */
   .supporter-pagination {
     width: 100%;
@@ -1665,10 +1661,6 @@
 
   .admin-actions {
     flex-wrap: wrap;
-  }
-
-  .pr-form-grid {
-    grid-template-columns: 1fr;
   }
 
   .pr-card__top {
