@@ -56,7 +56,6 @@ interface AchievementsResponse {
 
 interface GeneratePostResponse {
   postCopy: string;
-  dataInsight: string | null;
   platform: string;
 }
 
@@ -224,7 +223,7 @@ function RecommendationsTab({ onGenerateFromHighlight }: RecommendationsTabProps
       {/* Section A — ML insights */}
       <div className="sms-section">
         <h4 className="sms-section-title">What the data says</h4>
-        <p className="sms-section-sub">ML-surfaced highlights from this month's program data</p>
+        <p className="sms-section-sub">ML insights from this month's program data. Use one to prefill the generator.</p>
 
         {loading && <div className="sms-loading">Loading highlights…</div>}
 
@@ -248,7 +247,7 @@ function RecommendationsTab({ onGenerateFromHighlight }: RecommendationsTabProps
                     className="sms-btn sms-btn--sm"
                     onClick={() => onGenerateFromHighlight(h.recommendedPlatform, h.recommendedPostType, h.highlightText)}
                   >
-                    Generate Post
+                    Use in Generator
                   </button>
                 </div>
               </div>
@@ -292,7 +291,6 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [highlightsLoading, setHighlightsLoading] = useState(true);
   const [generatedPost, setGeneratedPost] = useState('');
-  const [dataInsight, setDataInsight] = useState<string | null>(null);
   const [loading, setLoading]       = useState(false);
   const [validationError, setValidationError] = useState('');
   const [generateError, setGenerateError] = useState('');
@@ -348,7 +346,6 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
         achievement: { type: selected.category, summary: selected.highlightText },
       });
       setGeneratedPost(result.postCopy);
-      setDataInsight(result.dataInsight);
     } catch (err) {
       setGenerateError(err instanceof Error ? err.message : 'Failed to generate post — please try again.');
     } finally {
@@ -366,16 +363,60 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
     setShowAdvanced(false);
     setSelectedIndex(null);
     setGeneratedPost('');
-    setDataInsight(null);
     setValidationError('');
     setGenerateError('');
   };
 
+  const selectedHighlight =
+    selectedIndex !== null && highlights[selectedIndex]
+      ? highlights[selectedIndex]
+      : null;
+
+  const simplifyHighlightText = (text?: string) =>
+    (text ?? '').replace(' — your donors want to hear this story.', '').trim();
+
   return (
     <div className="sms-tab-content">
-      {/* Post Configuration */}
+      {/* Step 1: Select Highlight */}
       <div className="sms-section">
-        <h4 className="sms-section-title">Post Configuration</h4>
+        <h4 className="sms-section-title">Step 1: Choose Prompt Input (Required)</h4>
+        <p className="sms-section-sub">Select exactly one highlight to inject into your generated post prompt.</p>
+
+        {highlightsLoading && <div className="sms-loading">Loading achievements…</div>}
+
+        {!highlightsLoading && highlights.length === 0 && (
+          <div className="sms-empty">No standout achievements this month yet — check back soon.</div>
+        )}
+
+        {!highlightsLoading && highlights.length > 0 && (
+          <div className="smg-achievement-cards">
+            {highlights.map((h, i) => (
+              <div
+                key={i}
+                className={`smg-achievement-card smg-achievement-card--input${selectedIndex === i ? ' smg-achievement-card--selected' : ''}`}
+                onClick={() => {
+                  setSelectedIndex(i);
+                  setValidationError('');
+                }}
+              >
+                <div className="smg-achievement-head">
+                  <span className="smg-achievement-label">{h.category}</span>
+                </div>
+                <span className="smg-achievement-value">{simplifyHighlightText(h.highlightText)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Step 2: Post Configuration */}
+      <div className="sms-section">
+        <h4 className="sms-section-title">Step 2: Configure and Generate</h4>
+        <p className="smg-step-helper">
+          {selectedHighlight
+            ? `Selected highlight: ${selectedHighlight.category} — ${simplifyHighlightText(selectedHighlight.highlightText)}`
+            : 'No highlight selected yet. Complete Step 1 to enable generation.'}
+        </p>
         <div className="smg-form-row">
           <div className="smg-field">
             <label className="smg-label">Platform</label>
@@ -394,8 +435,16 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
             </select>
           </div>
           <div className="smg-field smg-field--button">
-            <button className="smg-generate-btn" onClick={handleGenerate} disabled={loading}>
-              {loading ? <><span className="smg-spinner" /> Crafting your post…</> : 'Generate Post'}
+            <button
+              className="smg-generate-btn"
+              onClick={handleGenerate}
+              disabled={loading || selectedIndex === null}
+            >
+              {loading
+                ? <><span className="smg-spinner" /> Crafting your post…</>
+                : selectedIndex === null
+                  ? 'Select Highlight to Generate'
+                  : 'Generate Post'}
             </button>
           </div>
         </div>
@@ -473,39 +522,15 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
         {generateError && <p className="smg-validation">{generateError}</p>}
       </div>
 
-      {/* ML-surfaced Achievements */}
-      <div className="sms-section">
-        <h4 className="sms-section-title">ML-Surfaced Achievements</h4>
-        <p className="sms-section-sub">Select one to highlight in your post — these are the standout moments from this month's program data</p>
-
-        {highlightsLoading && <div className="sms-loading">Loading achievements…</div>}
-
-        {!highlightsLoading && highlights.length === 0 && (
-          <div className="sms-empty">No standout achievements this month yet — check back soon.</div>
-        )}
-
-        {!highlightsLoading && highlights.length > 0 && (
-          <div className="smg-achievement-cards">
-            {highlights.map((h, i) => (
-              <div
-                key={i}
-                className={`smg-achievement-card${selectedIndex === i ? ' smg-achievement-card--selected' : ''}`}
-                onClick={() => setSelectedIndex(i)}
-              >
-                <span className="smg-achievement-label">{h.category}</span>
-                <span className="smg-achievement-value">{h.highlightText}</span>
-                <span className="sms-highlight-pct" style={{ fontSize: '0.72rem', marginTop: '0.25rem' }}>
-                  +{h.pctAboveAverage}% above avg
-                </span>
-              </div>
-            ))}
+      {/* Step 3: Generated Output */}
+      <div className="sms-section smg-output-section">
+        <h4 className="sms-section-title">Step 3: Generated Post</h4>
+        {!generatedPost ? (
+          <div className="smg-output-empty">
+            Your generated post will appear here after you complete Steps 1 and 2.
           </div>
-        )}
-      </div>
-
-      {/* Generated Post Output */}
-      {generatedPost && (
-        <div className="sms-section">
+        ) : (
+          <>
           <div className="smg-output-header">
             <span
               className="smg-platform-badge"
@@ -523,9 +548,6 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
             value={generatedPost}
             onChange={e => setGeneratedPost(e.target.value)}
           />
-          {dataInsight && (
-            <p className="smg-data-insight">{dataInsight}</p>
-          )}
           <div className="smg-output-actions">
             <button className="smg-btn smg-btn--primary" onClick={handleCopy}>Copy to Clipboard</button>
             <button className="smg-btn smg-btn--secondary" onClick={handleGenerate} disabled={loading}>
@@ -533,8 +555,9 @@ function GeneratorTab({ initialPlatform, initialPostType, initialSummary }: Gene
             </button>
             <button className="smg-btn smg-btn--ghost" onClick={handleClear}>Clear</button>
           </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

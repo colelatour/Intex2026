@@ -2349,6 +2349,13 @@
   margin: 0.5rem 0 0 0;
 }
 
+.smg-step-helper {
+  font-size: 0.82rem;
+  color: var(--gray-600);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
 .smg-achievement-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2364,6 +2371,11 @@
   flex-direction: column;
   gap: 0.4rem;
   transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.smg-achievement-card--input {
+  border-style: solid;
+  background: #fcfcfb;
 }
 
 .smg-achievement-card:hover {
@@ -2385,6 +2397,25 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--gray-400);
+}
+
+.smg-achievement-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.smg-achievement-purpose {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--navy);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  padding: 0.12rem 0.45rem;
 }
 
 .smg-achievement-value {
@@ -2448,6 +2479,15 @@
   gap: 0.75rem;
   margin-top: 1rem;
   flex-wrap: wrap;
+}
+
+.smg-output-empty {
+  border: 1px dashed var(--gray-200);
+  border-radius: 8px;
+  background: var(--gray-50);
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  padding: 1rem;
 }
 
 .smg-btn {

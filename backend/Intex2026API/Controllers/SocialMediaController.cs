@@ -156,7 +156,18 @@ When writing posts:
     ? $"\n\nData-driven writing guidelines from analysis of past posts:\n{mlGuidelines}"
     : string.Empty);
 
-        var achievementContext = $"This month's program data: {educationCount} education completions, health scores {(healthDelta >= 0 ? "+" : "")}{healthDelta} points vs last month, {nearReadyCount} residents approaching reintegration readiness.";
+        var achievementType = (request.Achievement.Type ?? string.Empty).Trim().ToLowerInvariant();
+        var achievementContext = achievementType switch
+        {
+            var t when t.Contains("educ") =>
+                $"Context metric: {educationCount} education completions this month.",
+            var t when t.Contains("health") =>
+                $"Context metric: health scores {(healthDelta >= 0 ? "+" : "")}{healthDelta} points vs last month.",
+            var t when t.Contains("ready") || t.Contains("reintegr") =>
+                $"Context metric: {nearReadyCount} residents approaching reintegration readiness.",
+            _ =>
+                $"Context metric: {request.Achievement.Summary}",
+        };
 
         var storyArcLine = string.IsNullOrEmpty(request.StoryArc) ? "" : $"\nStory arc: {request.StoryArc}";
 

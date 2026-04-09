@@ -204,9 +204,6 @@ export default function SocialMediaPostGenerator() {
             value={generatedPost}
             onChange={e => setGeneratedPost(e.target.value)}
           />
-          {dataInsight && (
-            <p className="smg-data-insight">{dataInsight}</p>
-          )}
           <div className="smg-output-actions">
             <button className="smg-btn smg-btn--primary" onClick={handleCopy}>Copy to Clipboard</button>
             <button className="smg-btn smg-btn--secondary" onClick={handleGenerate} disabled={loading}>
