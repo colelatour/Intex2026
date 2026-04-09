@@ -1089,6 +1089,8 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pr-form-card__header {
@@ -1122,7 +1124,7 @@
 
 .pr-form-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -1144,6 +1146,8 @@
 .pr-form-field input,
 .pr-form-field select,
 .pr-form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
   padding: 8px 10px;
   border: 1px solid var(--gray-200);
   border-radius: 6px;
@@ -1561,10 +1565,6 @@
     min-height: 80px;
   }
 
-  .pr-form-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
   /* ── Pagination ─────────────────────────── */
   .supporter-pagination {
     width: 100%;
@@ -1608,6 +1608,36 @@
   .table-footer select.filter-btn {
     min-width: 90px;
   }
+
+  /* ── Slide-over: full width on mobile ── */
+  .slide-over {
+    width: 100vw;
+  }
+
+  /* ── Form grids collapse to single column ── */
+  .form-row--2col {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .safehouse-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Form action buttons wrap ── */
+  .form-actions,
+  .pr-form-actions {
+    flex-wrap: wrap;
+  }
+
+  .form-actions .btn-add,
+  .form-actions .btn-export,
+  .pr-form-actions .btn-add,
+  .pr-form-actions .btn-export {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1631,10 +1661,6 @@
 
   .admin-actions {
     flex-wrap: wrap;
-  }
-
-  .pr-form-grid {
-    grid-template-columns: 1fr;
   }
 
   .pr-card__top {
@@ -1873,6 +1899,12 @@
   justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1.25rem;
+}
+
+.safehouse-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
 }
 
 /* Outreach textarea */

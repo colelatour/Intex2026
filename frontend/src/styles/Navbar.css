@@ -320,17 +320,21 @@
     display: block;
   }
 
-  .navbar__links li {
+  .navbar__links > li {
     list-style: none;
     border-bottom: 1px solid var(--gray-100);
+    /* Let row links span full drawer width (avoid shrink-to-text flex sizing) */
+    align-items: stretch;
   }
 
-  .navbar__links li:last-child {
+  .navbar__links > li:last-child {
     border-bottom: none;
   }
 
   .navbar__links a {
     display: block;
+    width: 100%;
+    box-sizing: border-box;
     padding: 14px 16px;
     font-size: 1rem;
     border-radius: 0;
