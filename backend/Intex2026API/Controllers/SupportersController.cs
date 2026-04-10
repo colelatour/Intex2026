@@ -76,6 +76,14 @@ public record UpsertSupporterRequest(
 );
 
 public record PatchStatusRequest(string Status);
+public record AddSupporterDonationRequest(
+    decimal Amount,
+    string? CurrencyCode,
+    string? DonationDate,
+    bool IsRecurring,
+    string? DonationType,
+    string? Notes
+);
 
 // ── Controller ────────────────────────────────────────────────────────────────
 
@@ -332,6 +340,53 @@ public class SupportersController : ControllerBase
         return Ok(donations);
     }
 
+    // POST /api/supporters/{id}/donations
+    [HttpPost("{id}/donations")]
+    public async Task<ActionResult<DonationSummaryDto>> AddDonation(string id, [FromBody] AddSupporterDonationRequest req)
+    {
+        var supporter = await _context.Supporters.FindAsync(id);
+        if (supporter == null) return NotFound();
+        if (req.Amount <= 0) return BadRequest("Amount must be greater than zero.");
+
+        var donationDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (!string.IsNullOrWhiteSpace(req.DonationDate)
+            && !DateOnly.TryParse(req.DonationDate, out donationDate))
+        {
+            return BadRequest("DonationDate must be a valid date in YYYY-MM-DD format.");
+        }
+
+        var donation = new Donation
+        {
+            DonationId = await GetNextDonationIdAsync(),
+            SupporterId = id,
+            DonationType = string.IsNullOrWhiteSpace(req.DonationType) ? "Monetary" : req.DonationType.Trim(),
+            DonationDate = donationDate,
+            IsRecurring = req.IsRecurring ? "True" : "False",
+            CurrencyCode = string.IsNullOrWhiteSpace(req.CurrencyCode) ? "PHP" : req.CurrencyCode.Trim().ToUpperInvariant(),
+            Amount = req.Amount,
+            EstimatedValue = req.Amount,
+            Notes = req.Notes?.Trim()
+        };
+
+        if (supporter.FirstDonationDate == null || donationDate < supporter.FirstDonationDate.Value)
+        {
+            supporter.FirstDonationDate = donationDate;
+        }
+
+        _context.Donations.Add(donation);
+        await _context.SaveChangesAsync();
+
+        return Ok(new DonationSummaryDto(
+            donation.DonationId,
+            donation.DonationType,
+            donation.DonationDate?.ToString("yyyy-MM-dd"),
+            donation.Amount,
+            donation.CurrencyCode,
+            donation.IsRecurring?.ToLower() is "true" or "1" or "yes",
+            donation.Notes
+        ));
+    }
+
     // DELETE /api/supporters/{id}
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin,Worker")]
@@ -349,6 +404,21 @@ public class SupportersController : ControllerBase
         var ids = await _context.Supporters
             .Where(s => s.SupporterId != null)
             .Select(s => s.SupporterId!)
+            .ToListAsync();
+
+        var max = ids
+            .Select(id => int.TryParse(id, out var n) ? n : 0)
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return (max + 1).ToString();
+    }
+
+    private async Task<string> GetNextDonationIdAsync()
+    {
+        var ids = await _context.Donations
+            .Where(d => d.DonationId != null)
+            .Select(d => d.DonationId!)
             .ToListAsync();
 
         var max = ids

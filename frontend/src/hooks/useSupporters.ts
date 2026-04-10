@@ -91,6 +91,7 @@ export function useSupporterDetail(id: string | null) {
   const [data,    setData]    = useState<SupporterDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!id) { setData(null); return; }
@@ -98,7 +99,7 @@ export function useSupporterDetail(id: string | null) {
     get<SupporterDetail>(`/api/supporters/${id}`)
       .then(d => { setData(d); setLoading(false); setError(null); })
       .catch((err: Error) => { setError(err.message); setLoading(false); });
-  }, [id]);
+  }, [id, reloadKey]);
 
-  return { data, loading, error };
+  return { data, loading, error, refetch: () => setReloadKey(k => k + 1) };
 }

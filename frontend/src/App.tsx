@@ -10,6 +10,7 @@ import AdminLayout, {
   AdminDashboard,
   AdminResidentDirectory,
   AdminDonors,
+  AdminDonations,
   AdminProcessRecordings,
   AdminSafehouseManagement,
   AdminUserManagement,
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="resident-directory" element={<AdminResidentDirectory />} />
           <Route path="donors" element={<AdminDonors />} />
+          <Route path="donations" element={<AdminDonations />} />
           <Route path="process-recordings" element={<AdminProcessRecordings />} />
           <Route path="safehouse-management" element={<AdminSafehouseManagement />} />
           <Route

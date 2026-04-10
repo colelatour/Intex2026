@@ -16,6 +16,7 @@ import ReportsOverviewSection from '../components/admin/ReportsOverviewSection';
 import BottomCharts from '../components/admin/BottomCharts';
 import ResidentDirectory from '../components/admin/ResidentDirectory';
 import DonorDashboard from '../components/admin/DonorDashboard';
+import DonationManagement from '../components/admin/DonationManagement';
 import ProcessRecordings from '../components/admin/ProcessRecordings';
 import SafehouseManagement from '../components/admin/SafehouseManagement';
 import UserManagement from '../components/admin/UserManagement';
@@ -31,6 +32,7 @@ export const SECTION_TITLES: Record<string, string> = {
   dashboard: 'Admin Dashboard',
   'resident-directory': 'Resident Directory',
   donors: 'Donor Dashboard',
+  donations: 'Donation Management',
   'process-recordings': 'Process Recordings',
   'safehouse-management': 'Safehouse Management',
   'user-management': 'User Management',
@@ -111,6 +113,10 @@ export function AdminResidentDirectory() {
 
 export function AdminDonors() {
   return <DonorDashboard />;
+}
+
+export function AdminDonations() {
+  return <DonationManagement />;
 }
 
 export function AdminProcessRecordings() {

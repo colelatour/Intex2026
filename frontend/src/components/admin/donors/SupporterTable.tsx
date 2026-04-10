@@ -58,7 +58,7 @@ export default function SupporterTable({ onSelect, onAdd }: Props) {
           <option value="">All regions</option>
           {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
-        <button className="btn-add" onClick={onAdd}>+ Add Supporter</button>
+        <button type="button" className="btn-add" onClick={onAdd}>+ Add Supporter</button>
       </div>
 
       {error && <p className="supporter-error">{error}</p>}

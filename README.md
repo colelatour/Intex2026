@@ -109,8 +109,7 @@ uvicorn api.main:app --reload   # http://localhost:8000
 ├── backend/           ASP.NET Core API
 ├── ml-pipelines/      Python ML pipelines + FastAPI inference server
 │   ├── jobs/          Nightly inference scripts (churn, readiness, social)
-│   ├── api/           FastAPI wrapper for manual re-runs
-│   └── test_connection.py  DB connectivity + view creation utility
+│   └── api/           FastAPI wrapper for manual re-runs
 └── .github/workflows/ CI/CD (Azure Static Web Apps)
 ```
 
@@ -118,12 +117,13 @@ uvicorn api.main:app --reload   # http://localhost:8000
 
 ## ML Pipelines
 
-Three nightly jobs run on Render (see `ml-pipelines/render.yaml`):
+Nightly ML inference runs via GitHub Actions in
+`.github/workflows/nightly-inference.yml` (daily at 2:00 AM UTC, plus manual dispatch):
 
-| Job | Schedule | Output table |
+| Step | Output table |
 |---|---|---|
-| Donor churn scoring | 2:00 AM UTC | `donor_churn_scores` |
-| Reintegration readiness | 2:10 AM UTC | `resident_readiness_scores` |
-| Social media analysis | 2:20 AM UTC | `social_media_recommendations` |
+| Donor churn scoring | `donor_churn_scores` |
+| Reintegration readiness | `resident_readiness_scores` |
+| Social media analysis | `social_media_recommendations` |
 
-The `social_media_highlights` SQL view (created via `ml-pipelines/test_connection.py`) aggregates live program data for the Social Media Strategy page.
+The `social_media_highlights` SQL view is used by the Social Media Strategy page and must exist in the Azure SQL database.
