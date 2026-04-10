@@ -47,6 +47,27 @@ export default function DonationForm({ onDonationSuccess }: { onDonationSuccess?
     setRegion(initialRegion);
   }, [initialRegion]);
 
+  // Restore form draft saved before auth redirect
+  useEffect(() => {
+    const raw = sessionStorage.getItem('donate-form-draft');
+    if (!raw) return;
+    sessionStorage.removeItem('donate-form-draft');
+    try {
+      const d = JSON.parse(raw);
+      if (d.selectedAmt) setSelectedAmt(d.selectedAmt);
+      if (d.customAmt) setCustomAmt(d.customAmt);
+      if (d.giftType) setGiftType(d.giftType);
+      if (d.region) setRegion(d.region);
+      if (d.firstName) setFirstName(d.firstName);
+      if (d.lastName) setLastName(d.lastName);
+      if (d.email) setEmail(d.email);
+      if (d.honorToggle != null) setHonorToggle(d.honorToggle);
+      if (d.honoreeName) setHonoreeName(d.honoreeName);
+      if (d.honoreeEmail) setHonoreeEmail(d.honoreeEmail);
+      if (d.honorNote) setHonorNote(d.honorNote);
+    } catch { /* corrupted data — ignore */ }
+  }, []);
+
   // Tie donation records to the signed-in account email (matches /api/donations/my lookup).
   useEffect(() => {
     let cancelled = false;
@@ -70,10 +91,16 @@ export default function DonationForm({ onDonationSuccess }: { onDonationSuccess?
     try {
       const session = await getSession();
       if (!session.isAuthenticated) {
+        const draft = { selectedAmt, customAmt, giftType, region, firstName, lastName, email,
+                        honorToggle, honoreeName, honoreeEmail, honorNote };
+        sessionStorage.setItem('donate-form-draft', JSON.stringify(draft));
         navigate('/login?redirect=/donate');
         return;
       }
     } catch {
+      const draft = { selectedAmt, customAmt, giftType, region, firstName, lastName, email,
+                      honorToggle, honoreeName, honoreeEmail, honorNote };
+      sessionStorage.setItem('donate-form-draft', JSON.stringify(draft));
       navigate('/login?redirect=/donate');
       return;
     }
