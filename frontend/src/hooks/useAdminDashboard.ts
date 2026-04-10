@@ -10,7 +10,7 @@ export function useAdminDashboard() {
   const fetch_ = useCallback(() => {
     setLoading(true);
     setError(null);
-    get<DashboardResponse>('/api/admin/dashboard')
+    get<DashboardResponse>("/api/admin/dashboard?includeActivity=false")
       .then(setData)
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : 'Failed to load dashboard'),

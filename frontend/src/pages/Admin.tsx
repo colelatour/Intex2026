@@ -12,7 +12,7 @@ import '../styles/Admin.css';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import KpiCards from '../components/admin/KpiCards';
 import CaseloadTable from '../components/admin/CaseloadTable';
-import RecentActivity from '../components/admin/RecentActivity';
+import ReportsOverviewSection from '../components/admin/ReportsOverviewSection';
 import BottomCharts from '../components/admin/BottomCharts';
 import ResidentDirectory from '../components/admin/ResidentDirectory';
 import DonorDashboard from '../components/admin/DonorDashboard';
@@ -64,10 +64,10 @@ export function AdminDashboard() {
       <div className="dashboard-hero">
         <div className="dashboard-hero__content">
           <span className="dashboard-hero__eyebrow">Operations Overview</span>
-          <h2>Daily Snapshot</h2>
+          <h2>Dashboard</h2>
           <p>
-            Monitor residents, conferences, donations, and operational activity
-            from a single fuller dashboard view.
+            Live KPIs, caseload, and the same headline metrics as Reports &amp; Analytics — refreshed from the server
+            on each load.
           </p>
         </div>
         <div className="dashboard-hero__meta">
@@ -82,17 +82,11 @@ export function AdminDashboard() {
         <KpiCards kpis={dash?.kpis ?? null} loading={dashLoading} />
       </div>
 
-      <div className="admin-mid-row dashboard-section">
+      <ReportsOverviewSection overview={dash?.reportsOverview} loading={dashLoading} />
+
+      <div className="dashboard-section dashboard-section--caseload-wide">
         <div className="dashboard-panel dashboard-panel--table">
           <CaseloadTable rows={dash?.caseload ?? []} loading={dashLoading} />
-        </div>
-        <div className="admin-mid-right">
-          <div className="dashboard-panel">
-            <RecentActivity
-              items={dash?.activity ?? []}
-              loading={dashLoading}
-            />
-          </div>
         </div>
       </div>
 

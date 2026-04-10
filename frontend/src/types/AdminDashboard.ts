@@ -39,6 +39,47 @@ export interface UpcomingEvent {
   location: string | null;
 }
 
+export interface DashboardDonationsOverview {
+  rangeStart: string;
+  rangeEnd: string;
+  totalInRange: number;
+  donationCount: number;
+  donorCount: number;
+  percentChangeFromPreviousPeriod: number;
+}
+
+export interface DashboardUtilizationMarker {
+  safehouseId: string;
+  name: string;
+  utilizationPct: number;
+}
+
+export interface DashboardSafehousesOverview {
+  rangeStart: string;
+  rangeEnd: string;
+  totalSafehouses: number;
+  averageOccupancyRate: number;
+  highestUtilization: DashboardUtilizationMarker | null;
+  lowestUtilization: DashboardUtilizationMarker | null;
+  totalResidentsHoused: number;
+  turnoverRate: number;
+}
+
+export interface DashboardResidentsOverview {
+  rangeStart: string;
+  rangeEnd: string;
+  totalResidentsInRange: number;
+  activeResidents: number;
+  completionRate: number;
+  intakeChangePercent: number;
+}
+
+export interface DashboardReportsOverview {
+  donations: DashboardDonationsOverview;
+  residents: DashboardResidentsOverview;
+  safehouses: DashboardSafehousesOverview;
+}
+
 export interface DashboardResponse {
   serverTimeUtc: string;
   kpis: DashboardKpis;
@@ -47,4 +88,5 @@ export interface DashboardResponse {
   donationsMonthly: DonationMonth[];
   residentOutcomes: OutcomeSlice[];
   upcomingEvents: UpcomingEvent[];
+  reportsOverview: DashboardReportsOverview;
 }

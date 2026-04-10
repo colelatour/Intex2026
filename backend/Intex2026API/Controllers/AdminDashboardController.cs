@@ -1,4 +1,5 @@
 using Intex2026API.Data;
+using Intex2026API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +44,8 @@ public record DashboardResponse(
     List<ActivityItem> Activity,
     List<DonationMonth> DonationsMonthly,
     List<OutcomeSlice> ResidentOutcomes,
-    List<UpcomingEvent> UpcomingEvents);
+    List<UpcomingEvent> UpcomingEvents,
+    DashboardReportsOverview ReportsOverview);
 
 // ── Controller ──────────────────────────────────────────────────────
 [ApiController]
@@ -56,7 +58,11 @@ public class AdminDashboardController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<DashboardResponse>> Get(
-        int days = 7, int caseloadLimit = 10, int activityLimit = 10, int months = 12)
+        int days = 7,
+        int caseloadLimit = 10,
+        int activityLimit = 10,
+        int months = 12,
+        bool includeActivity = false)
     {
         var utcNow   = DateTime.UtcNow;
         var today     = DateOnly.FromDateTime(utcNow);
@@ -123,57 +129,63 @@ public class AdminDashboardController : ControllerBase
                 MapStatus(r)))
             .ToList();
 
-        // ── Activity Feed ───────────────────────────────────────
-        var activityItems = new List<ActivityItem>();
+        // ── Activity Feed (skipped by default — saves queries) ─────────────
+        List<ActivityItem> activity;
+        if (includeActivity)
+        {
+            var activityItems = new List<ActivityItem>();
 
-        // Process recordings (last 30 days)
-        var recentRecordings = await _ctx.ProcessRecordings.AsNoTracking()
-            .Where(pr => pr.SessionDate != null && pr.SessionDate >= today.AddDays(-30))
-            .OrderByDescending(pr => pr.SessionDate)
-            .Take(activityLimit)
-            .ToListAsync();
-        activityItems.AddRange(recentRecordings.Select(pr =>
-            new ActivityItem("ProcessRecordingAdded",
-                $"Process recording added for {pr.ResidentId ?? "unknown"}",
-                pr.SessionDate!.Value.ToDateTime(TimeOnly.MinValue))));
+            var recentRecordings = await _ctx.ProcessRecordings.AsNoTracking()
+                .Where(pr => pr.SessionDate != null && pr.SessionDate >= today.AddDays(-30))
+                .OrderByDescending(pr => pr.SessionDate)
+                .Take(activityLimit)
+                .ToListAsync();
+            activityItems.AddRange(recentRecordings.Select(pr =>
+                new ActivityItem("ProcessRecordingAdded",
+                    $"Process recording added for {pr.ResidentId ?? "unknown"}",
+                    pr.SessionDate!.Value.ToDateTime(TimeOnly.MinValue))));
 
-        // Donations (last 30 days)
-        var recentDonationActivity = await _ctx.Donations.AsNoTracking()
-            .Where(d => d.DonationDate != null && d.DonationDate >= today.AddDays(-30))
-            .OrderByDescending(d => d.DonationDate)
-            .Take(activityLimit)
-            .ToListAsync();
-        activityItems.AddRange(recentDonationActivity.Select(d =>
-            new ActivityItem("DonationRecorded",
-                $"New donation logged — {(d.Amount.HasValue ? $"₱{d.Amount.Value:N0}" : $"₱{d.EstimatedValue ?? 0:N0}")}",
-                d.DonationDate!.Value.ToDateTime(TimeOnly.MinValue))));
+            var recentDonationActivity = await _ctx.Donations.AsNoTracking()
+                .Where(d => d.DonationDate != null && d.DonationDate >= today.AddDays(-30))
+                .OrderByDescending(d => d.DonationDate)
+                .Take(activityLimit)
+                .ToListAsync();
+            activityItems.AddRange(recentDonationActivity.Select(d =>
+                new ActivityItem("DonationRecorded",
+                    $"New donation logged — {(d.Amount.HasValue ? $"₱{d.Amount.Value:N0}" : $"₱{d.EstimatedValue ?? 0:N0}")}",
+                    d.DonationDate!.Value.ToDateTime(TimeOnly.MinValue))));
 
-        // Home visits (last 30 days)
-        var recentVisits = await _ctx.HomeVisitations.AsNoTracking()
-            .Where(hv => hv.VisitDate != null && hv.VisitDate >= today.AddDays(-30))
-            .OrderByDescending(hv => hv.VisitDate)
-            .Take(activityLimit)
-            .ToListAsync();
-        activityItems.AddRange(recentVisits.Select(hv =>
-            new ActivityItem("HomeVisitScheduled",
-                $"Home visit — {hv.LocationVisited ?? "Location TBD"}",
-                hv.VisitDate!.Value.ToDateTime(TimeOnly.MinValue))));
+            var recentVisits = await _ctx.HomeVisitations.AsNoTracking()
+                .Where(hv => hv.VisitDate != null && hv.VisitDate >= today.AddDays(-30))
+                .OrderByDescending(hv => hv.VisitDate)
+                .Take(activityLimit)
+                .ToListAsync();
+            activityItems.AddRange(recentVisits.Select(hv =>
+                new ActivityItem("HomeVisitScheduled",
+                    $"Home visit — {hv.LocationVisited ?? "Location TBD"}",
+                    hv.VisitDate!.Value.ToDateTime(TimeOnly.MinValue))));
 
-        // New residents (last 30 days)
-        var recentResidents = residents
-            .Where(r => r.CreatedAt != null && r.CreatedAt >= utcNow.AddDays(-30))
-            .OrderByDescending(r => r.CreatedAt)
-            .Take(activityLimit)
-            .Select(r => new ActivityItem("ResidentCreated",
-                $"New resident admitted — {r.ResidentId}",
-                r.CreatedAt!.Value));
+            var recentResidentsActivity = residents
+                .Where(r => r.CreatedAt != null && r.CreatedAt >= utcNow.AddDays(-30))
+                .OrderByDescending(r => r.CreatedAt)
+                .Take(activityLimit)
+                .Select(r => new ActivityItem("ResidentCreated",
+                    $"New resident admitted — {r.ResidentId}",
+                    r.CreatedAt!.Value));
 
-        activityItems.AddRange(recentResidents);
+            activityItems.AddRange(recentResidentsActivity);
 
-        var activity = activityItems
-            .OrderByDescending(a => a.Timestamp)
-            .Take(activityLimit)
-            .ToList();
+            activity = activityItems
+                .OrderByDescending(a => a.Timestamp)
+                .Take(activityLimit)
+                .ToList();
+        }
+        else
+        {
+            activity = [];
+        }
+
+        var reportsOverview = await DashboardReportsOverviewBuilder.BuildAsync(_ctx, residents, HttpContext.RequestAborted);
 
         // ── Donation Trends (monthly) ───────────────────────────
         var trendDonations = await _ctx.Donations.AsNoTracking()
@@ -224,7 +236,13 @@ public class AdminDashboardController : ControllerBase
 
         return new DashboardResponse(
             utcNow.ToString("o"),
-            kpis, caseload, activity, donationsMonthly, outcomeGroups, upcomingEvents);
+            kpis,
+            caseload,
+            activity,
+            donationsMonthly,
+            outcomeGroups,
+            upcomingEvents,
+            reportsOverview);
     }
 
     // ── Status mapping (shared) ─────────────────────────────────

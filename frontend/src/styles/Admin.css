@@ -734,6 +734,95 @@
   gap: 1rem;
 }
 
+.dashboard-section--caseload-wide {
+  margin-bottom: 1.25rem;
+}
+
+.dashboard-section--caseload-wide .dashboard-panel--table {
+  width: 100%;
+}
+
+.reports-overview__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 0.35rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.reports-overview__subtitle {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.reports-overview__link {
+  color: var(--gold);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.reports-overview__link:hover {
+  text-decoration: underline;
+}
+
+.reports-overview__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .reports-overview__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reports-overview__card h4 {
+  margin-bottom: 0.75rem;
+}
+
+.reports-overview__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.65rem;
+}
+
+.reports-overview__stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gray-500);
+  font-weight: 600;
+}
+
+.reports-overview__stat-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.reports-overview__meta {
+  font-size: 0.78rem;
+  color: var(--gray-600);
+  line-height: 1.45;
+  margin-bottom: 0.75rem;
+}
+
+.reports-overview__footer-link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.reports-overview__footer-link:hover {
+  text-decoration: underline;
+}
+
 /* ─── Admin Cards ───────────────────────── */
 .admin-card {
   background: white;
